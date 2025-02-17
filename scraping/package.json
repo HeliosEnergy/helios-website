@@ -1,0 +1,22 @@
+{
+  "name": "scrapper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node --interactive main.ts",
+    "textify": "ts-node textify.ts"
+  },
+  "author": "",
+  "description": "",
+  "dependencies": {
+    "@googleapis/sheets": "^9.3.1",
+    "@types/html": "^1.0.4",
+    "dotenv": "^16.4.7",
+    "googleapis": "^144.0.0",
+    "html": "^1.0.0",
+    "openai": "^4.80.1",
+    "puppeteer": "^22.15.0",
+    "ts-node": "^10.9.2"
+  }
+}

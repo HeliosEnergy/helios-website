@@ -8,7 +8,7 @@ services:
       args:
         - APP_USER=${APP_USER:-developer}
         - APP_USER_PASSWORD=${APP_USER_PASSWORD:-developer123}
-    container_name: gpu_monitor
+    container_name: da_monitor
     volumes:
       - .:/workspace
     depends_on:
@@ -21,7 +21,8 @@ services:
 
   timescaledb:
     image: timescale/timescaledb:latest-pg14
-    container_name: gpu_timescaledb
+    container_name: da_timescaledb
+    user: "${UID}:${GID}"
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -36,8 +37,8 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: gpu_grafana
-    user: "472"  # Grafana's default user
+    container_name: da_grafana
+    user: "${UID}:${GID}"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
