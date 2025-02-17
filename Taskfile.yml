@@ -1,0 +1,70 @@
+version: '3'
+
+tasks:
+  up:
+    desc: Start all containers
+    cmds:
+      - docker compose up --remove-orphans
+
+  down:
+    desc: Stop and remove all containers
+    cmds:
+      - docker compose down
+
+  rebuild:
+    desc: Rebuild and restart all containers
+    cmds:
+      - docker compose down
+      - docker compose build --no-cache
+      - docker compose up -d --remove-orphans
+
+  clean:
+    desc: Full cleanup (including volumes)
+    cmds:
+      - docker compose down -v
+      - docker system prune -f
+
+  logs:
+    desc: View logs from all containers
+    cmds:
+      - docker compose logs -f
+
+  logs-app:
+    desc: View logs from app container only
+    cmds:
+      - docker compose logs -f app
+
+  logs-db:
+    desc: View logs from database container only
+    cmds:
+      - docker compose logs -f timescaledb
+
+  logs-grafana:
+    desc: View logs from grafana container only
+    cmds:
+      - docker compose logs -f grafana
+
+  shell:
+    desc: Open a shell in the app container
+    cmds:
+      - docker compose exec app bash
+
+  restart:
+    desc: Restart all containers
+    cmds:
+      - docker compose restart
+
+  status:
+    desc: Show status of all containers
+    cmds:
+      - docker compose ps
+
+  pull:
+    desc: Pull latest versions of all images
+    cmds:
+      - docker compose pull
+
+  prune:
+    desc: Remove unused Docker resources
+    cmds:
+      - docker system prune --volumes -f 
