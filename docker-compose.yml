@@ -34,6 +34,7 @@ services:
       - "6432:5432"
     volumes:
       - ./data/timescaledb:/var/lib/postgresql/data
+      - ./database/schema:/app/database/schema
     restart: unless-stopped
     networks:
       - data_analysis_net
@@ -51,7 +52,7 @@ services:
       - GF_SERVER_DOMAIN=localhost
       - GF_SERVER_ROOT_URL=http://localhost:3000
     ports:
-      - 3000:3000
+      - 6700:3000
     volumes:
       - ./data/grafana:/var/lib/grafana
     depends_on:

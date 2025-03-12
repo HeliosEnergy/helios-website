@@ -1,0 +1,128 @@
+account:
+    test_account:
+        tag: 0000ffff-0000-0000-0000-000000000000
+        account_type: CUSTOMER
+        name: Test Account
+        email: test@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+
+
+    tucker@heliosenergy.io:
+        tag: 0001ffff-0000-0000-0000-000000000000
+        account_type: CUSTOMER
+        name: Tucker Sneed
+        email: tucker@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+    
+    jose@heliosenergy.io:
+        tag: 0002ffff-67bb-4e18-88ed-eb5d6a3bbcbe
+        account_type: CUSTOMER
+        name: Jose Rojas
+        email: jose@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+
+    employee+test@heliosenergy.io:
+        tag: 0003ffff-0000-0000-0000-000000000000
+        account_type: EMPLOYEE
+        name: Test
+        email: employee+test@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+    
+    employee+tucker@heliosenergy.io:
+        tag: 0004ffff-ee0f-4960-a2d1-09b8e816f620
+        account_type: EMPLOYEE
+        name: Tucker
+        email: employee+tucker@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+    
+    employee+jose@heliosenergy.io:
+        tag: 0005ffff-ee0f-4960-a2d1-09b8e816f620
+        account_type: EMPLOYEE
+        name: Jose
+        email: employee+jose@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+
+    supplier+test@heliosenergy.io:
+        tag: 0006ffff-dad8-40f3-8955-b2911ddfad9d
+        account_type: SUPPLIER
+        name: Test Supplier
+        email: supplier+test@heliosenergy.io
+        password: _@utahOcean
+        data: {}
+
+machine_cluster:
+    local_machine_cluster:
+        tag: cef1c284-c855-45cd-a4b4-9656450e5024
+        name: Local Machine Cluster
+        description: Local Machine Cluster
+        data: {}
+        contact_email: employee+test@heliosenergy.io
+        billing_email: employee+test@heliosenergy.io
+        profit_share_email: supplier+test@heliosenergy.io
+
+machine:
+    local_machine:
+        tag: 8c7515e5-04e3-40a8-9fd8-5dae47fb5126
+        name: Local Machine
+        description: Local Machine
+        # properties like os_type, gpu_configuration, etc.
+        # are automatically populated in the python seed script
+        internet_mbps: 50
+        docker: true
+        docker_secure: true
+        data: {}
+        machine_cluster_tag: cef1c284-c855-45cd-a4b4-9656450e5024
+        contact_email: employee+test@heliosenergy.io
+
+tenant:
+    blank_tenant:
+        tag: 00000000-0000-0000-0000-000000000000
+        name: Helios Customer
+        description: Helios Customer
+        data: {}
+
+tenant_role:
+    admin_role:
+        tag: 00000000-1234-5678-90ab-cdef12345678
+        name: Admin
+        policy: {}
+        data: {}
+        tenant_tag: 00000000-0000-0000-0000-000000000000
+        creator_tag: 0001ffff-0000-0000-0000-000000000000
+
+tenant_member:
+    test_member:
+        tag: 00000000-1234-5678-90ab-cdef12345678
+        tenant_tag: 00000000-0000-0000-0000-000000000000
+        account_tag: 0001ffff-0000-0000-0000-000000000000
+        data: {}
+
+tenant_member_role:
+    test_member_role:
+        tag: 00000000-1234-5678-90ab-cdef12345678
+        tenant_tag: 00000000-0000-0000-0000-000000000000
+        account_tag: 0001ffff-0000-0000-0000-000000000000
+        role_tag: 00000000-1234-5678-90ab-cdef12345678
+        data: {}
+
+workspace:
+    test_workspace:
+        tag: 00000000-1234-5678-90ab-cdef12345678
+        name: Example Workspace
+        data: {}
+        tenant_tag: 00000000-0000-0000-0000-000000000000
+        owner_tag: 0001ffff-0000-0000-0000-000000000000
+
+workspace_member:
+    test_member:
+        tag: 00000000-1234-5678-90ab-cdef12345678
+        workspace_tag: 00000000-1234-5678-90ab-cdef12345678
+        account_tag: 0001ffff-0000-0000-0000-000000000000
+        granter_tag: 0001ffff-0000-0000-0000-000000000000
+        data: {}

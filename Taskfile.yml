@@ -67,4 +67,26 @@ tasks:
   prune:
     desc: Remove unused Docker resources
     cmds:
-      - docker system prune --volumes -f 
+      - docker system prune --volumes -f
+
+  # Database migration tasks - run from host - with explicit dir
+  goose-up:
+    desc: Run database migrations (up)
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" up
+
+  goose-down:
+    desc: Revert all database migrations (down)
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" down
+
+  goose-status:
+    desc: Check database migration status
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" status
+
+  goose-create:
+    desc: Create a new migration file
+    cmds:
+      - cd database/schema && goose -dir migrations create {{.CLI_ARGS}} sql
+
