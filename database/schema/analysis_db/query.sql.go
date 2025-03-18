@@ -66,6 +66,37 @@ func (q *Queries) GetMetric(ctx context.Context, id int32) (Metric, error) {
 	return i, err
 }
 
+const getMetricsByName = `-- name: GetMetricsByName :many
+SELECT id, name, value, timestamp FROM metrics
+WHERE name = $1
+ORDER BY timestamp DESC
+`
+
+func (q *Queries) GetMetricsByName(ctx context.Context, name string) ([]Metric, error) {
+	rows, err := q.db.Query(ctx, getMetricsByName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Metric
+	for rows.Next() {
+		var i Metric
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Value,
+			&i.Timestamp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getMetricsByTimeRange = `-- name: GetMetricsByTimeRange :many
 SELECT id, name, value, timestamp FROM metrics
 WHERE timestamp BETWEEN $1 AND $2
@@ -73,12 +104,12 @@ ORDER BY timestamp DESC
 `
 
 type GetMetricsByTimeRangeParams struct {
-	Timestamp   pgtype.Timestamptz
-	Timestamp_2 pgtype.Timestamptz
+	StartTimestamp pgtype.Timestamptz
+	EndTimestamp   pgtype.Timestamptz
 }
 
 func (q *Queries) GetMetricsByTimeRange(ctx context.Context, arg GetMetricsByTimeRangeParams) ([]Metric, error) {
-	rows, err := q.db.Query(ctx, getMetricsByTimeRange, arg.Timestamp, arg.Timestamp_2)
+	rows, err := q.db.Query(ctx, getMetricsByTimeRange, arg.StartTimestamp, arg.EndTimestamp)
 	if err != nil {
 		return nil, err
 	}
@@ -105,16 +136,10 @@ func (q *Queries) GetMetricsByTimeRange(ctx context.Context, arg GetMetricsByTim
 const listMetrics = `-- name: ListMetrics :many
 SELECT id, name, value, timestamp FROM metrics
 ORDER BY timestamp DESC
-LIMIT $1 OFFSET $2
 `
 
-type ListMetricsParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) ListMetrics(ctx context.Context, arg ListMetricsParams) ([]Metric, error) {
-	rows, err := q.db.Query(ctx, listMetrics, arg.Limit, arg.Offset)
+func (q *Queries) ListMetrics(ctx context.Context) ([]Metric, error) {
+	rows, err := q.db.Query(ctx, listMetrics)
 	if err != nil {
 		return nil, err
 	}
@@ -138,20 +163,29 @@ func (q *Queries) ListMetrics(ctx context.Context, arg ListMetricsParams) ([]Met
 	return items, nil
 }
 
-const updateMetricValue = `-- name: UpdateMetricValue :one
+const updateMetric = `-- name: UpdateMetric :one
 UPDATE metrics
-SET value = $2
+SET name = $2,
+    value = $3,
+    timestamp = $4
 WHERE id = $1
 RETURNING id, name, value, timestamp
 `
 
-type UpdateMetricValueParams struct {
-	ID    int32
-	Value float64
+type UpdateMetricParams struct {
+	ID        int32
+	Name      string
+	Value     float64
+	Timestamp pgtype.Timestamptz
 }
 
-func (q *Queries) UpdateMetricValue(ctx context.Context, arg UpdateMetricValueParams) (Metric, error) {
-	row := q.db.QueryRow(ctx, updateMetricValue, arg.ID, arg.Value)
+func (q *Queries) UpdateMetric(ctx context.Context, arg UpdateMetricParams) (Metric, error) {
+	row := q.db.QueryRow(ctx, updateMetric,
+		arg.ID,
+		arg.Name,
+		arg.Value,
+		arg.Timestamp,
+	)
 	var i Metric
 	err := row.Scan(
 		&i.ID,

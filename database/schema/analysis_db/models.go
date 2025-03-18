@@ -8,6 +8,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type KmzFeature struct {
+	ID          int32
+	SourceID    string
+	Name        pgtype.Text
+	Description pgtype.Text
+	Metadata    []byte
+	Geometry    interface{}
+	CreatedAt   pgtype.Timestamptz
+}
+
 type Metric struct {
 	ID        int32
 	Name      string

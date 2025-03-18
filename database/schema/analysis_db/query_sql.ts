@@ -67,13 +67,7 @@ export async function getMetric(sql: Sql, args: GetMetricArgs): Promise<GetMetri
 
 export const listMetricsQuery = `-- name: ListMetrics :many
 SELECT id, name, value, timestamp FROM metrics
-ORDER BY timestamp DESC
-LIMIT $1 OFFSET $2`;
-
-export interface ListMetricsArgs {
-    limit: string;
-    offset: string;
-}
+ORDER BY timestamp DESC`;
 
 export interface ListMetricsRow {
     id: number;
@@ -82,8 +76,8 @@ export interface ListMetricsRow {
     timestamp: Date | null;
 }
 
-export async function listMetrics(sql: Sql, args: ListMetricsArgs): Promise<ListMetricsRow[]> {
-    return (await sql.unsafe(listMetricsQuery, [args.limit, args.offset]).values()).map(row => ({
+export async function listMetrics(sql: Sql): Promise<ListMetricsRow[]> {
+    return (await sql.unsafe(listMetricsQuery, []).values()).map(row => ({
         id: row[0],
         name: row[1],
         value: row[2],
@@ -97,8 +91,8 @@ WHERE timestamp BETWEEN $1 AND $2
 ORDER BY timestamp DESC`;
 
 export interface GetMetricsByTimeRangeArgs {
-    timestamp: Date | null;
-    timestamp: Date | null;
+    startTimestamp: Date | null;
+    endTimestamp: Date | null;
 }
 
 export interface GetMetricsByTimeRangeRow {
@@ -109,7 +103,7 @@ export interface GetMetricsByTimeRangeRow {
 }
 
 export async function getMetricsByTimeRange(sql: Sql, args: GetMetricsByTimeRangeArgs): Promise<GetMetricsByTimeRangeRow[]> {
-    return (await sql.unsafe(getMetricsByTimeRangeQuery, [args.timestamp, args.timestamp]).values()).map(row => ({
+    return (await sql.unsafe(getMetricsByTimeRangeQuery, [args.startTimestamp, args.endTimestamp]).values()).map(row => ({
         id: row[0],
         name: row[1],
         value: row[2],
@@ -117,26 +111,30 @@ export async function getMetricsByTimeRange(sql: Sql, args: GetMetricsByTimeRang
     }));
 }
 
-export const updateMetricValueQuery = `-- name: UpdateMetricValue :one
+export const updateMetricQuery = `-- name: UpdateMetric :one
 UPDATE metrics
-SET value = $2
+SET name = $2,
+    value = $3,
+    timestamp = $4
 WHERE id = $1
 RETURNING id, name, value, timestamp`;
 
-export interface UpdateMetricValueArgs {
-    id: number;
-    value: number;
-}
-
-export interface UpdateMetricValueRow {
+export interface UpdateMetricArgs {
     id: number;
     name: string;
     value: number;
     timestamp: Date | null;
 }
 
-export async function updateMetricValue(sql: Sql, args: UpdateMetricValueArgs): Promise<UpdateMetricValueRow | null> {
-    const rows = await sql.unsafe(updateMetricValueQuery, [args.id, args.value]).values();
+export interface UpdateMetricRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function updateMetric(sql: Sql, args: UpdateMetricArgs): Promise<UpdateMetricRow | null> {
+    const rows = await sql.unsafe(updateMetricQuery, [args.id, args.name, args.value, args.timestamp]).values();
     if (rows.length !== 1) {
         return null;
     }
@@ -159,5 +157,30 @@ export interface DeleteMetricArgs {
 
 export async function deleteMetric(sql: Sql, args: DeleteMetricArgs): Promise<void> {
     await sql.unsafe(deleteMetricQuery, [args.id]);
+}
+
+export const getMetricsByNameQuery = `-- name: GetMetricsByName :many
+SELECT id, name, value, timestamp FROM metrics
+WHERE name = $1
+ORDER BY timestamp DESC`;
+
+export interface GetMetricsByNameArgs {
+    name: string;
+}
+
+export interface GetMetricsByNameRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function getMetricsByName(sql: Sql, args: GetMetricsByNameArgs): Promise<GetMetricsByNameRow[]> {
+    return (await sql.unsafe(getMetricsByNameQuery, [args.name]).values()).map(row => ({
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    }));
 }
 

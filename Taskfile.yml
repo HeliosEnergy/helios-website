@@ -71,7 +71,7 @@ tasks:
 
   # Database migration tasks - run from host - with explicit dir
   goose-up:
-    desc: Run database migrations (up) and generate code
+    desc: Run database migrations (up)
     cmds:
       - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" up
       - cd database/schema && sqlc generate

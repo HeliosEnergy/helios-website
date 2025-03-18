@@ -13,20 +13,26 @@ WHERE id = $1;
 
 -- name: ListMetrics :many
 SELECT * FROM metrics
-ORDER BY timestamp DESC
-LIMIT $1 OFFSET $2;
+ORDER BY timestamp DESC;
 
 -- name: GetMetricsByTimeRange :many
 SELECT * FROM metrics
-WHERE timestamp BETWEEN $1 AND $2
+WHERE timestamp BETWEEN sqlc.arg(start_timestamp) AND sqlc.arg(end_timestamp)
 ORDER BY timestamp DESC;
 
--- name: UpdateMetricValue :one
+-- name: UpdateMetric :one
 UPDATE metrics
-SET value = $2
+SET name = $2,
+    value = $3,
+    timestamp = $4
 WHERE id = $1
 RETURNING *;
 
 -- name: DeleteMetric :exec
 DELETE FROM metrics
 WHERE id = $1;
+
+-- name: GetMetricsByName :many
+SELECT * FROM metrics
+WHERE name = $1
+ORDER BY timestamp DESC;

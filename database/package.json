@@ -1,0 +1,18 @@
+{
+    "name": "@helios/analysis_db",
+    "version": "1.0.0",
+    "main": "analysis_db/query_sql.ts",
+    "types": "analysis_db/query_sql.ts",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "generate": "sqlc generate"
+    },
+    "dependencies": {
+        "postgres": "^3.4.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20.0.0",
+        "typescript": "^5.0.0"
+    }
+}

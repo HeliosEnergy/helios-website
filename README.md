@@ -8,6 +8,8 @@ Contains data scrapping and processing for things like fiber optic maps, energy 
 # Data Analysis Containers
 To run the complete data analysis stack run `docker compose up --build` which will start the container which runs the scripts, TimeScaleDB (Postgres) with the PostGIS extension, and Grafana for visualizations/analysis.
 
+Then run `task goose-up` in a seperate terminal to init/update the database. 
+
 
 
 # Scripts
@@ -15,7 +17,7 @@ To run the complete data analysis stack run `docker compose up --build` which wi
 ## KMZ Upload
 /scripts/kmz_upload.py
 
-Reads /kmz_files.json to parse KMZ map data into the PostGIS DB. The KMZ files will be in /data/kmz or provided by URL which will be pulled by the script.
+Reads a list of KMZ files from /kmz_files.json into the PostGIS DB. The KMZ files will be in /data/kmz or provided by URL which will be pulled by the script.
 
 It's intended to be ran by a CRON tab in /container/cron/kmz
 

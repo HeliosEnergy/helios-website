@@ -3,7 +3,18 @@
 #   sqlc v1.28.0
 import dataclasses
 import datetime
-from typing import Optional
+from typing import Any, Optional
+
+
+@dataclasses.dataclass()
+class KmzFeature:
+    id: int
+    source_id: str
+    name: Optional[str]
+    description: Optional[str]
+    metadata: Optional[Any]
+    geometry: Optional[Any]
+    created_at: Optional[datetime.datetime]
 
 
 @dataclasses.dataclass()

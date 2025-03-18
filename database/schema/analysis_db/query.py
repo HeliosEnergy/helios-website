@@ -34,6 +34,13 @@ WHERE id = :p1
 """
 
 
+GET_METRICS_BY_NAME = """-- name: get_metrics_by_name \\:many
+SELECT id, name, value, timestamp FROM metrics
+WHERE name = :p1
+ORDER BY timestamp DESC
+"""
+
+
 GET_METRICS_BY_TIME_RANGE = """-- name: get_metrics_by_time_range \\:many
 SELECT id, name, value, timestamp FROM metrics
 WHERE timestamp BETWEEN :p1 AND :p2
@@ -44,13 +51,14 @@ ORDER BY timestamp DESC
 LIST_METRICS = """-- name: list_metrics \\:many
 SELECT id, name, value, timestamp FROM metrics
 ORDER BY timestamp DESC
-LIMIT :p1 OFFSET :p2
 """
 
 
-UPDATE_METRIC_VALUE = """-- name: update_metric_value \\:one
+UPDATE_METRIC = """-- name: update_metric \\:one
 UPDATE metrics
-SET value = :p2
+SET name = :p2,
+    value = :p3,
+    timestamp = :p4
 WHERE id = :p1
 RETURNING id, name, value, timestamp
 """
@@ -85,8 +93,8 @@ class Querier:
             timestamp=row[3],
         )
 
-    def get_metrics_by_time_range(self, *, timestamp: Optional[datetime.datetime], timestamp: Optional[datetime.datetime]) -> Iterator[models.Metric]:
-        result = self._conn.execute(sqlalchemy.text(GET_METRICS_BY_TIME_RANGE), {"p1": timestamp, "p2": timestamp})
+    def get_metrics_by_name(self, *, name: str) -> Iterator[models.Metric]:
+        result = self._conn.execute(sqlalchemy.text(GET_METRICS_BY_NAME), {"p1": name})
         for row in result:
             yield models.Metric(
                 id=row[0],
@@ -95,8 +103,8 @@ class Querier:
                 timestamp=row[3],
             )
 
-    def list_metrics(self, *, limit: int, offset: int) -> Iterator[models.Metric]:
-        result = self._conn.execute(sqlalchemy.text(LIST_METRICS), {"p1": limit, "p2": offset})
+    def get_metrics_by_time_range(self, *, start_timestamp: Optional[datetime.datetime], end_timestamp: Optional[datetime.datetime]) -> Iterator[models.Metric]:
+        result = self._conn.execute(sqlalchemy.text(GET_METRICS_BY_TIME_RANGE), {"p1": start_timestamp, "p2": end_timestamp})
         for row in result:
             yield models.Metric(
                 id=row[0],
@@ -105,8 +113,23 @@ class Querier:
                 timestamp=row[3],
             )
 
-    def update_metric_value(self, *, id: int, value: float) -> Optional[models.Metric]:
-        row = self._conn.execute(sqlalchemy.text(UPDATE_METRIC_VALUE), {"p1": id, "p2": value}).first()
+    def list_metrics(self) -> Iterator[models.Metric]:
+        result = self._conn.execute(sqlalchemy.text(LIST_METRICS))
+        for row in result:
+            yield models.Metric(
+                id=row[0],
+                name=row[1],
+                value=row[2],
+                timestamp=row[3],
+            )
+
+    def update_metric(self, *, id: int, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
+        row = self._conn.execute(sqlalchemy.text(UPDATE_METRIC), {
+            "p1": id,
+            "p2": name,
+            "p3": value,
+            "p4": timestamp,
+        }).first()
         if row is None:
             return None
         return models.Metric(
@@ -146,8 +169,8 @@ class AsyncQuerier:
             timestamp=row[3],
         )
 
-    async def get_metrics_by_time_range(self, *, timestamp: Optional[datetime.datetime], timestamp: Optional[datetime.datetime]) -> AsyncIterator[models.Metric]:
-        result = await self._conn.stream(sqlalchemy.text(GET_METRICS_BY_TIME_RANGE), {"p1": timestamp, "p2": timestamp})
+    async def get_metrics_by_name(self, *, name: str) -> AsyncIterator[models.Metric]:
+        result = await self._conn.stream(sqlalchemy.text(GET_METRICS_BY_NAME), {"p1": name})
         async for row in result:
             yield models.Metric(
                 id=row[0],
@@ -156,8 +179,8 @@ class AsyncQuerier:
                 timestamp=row[3],
             )
 
-    async def list_metrics(self, *, limit: int, offset: int) -> AsyncIterator[models.Metric]:
-        result = await self._conn.stream(sqlalchemy.text(LIST_METRICS), {"p1": limit, "p2": offset})
+    async def get_metrics_by_time_range(self, *, start_timestamp: Optional[datetime.datetime], end_timestamp: Optional[datetime.datetime]) -> AsyncIterator[models.Metric]:
+        result = await self._conn.stream(sqlalchemy.text(GET_METRICS_BY_TIME_RANGE), {"p1": start_timestamp, "p2": end_timestamp})
         async for row in result:
             yield models.Metric(
                 id=row[0],
@@ -166,8 +189,23 @@ class AsyncQuerier:
                 timestamp=row[3],
             )
 
-    async def update_metric_value(self, *, id: int, value: float) -> Optional[models.Metric]:
-        row = (await self._conn.execute(sqlalchemy.text(UPDATE_METRIC_VALUE), {"p1": id, "p2": value})).first()
+    async def list_metrics(self) -> AsyncIterator[models.Metric]:
+        result = await self._conn.stream(sqlalchemy.text(LIST_METRICS))
+        async for row in result:
+            yield models.Metric(
+                id=row[0],
+                name=row[1],
+                value=row[2],
+                timestamp=row[3],
+            )
+
+    async def update_metric(self, *, id: int, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
+        row = (await self._conn.execute(sqlalchemy.text(UPDATE_METRIC), {
+            "p1": id,
+            "p2": name,
+            "p3": value,
+            "p4": timestamp,
+        })).first()
         if row is None:
             return None
         return models.Metric(
