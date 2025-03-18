@@ -8,6 +8,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type EiaElectricityDatum struct {
+	ID          int32
+	SeriesID    string
+	Name        string
+	Units       string
+	Frequency   pgtype.Text
+	Copyright   pgtype.Text
+	Source      pgtype.Text
+	Iso3166     pgtype.Text
+	Location    interface{}
+	Geography   pgtype.Text
+	StartDate   pgtype.Timestamptz
+	EndDate     pgtype.Timestamptz
+	LastUpdated pgtype.Timestamptz
+	Data        []byte
+	CreatedAt   pgtype.Timestamptz
+}
+
 type KmzFeature struct {
 	ID          int32
 	SourceID    string

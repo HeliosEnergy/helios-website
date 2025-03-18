@@ -7,6 +7,25 @@ from typing import Any, Optional
 
 
 @dataclasses.dataclass()
+class EiaElectricityDatum:
+    id: int
+    series_id: str
+    name: str
+    units: str
+    frequency: Optional[str]
+    copyright: Optional[str]
+    source: Optional[str]
+    iso3166: Optional[str]
+    location: Optional[Any]
+    geography: Optional[str]
+    start_date: Optional[datetime.datetime]
+    end_date: Optional[datetime.datetime]
+    last_updated: Optional[datetime.datetime]
+    data: Optional[Any]
+    created_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
 class KmzFeature:
     id: int
     source_id: str

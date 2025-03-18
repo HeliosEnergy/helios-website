@@ -184,3 +184,58 @@ export async function getMetricsByName(sql: Sql, args: GetMetricsByNameArgs): Pr
     }));
 }
 
+export const createEIAElectricityDataQuery = `-- name: CreateEIAElectricityData :exec
+INSERT INTO eia_electricity_data (
+    series_id,
+    name,
+    units,
+    frequency,
+    copyright,
+    source,
+    iso3166,
+    location,
+    geography,
+    start_date,
+    end_date,
+    last_updated,
+    data
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    ST_SetSRID(ST_MakePoint(
+        $8::float8,
+        $9::float8
+    ), 4326)::geography,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14
+)`;
+
+export interface CreateEIAElectricityDataArgs {
+    seriesId: string;
+    name: string;
+    units: string;
+    frequency: string | null;
+    copyright: string | null;
+    source: string | null;
+    iso3166: string | null;
+    longitude: number;
+    latitude: number;
+    geography: string | null;
+    startDate: Date | null;
+    endDate: Date | null;
+    lastUpdated: Date | null;
+    data: any | null;
+}
+
+export async function createEIAElectricityData(sql: Sql, args: CreateEIAElectricityDataArgs): Promise<void> {
+    await sql.unsafe(createEIAElectricityDataQuery, [args.seriesId, args.name, args.units, args.frequency, args.copyright, args.source, args.iso3166, args.longitude, args.latitude, args.geography, args.startDate, args.endDate, args.lastUpdated, args.data]);
+}
+

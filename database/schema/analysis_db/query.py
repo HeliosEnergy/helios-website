@@ -2,13 +2,68 @@
 # versions:
 #   sqlc v1.28.0
 # source: query.sql
+import dataclasses
 import datetime
-from typing import AsyncIterator, Iterator, Optional
+from typing import Any, AsyncIterator, Iterator, Optional
 
 import sqlalchemy
 import sqlalchemy.ext.asyncio
 
 from analysis_db import models
+
+
+CREATE_EIA_ELECTRICITY_DATA = """-- name: create_eia_electricity_data \\:exec
+INSERT INTO eia_electricity_data (
+    series_id,
+    name,
+    units,
+    frequency,
+    copyright,
+    source,
+    iso3166,
+    location,
+    geography,
+    start_date,
+    end_date,
+    last_updated,
+    data
+) VALUES (
+    :p1,
+    :p2,
+    :p3,
+    :p4,
+    :p5,
+    :p6,
+    :p7,
+    ST_SetSRID(ST_MakePoint(
+        :p8\\:\\:float8,
+        :p9\\:\\:float8
+    ), 4326)\\:\\:geography,
+    :p10,
+    :p11,
+    :p12,
+    :p13,
+    :p14
+)
+"""
+
+
+@dataclasses.dataclass()
+class CreateEIAElectricityDataParams:
+    series_id: str
+    name: str
+    units: str
+    frequency: Optional[str]
+    copyright: Optional[str]
+    source: Optional[str]
+    iso3166: Optional[str]
+    longitude: float
+    latitude: float
+    geography: Optional[str]
+    start_date: Optional[datetime.datetime]
+    end_date: Optional[datetime.datetime]
+    last_updated: Optional[datetime.datetime]
+    data: Optional[Any]
 
 
 CREATE_METRIC = """-- name: create_metric \\:one
@@ -67,6 +122,24 @@ RETURNING id, name, value, timestamp
 class Querier:
     def __init__(self, conn: sqlalchemy.engine.Connection):
         self._conn = conn
+
+    def create_eia_electricity_data(self, arg: CreateEIAElectricityDataParams) -> None:
+        self._conn.execute(sqlalchemy.text(CREATE_EIA_ELECTRICITY_DATA), {
+            "p1": arg.series_id,
+            "p2": arg.name,
+            "p3": arg.units,
+            "p4": arg.frequency,
+            "p5": arg.copyright,
+            "p6": arg.source,
+            "p7": arg.iso3166,
+            "p8": arg.longitude,
+            "p9": arg.latitude,
+            "p10": arg.geography,
+            "p11": arg.start_date,
+            "p12": arg.end_date,
+            "p13": arg.last_updated,
+            "p14": arg.data,
+        })
 
     def create_metric(self, *, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
         row = self._conn.execute(sqlalchemy.text(CREATE_METRIC), {"p1": name, "p2": value, "p3": timestamp}).first()
@@ -143,6 +216,24 @@ class Querier:
 class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
         self._conn = conn
+
+    async def create_eia_electricity_data(self, arg: CreateEIAElectricityDataParams) -> None:
+        await self._conn.execute(sqlalchemy.text(CREATE_EIA_ELECTRICITY_DATA), {
+            "p1": arg.series_id,
+            "p2": arg.name,
+            "p3": arg.units,
+            "p4": arg.frequency,
+            "p5": arg.copyright,
+            "p6": arg.source,
+            "p7": arg.iso3166,
+            "p8": arg.longitude,
+            "p9": arg.latitude,
+            "p10": arg.geography,
+            "p11": arg.start_date,
+            "p12": arg.end_date,
+            "p13": arg.last_updated,
+            "p14": arg.data,
+        })
 
     async def create_metric(self, *, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
         row = (await self._conn.execute(sqlalchemy.text(CREATE_METRIC), {"p1": name, "p2": value, "p3": timestamp})).first()

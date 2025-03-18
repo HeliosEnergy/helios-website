@@ -1,0 +1,29 @@
+{
+  "name": "eia",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scrape": "node --loader ts-node/esm eia_scrape.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@helios/analysis_db": "file:../../database",
+    "adm-zip": "^0.5.16",
+    "dotenv": "^16.4.7",
+    "nanoid": "^5.0.0",
+    "pg": "^8.14.1",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/dotenv": "^6.1.1",
+    "@types/nanoid": "^2.1.0",
+    "@types/node": "^20.17.24",
+    "@types/pg": "^8.11.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}

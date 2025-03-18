@@ -4,6 +4,7 @@
     "main": "analysis_db/query_sql.ts",
     "types": "analysis_db/query_sql.ts",
     "private": true,
+    "type": "module",
     "scripts": {
         "build": "tsc",
         "generate": "sqlc generate"

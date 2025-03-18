@@ -11,6 +11,78 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createEIAElectricityData = `-- name: CreateEIAElectricityData :exec
+INSERT INTO eia_electricity_data (
+    series_id,
+    name,
+    units,
+    frequency,
+    copyright,
+    source,
+    iso3166,
+    location,
+    geography,
+    start_date,
+    end_date,
+    last_updated,
+    data
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    ST_SetSRID(ST_MakePoint(
+        $8::float8,
+        $9::float8
+    ), 4326)::geography,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14
+)
+`
+
+type CreateEIAElectricityDataParams struct {
+	SeriesID    string
+	Name        string
+	Units       string
+	Frequency   pgtype.Text
+	Copyright   pgtype.Text
+	Source      pgtype.Text
+	Iso3166     pgtype.Text
+	Longitude   float64
+	Latitude    float64
+	Geography   pgtype.Text
+	StartDate   pgtype.Timestamptz
+	EndDate     pgtype.Timestamptz
+	LastUpdated pgtype.Timestamptz
+	Data        []byte
+}
+
+func (q *Queries) CreateEIAElectricityData(ctx context.Context, arg CreateEIAElectricityDataParams) error {
+	_, err := q.db.Exec(ctx, createEIAElectricityData,
+		arg.SeriesID,
+		arg.Name,
+		arg.Units,
+		arg.Frequency,
+		arg.Copyright,
+		arg.Source,
+		arg.Iso3166,
+		arg.Longitude,
+		arg.Latitude,
+		arg.Geography,
+		arg.StartDate,
+		arg.EndDate,
+		arg.LastUpdated,
+		arg.Data,
+	)
+	return err
+}
+
 const createMetric = `-- name: CreateMetric :one
 INSERT INTO metrics (
     name,
