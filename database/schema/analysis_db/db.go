@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.28.0
 
-package primary_db
+package analysis_db
 
 import (
 	"context"

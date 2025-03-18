@@ -1,0 +1,163 @@
+import { Sql } from "postgres";
+
+export const createMetricQuery = `-- name: CreateMetric :one
+INSERT INTO metrics (
+    name,
+    value,
+    timestamp
+) VALUES (
+    $1, $2, $3
+) RETURNING id, name, value, timestamp`;
+
+export interface CreateMetricArgs {
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export interface CreateMetricRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function createMetric(sql: Sql, args: CreateMetricArgs): Promise<CreateMetricRow | null> {
+    const rows = await sql.unsafe(createMetricQuery, [args.name, args.value, args.timestamp]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    };
+}
+
+export const getMetricQuery = `-- name: GetMetric :one
+SELECT id, name, value, timestamp FROM metrics
+WHERE id = $1`;
+
+export interface GetMetricArgs {
+    id: number;
+}
+
+export interface GetMetricRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function getMetric(sql: Sql, args: GetMetricArgs): Promise<GetMetricRow | null> {
+    const rows = await sql.unsafe(getMetricQuery, [args.id]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    };
+}
+
+export const listMetricsQuery = `-- name: ListMetrics :many
+SELECT id, name, value, timestamp FROM metrics
+ORDER BY timestamp DESC
+LIMIT $1 OFFSET $2`;
+
+export interface ListMetricsArgs {
+    limit: string;
+    offset: string;
+}
+
+export interface ListMetricsRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function listMetrics(sql: Sql, args: ListMetricsArgs): Promise<ListMetricsRow[]> {
+    return (await sql.unsafe(listMetricsQuery, [args.limit, args.offset]).values()).map(row => ({
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    }));
+}
+
+export const getMetricsByTimeRangeQuery = `-- name: GetMetricsByTimeRange :many
+SELECT id, name, value, timestamp FROM metrics
+WHERE timestamp BETWEEN $1 AND $2
+ORDER BY timestamp DESC`;
+
+export interface GetMetricsByTimeRangeArgs {
+    timestamp: Date | null;
+    timestamp: Date | null;
+}
+
+export interface GetMetricsByTimeRangeRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function getMetricsByTimeRange(sql: Sql, args: GetMetricsByTimeRangeArgs): Promise<GetMetricsByTimeRangeRow[]> {
+    return (await sql.unsafe(getMetricsByTimeRangeQuery, [args.timestamp, args.timestamp]).values()).map(row => ({
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    }));
+}
+
+export const updateMetricValueQuery = `-- name: UpdateMetricValue :one
+UPDATE metrics
+SET value = $2
+WHERE id = $1
+RETURNING id, name, value, timestamp`;
+
+export interface UpdateMetricValueArgs {
+    id: number;
+    value: number;
+}
+
+export interface UpdateMetricValueRow {
+    id: number;
+    name: string;
+    value: number;
+    timestamp: Date | null;
+}
+
+export async function updateMetricValue(sql: Sql, args: UpdateMetricValueArgs): Promise<UpdateMetricValueRow | null> {
+    const rows = await sql.unsafe(updateMetricValueQuery, [args.id, args.value]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        name: row[1],
+        value: row[2],
+        timestamp: row[3]
+    };
+}
+
+export const deleteMetricQuery = `-- name: DeleteMetric :exec
+DELETE FROM metrics
+WHERE id = $1`;
+
+export interface DeleteMetricArgs {
+    id: number;
+}
+
+export async function deleteMetric(sql: Sql, args: DeleteMetricArgs): Promise<void> {
+    await sql.unsafe(deleteMetricQuery, [args.id]);
+}
+

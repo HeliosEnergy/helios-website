@@ -14,17 +14,17 @@ sql:
     schema: "migrations/*.sql"
     gen:
       go:
-        package: primary_db
-        out: primary_db
+        package: analysis_db
+        out: analysis_db
         sql_package: "pgx/v5"
     codegen:
-      - out: primary_db
+      - out: analysis_db
         plugin: py
         options:
-          package: authors
+          package: analysis_db
           emit_sync_querier: true
           emit_async_querier: true
-      - out: primary_db
+      - out: analysis_db
         plugin: ts
         options:
           runtime: node
