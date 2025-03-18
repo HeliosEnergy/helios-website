@@ -1,0 +1,44 @@
+# Helios Data Analysis
+Database/dashboards/interactive apps for Helios data collection and analysis.
+
+Contains data scrapping and processing for things like fiber optic maps, energy pricing, and GPU pricing.
+
+
+
+# Data Analysis Containers
+To run the complete data analysis stack run `docker compose up --build` which will start the container which runs the scripts, TimeScaleDB (Postgres) with the PostGIS extension, and Grafana for visualizations/analysis.
+
+
+
+# Scripts
+
+## KMZ Upload
+/scripts/kmz_upload.py
+
+Reads /kmz_files.json to parse KMZ map data into the PostGIS DB. The KMZ files will be in /data/kmz or provided by URL which will be pulled by the script.
+
+It's intended to be ran by a CRON tab in /container/cron/kmz
+
+## EIA Collection
+/scripts/eia_collection.py
+
+Reads data from the EIA (U.S. Energy Information Administration) APIs found at [https://www.eia.gov/opendata/](https://www.eia.gov/opendata/) with an OpenAPI spec provided here [https://www.eia.gov/opendata/eia-api-swagger.zip](https://www.eia.gov/opendata/eia-api-swagger.zip).
+
+You can request an API at one of the pages listed above, or contact Tucker for his.
+
+# Scraping
+NodeJS REPL, Puppeteer, web scraping for to the data analysis repo. It uses Google Chrome automation to scrape data into the TimeScaleDB or JSON files for analaysis.
+
+Haven't determined if this script will manage it's own scheduling or be ran by CRON.
+
+## GPU Pricing
+Scrapes various cloud platforms to obtain real-time pricing info.
+
+
+
+# Container
+
+
+
+# Database
+

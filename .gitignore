@@ -3,3 +3,5 @@
 
 data/temp/*
 !data/temp/.gitkeep
+
+node_modules
