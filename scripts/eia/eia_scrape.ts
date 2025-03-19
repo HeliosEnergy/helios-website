@@ -140,17 +140,32 @@ function parseQuarterDate(dateStr: string): Date | null {
 }
 
 async function electricityDataProcessing(filePath: string) {
+	const fileSize = fs.statSync(filePath).size;
 	const fileStream = fs.createReadStream(filePath, { encoding: 'utf8' });
 	const reader = readline.createInterface({
 		input: fileStream,
 		crlfDelay: Infinity
 	});
 
+	let bytesRead = 0;
+	let count = 0;
+	const updateInterval = 1000; // Update progress every 1000 entries
+	const startTime = Date.now();
+
 	for await (const line of reader) {
 		try {
 			if (!line) continue;
-			const entry = JSON.parse(line);
+			count++;
+			bytesRead += Buffer.byteLength(line + '\n', 'utf8');
+			
+			if (count % updateInterval === 0) {
+				const percent = ((bytesRead / fileSize) * 100).toFixed(2);
+				const elapsedSeconds = (Date.now() - startTime) / 1000;
+				const rate = count / elapsedSeconds;
+				process.stdout.write(`\r[ELECTRICITY] ${count} entries (${percent}%) at ${rate.toFixed(2)} entries/sec`);
+			}
 
+			const entry = JSON.parse(line);
 			
 			await createEIAElectricityData(sql, {
 				seriesId: entry.series_id,
@@ -169,11 +184,15 @@ async function electricityDataProcessing(filePath: string) {
 				data: JSON.stringify(entry.data)
 			});
 		} catch (error) {
-			console.error(`Error processing line: |${line}|`);
+			console.error(`\nError processing line ${count}: |${line}|`);
 			console.error(error);
 			throw error;
 		}
 	}
+
+	const totalTime = (Date.now() - startTime) / 1000;
+	console.log(`\nFinished processing ${count} entries in ${totalTime.toFixed(2)} seconds`);
+	console.log(`Average rate: ${(count / totalTime).toFixed(2)} entries/sec`);
 
 	await sql.end();
 }
