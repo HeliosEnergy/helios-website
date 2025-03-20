@@ -70,3 +70,132 @@ INSERT INTO eia_electricity_data (
     sqlc.arg(last_updated),
     sqlc.arg(data)
 );
+
+-- New queries for EIA entities, plants, and stats
+
+-- name: GetEIAEntityByApiID :one
+SELECT * FROM eia_entities
+WHERE api_entity_id = sqlc.arg(api_entity_id);
+
+-- name: UpsertEIAEntity :one
+INSERT INTO eia_entities (
+    api_entity_id,
+    name,
+    description,
+    metadata
+) VALUES (
+    sqlc.arg(api_entity_id),
+    sqlc.arg(name),
+    sqlc.arg(description),
+    sqlc.arg(metadata)
+)
+ON CONFLICT (api_entity_id) 
+DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING *;
+
+-- name: GetEIAPowerPlantByApiID :one
+SELECT * FROM eia_power_plants
+WHERE api_plant_id = sqlc.arg(api_plant_id);
+
+-- name: UpsertEIAPowerPlant :one
+INSERT INTO eia_power_plants (
+    api_plant_id,
+    entity_id,
+    name,
+    county,
+    state,
+    location,
+    plant_code,
+    fuel_type,
+    prime_mover,
+    operating_status,
+    metadata
+) VALUES (
+    sqlc.arg(api_plant_id),
+    sqlc.arg(entity_id),
+    sqlc.arg(name),
+    sqlc.arg(county),
+    sqlc.arg(state),
+    ST_SetSRID(ST_MakePoint(
+        sqlc.arg(longitude)::float8,
+        sqlc.arg(latitude)::float8
+    ), 4326)::geography,
+    sqlc.arg(plant_code),
+    sqlc.arg(fuel_type),
+    sqlc.arg(prime_mover),
+    sqlc.arg(operating_status),
+    sqlc.arg(metadata)
+)
+ON CONFLICT (api_plant_id) 
+DO UPDATE SET
+    entity_id = EXCLUDED.entity_id,
+    name = EXCLUDED.name,
+    county = EXCLUDED.county,
+    state = EXCLUDED.state,
+    location = EXCLUDED.location,
+    plant_code = EXCLUDED.plant_code,
+    fuel_type = EXCLUDED.fuel_type,
+    prime_mover = EXCLUDED.prime_mover,
+    operating_status = EXCLUDED.operating_status,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING *;
+
+-- name: CreateEIAPlantStat :one
+INSERT INTO eia_plant_stats (
+    plant_id,
+    timestamp,
+    nameplate_capacity_mw,
+    net_summer_capacity_mw,
+    net_winter_capacity_mw,
+    planned_derate_summer_cap_mw,
+    planned_uprate_summer_cap_mw,
+    operating_year_month,
+    planned_derate_year_month,
+    planned_uprate_year_month,
+    planned_retirement_year_month,
+    source_timestamp,
+    data_period,
+    metadata
+) VALUES (
+    sqlc.arg(plant_id),
+    COALESCE(sqlc.arg(timestamp), CURRENT_TIMESTAMP),
+    sqlc.arg(nameplate_capacity_mw),
+    sqlc.arg(net_summer_capacity_mw),
+    sqlc.arg(net_winter_capacity_mw),
+    sqlc.arg(planned_derate_summer_cap_mw),
+    sqlc.arg(planned_uprate_summer_cap_mw),
+    sqlc.arg(operating_year_month),
+    sqlc.arg(planned_derate_year_month),
+    sqlc.arg(planned_uprate_year_month),
+    sqlc.arg(planned_retirement_year_month),
+    sqlc.arg(source_timestamp),
+    sqlc.arg(data_period),
+    sqlc.arg(metadata)
+)
+RETURNING *;
+
+-- name: GetEIAPlantStatsByPlantID :many
+SELECT * FROM eia_plant_stats
+WHERE plant_id = sqlc.arg(plant_id)
+ORDER BY timestamp DESC;
+
+-- name: GetEIAPlantStatsInTimeRange :many
+SELECT * FROM eia_plant_stats
+WHERE plant_id = sqlc.arg(plant_id)
+AND timestamp BETWEEN sqlc.arg(start_timestamp) AND sqlc.arg(end_timestamp)
+ORDER BY timestamp DESC;
+
+-- name: GetLatestEIAPlantStat :one
+SELECT * FROM eia_plant_stats
+WHERE plant_id = sqlc.arg(plant_id)
+ORDER BY timestamp DESC
+LIMIT 1;
+
+-- name: GetEIAPowerPlantsForEntity :many
+SELECT * FROM eia_power_plants
+WHERE entity_id = sqlc.arg(entity_id);

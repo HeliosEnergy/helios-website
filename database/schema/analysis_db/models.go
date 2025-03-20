@@ -26,6 +26,52 @@ type EiaElectricityDatum struct {
 	CreatedAt   pgtype.Timestamptz
 }
 
+type EiaEntity struct {
+	ID          int32
+	ApiEntityID string
+	Name        string
+	Description pgtype.Text
+	Metadata    []byte
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+}
+
+type EiaPlantStat struct {
+	ID                         int32
+	PlantID                    pgtype.Int4
+	Timestamp                  pgtype.Timestamptz
+	NameplateCapacityMw        pgtype.Float8
+	NetSummerCapacityMw        pgtype.Float8
+	NetWinterCapacityMw        pgtype.Float8
+	PlannedDerateSummerCapMw   pgtype.Float8
+	PlannedUprateSummerCapMw   pgtype.Float8
+	OperatingYearMonth         pgtype.Date
+	PlannedDerateYearMonth     pgtype.Date
+	PlannedUprateYearMonth     pgtype.Date
+	PlannedRetirementYearMonth pgtype.Date
+	SourceTimestamp            pgtype.Timestamptz
+	DataPeriod                 pgtype.Text
+	Metadata                   []byte
+	CreatedAt                  pgtype.Timestamptz
+}
+
+type EiaPowerPlant struct {
+	ID              int32
+	ApiPlantID      string
+	EntityID        pgtype.Int4
+	Name            string
+	County          pgtype.Text
+	State           pgtype.Text
+	Location        interface{}
+	PlantCode       pgtype.Text
+	FuelType        pgtype.Text
+	PrimeMover      pgtype.Text
+	OperatingStatus pgtype.Text
+	Metadata        []byte
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+}
+
 type KmzFeature struct {
 	ID          int32
 	SourceID    string

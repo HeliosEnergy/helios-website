@@ -66,6 +66,60 @@ class CreateEIAElectricityDataParams:
     data: Optional[Any]
 
 
+CREATE_EIA_PLANT_STAT = """-- name: create_eia_plant_stat \\:one
+INSERT INTO eia_plant_stats (
+    plant_id,
+    timestamp,
+    nameplate_capacity_mw,
+    net_summer_capacity_mw,
+    net_winter_capacity_mw,
+    planned_derate_summer_cap_mw,
+    planned_uprate_summer_cap_mw,
+    operating_year_month,
+    planned_derate_year_month,
+    planned_uprate_year_month,
+    planned_retirement_year_month,
+    source_timestamp,
+    data_period,
+    metadata
+) VALUES (
+    :p1,
+    COALESCE(:p2, CURRENT_TIMESTAMP),
+    :p3,
+    :p4,
+    :p5,
+    :p6,
+    :p7,
+    :p8,
+    :p9,
+    :p10,
+    :p11,
+    :p12,
+    :p13,
+    :p14
+)
+RETURNING id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
+"""
+
+
+@dataclasses.dataclass()
+class CreateEIAPlantStatParams:
+    plant_id: Optional[int]
+    timestamp: Optional[Any]
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_uprate_summer_cap_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    source_timestamp: Optional[datetime.datetime]
+    data_period: Optional[str]
+    metadata: Optional[Any]
+
+
 CREATE_METRIC = """-- name: create_metric \\:one
 INSERT INTO metrics (
     name,
@@ -80,6 +134,48 @@ INSERT INTO metrics (
 DELETE_METRIC = """-- name: delete_metric \\:exec
 DELETE FROM metrics
 WHERE id = :p1
+"""
+
+
+GET_EIA_ENTITY_BY_API_ID = """-- name: get_eia_entity_by_api_id \\:one
+
+SELECT id, api_entity_id, name, description, metadata, created_at, updated_at FROM eia_entities
+WHERE api_entity_id = :p1
+"""
+
+
+GET_EIA_PLANT_STATS_BY_PLANT_ID = """-- name: get_eia_plant_stats_by_plant_id \\:many
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = :p1
+ORDER BY timestamp DESC
+"""
+
+
+GET_EIA_PLANT_STATS_IN_TIME_RANGE = """-- name: get_eia_plant_stats_in_time_range \\:many
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = :p1
+AND timestamp BETWEEN :p2 AND :p3
+ORDER BY timestamp DESC
+"""
+
+
+GET_EIA_POWER_PLANT_BY_API_ID = """-- name: get_eia_power_plant_by_api_id \\:one
+SELECT id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at FROM eia_power_plants
+WHERE api_plant_id = :p1
+"""
+
+
+GET_EIA_POWER_PLANTS_FOR_ENTITY = """-- name: get_eia_power_plants_for_entity \\:many
+SELECT id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at FROM eia_power_plants
+WHERE entity_id = :p1
+"""
+
+
+GET_LATEST_EIA_PLANT_STAT = """-- name: get_latest_eia_plant_stat \\:one
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = :p1
+ORDER BY timestamp DESC
+LIMIT 1
 """
 
 
@@ -119,6 +215,90 @@ RETURNING id, name, value, timestamp
 """
 
 
+UPSERT_EIA_ENTITY = """-- name: upsert_eia_entity \\:one
+INSERT INTO eia_entities (
+    api_entity_id,
+    name,
+    description,
+    metadata
+) VALUES (
+    :p1,
+    :p2,
+    :p3,
+    :p4
+)
+ON CONFLICT (api_entity_id) 
+DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING id, api_entity_id, name, description, metadata, created_at, updated_at
+"""
+
+
+UPSERT_EIA_POWER_PLANT = """-- name: upsert_eia_power_plant \\:one
+INSERT INTO eia_power_plants (
+    api_plant_id,
+    entity_id,
+    name,
+    county,
+    state,
+    location,
+    plant_code,
+    fuel_type,
+    prime_mover,
+    operating_status,
+    metadata
+) VALUES (
+    :p1,
+    :p2,
+    :p3,
+    :p4,
+    :p5,
+    ST_SetSRID(ST_MakePoint(
+        :p6\\:\\:float8,
+        :p7\\:\\:float8
+    ), 4326)\\:\\:geography,
+    :p8,
+    :p9,
+    :p10,
+    :p11,
+    :p12
+)
+ON CONFLICT (api_plant_id) 
+DO UPDATE SET
+    entity_id = EXCLUDED.entity_id,
+    name = EXCLUDED.name,
+    county = EXCLUDED.county,
+    state = EXCLUDED.state,
+    location = EXCLUDED.location,
+    plant_code = EXCLUDED.plant_code,
+    fuel_type = EXCLUDED.fuel_type,
+    prime_mover = EXCLUDED.prime_mover,
+    operating_status = EXCLUDED.operating_status,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at
+"""
+
+
+@dataclasses.dataclass()
+class UpsertEIAPowerPlantParams:
+    api_plant_id: str
+    entity_id: Optional[int]
+    name: str
+    county: Optional[str]
+    state: Optional[str]
+    longitude: float
+    latitude: float
+    plant_code: Optional[str]
+    fuel_type: Optional[str]
+    prime_mover: Optional[str]
+    operating_status: Optional[str]
+    metadata: Optional[Any]
+
+
 class Querier:
     def __init__(self, conn: sqlalchemy.engine.Connection):
         self._conn = conn
@@ -141,6 +321,44 @@ class Querier:
             "p14": arg.data,
         })
 
+    def create_eia_plant_stat(self, arg: CreateEIAPlantStatParams) -> Optional[models.EiaPlantStat]:
+        row = self._conn.execute(sqlalchemy.text(CREATE_EIA_PLANT_STAT), {
+            "p1": arg.plant_id,
+            "p2": arg.timestamp,
+            "p3": arg.nameplate_capacity_mw,
+            "p4": arg.net_summer_capacity_mw,
+            "p5": arg.net_winter_capacity_mw,
+            "p6": arg.planned_derate_summer_cap_mw,
+            "p7": arg.planned_uprate_summer_cap_mw,
+            "p8": arg.operating_year_month,
+            "p9": arg.planned_derate_year_month,
+            "p10": arg.planned_uprate_year_month,
+            "p11": arg.planned_retirement_year_month,
+            "p12": arg.source_timestamp,
+            "p13": arg.data_period,
+            "p14": arg.metadata,
+        }).first()
+        if row is None:
+            return None
+        return models.EiaPlantStat(
+            id=row[0],
+            plant_id=row[1],
+            timestamp=row[2],
+            nameplate_capacity_mw=row[3],
+            net_summer_capacity_mw=row[4],
+            net_winter_capacity_mw=row[5],
+            planned_derate_summer_cap_mw=row[6],
+            planned_uprate_summer_cap_mw=row[7],
+            operating_year_month=row[8],
+            planned_derate_year_month=row[9],
+            planned_uprate_year_month=row[10],
+            planned_retirement_year_month=row[11],
+            source_timestamp=row[12],
+            data_period=row[13],
+            metadata=row[14],
+            created_at=row[15],
+        )
+
     def create_metric(self, *, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
         row = self._conn.execute(sqlalchemy.text(CREATE_METRIC), {"p1": name, "p2": value, "p3": timestamp}).first()
         if row is None:
@@ -154,6 +372,128 @@ class Querier:
 
     def delete_metric(self, *, id: int) -> None:
         self._conn.execute(sqlalchemy.text(DELETE_METRIC), {"p1": id})
+
+    def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:
+        row = self._conn.execute(sqlalchemy.text(GET_EIA_ENTITY_BY_API_ID), {"p1": api_entity_id}).first()
+        if row is None:
+            return None
+        return models.EiaEntity(
+            id=row[0],
+            api_entity_id=row[1],
+            name=row[2],
+            description=row[3],
+            metadata=row[4],
+            created_at=row[5],
+            updated_at=row[6],
+        )
+
+    def get_eia_plant_stats_by_plant_id(self, *, plant_id: Optional[int]) -> Iterator[models.EiaPlantStat]:
+        result = self._conn.execute(sqlalchemy.text(GET_EIA_PLANT_STATS_BY_PLANT_ID), {"p1": plant_id})
+        for row in result:
+            yield models.EiaPlantStat(
+                id=row[0],
+                plant_id=row[1],
+                timestamp=row[2],
+                nameplate_capacity_mw=row[3],
+                net_summer_capacity_mw=row[4],
+                net_winter_capacity_mw=row[5],
+                planned_derate_summer_cap_mw=row[6],
+                planned_uprate_summer_cap_mw=row[7],
+                operating_year_month=row[8],
+                planned_derate_year_month=row[9],
+                planned_uprate_year_month=row[10],
+                planned_retirement_year_month=row[11],
+                source_timestamp=row[12],
+                data_period=row[13],
+                metadata=row[14],
+                created_at=row[15],
+            )
+
+    def get_eia_plant_stats_in_time_range(self, *, plant_id: Optional[int], start_timestamp: datetime.datetime, end_timestamp: datetime.datetime) -> Iterator[models.EiaPlantStat]:
+        result = self._conn.execute(sqlalchemy.text(GET_EIA_PLANT_STATS_IN_TIME_RANGE), {"p1": plant_id, "p2": start_timestamp, "p3": end_timestamp})
+        for row in result:
+            yield models.EiaPlantStat(
+                id=row[0],
+                plant_id=row[1],
+                timestamp=row[2],
+                nameplate_capacity_mw=row[3],
+                net_summer_capacity_mw=row[4],
+                net_winter_capacity_mw=row[5],
+                planned_derate_summer_cap_mw=row[6],
+                planned_uprate_summer_cap_mw=row[7],
+                operating_year_month=row[8],
+                planned_derate_year_month=row[9],
+                planned_uprate_year_month=row[10],
+                planned_retirement_year_month=row[11],
+                source_timestamp=row[12],
+                data_period=row[13],
+                metadata=row[14],
+                created_at=row[15],
+            )
+
+    def get_eia_power_plant_by_api_id(self, *, api_plant_id: str) -> Optional[models.EiaPowerPlant]:
+        row = self._conn.execute(sqlalchemy.text(GET_EIA_POWER_PLANT_BY_API_ID), {"p1": api_plant_id}).first()
+        if row is None:
+            return None
+        return models.EiaPowerPlant(
+            id=row[0],
+            api_plant_id=row[1],
+            entity_id=row[2],
+            name=row[3],
+            county=row[4],
+            state=row[5],
+            location=row[6],
+            plant_code=row[7],
+            fuel_type=row[8],
+            prime_mover=row[9],
+            operating_status=row[10],
+            metadata=row[11],
+            created_at=row[12],
+            updated_at=row[13],
+        )
+
+    def get_eia_power_plants_for_entity(self, *, entity_id: Optional[int]) -> Iterator[models.EiaPowerPlant]:
+        result = self._conn.execute(sqlalchemy.text(GET_EIA_POWER_PLANTS_FOR_ENTITY), {"p1": entity_id})
+        for row in result:
+            yield models.EiaPowerPlant(
+                id=row[0],
+                api_plant_id=row[1],
+                entity_id=row[2],
+                name=row[3],
+                county=row[4],
+                state=row[5],
+                location=row[6],
+                plant_code=row[7],
+                fuel_type=row[8],
+                prime_mover=row[9],
+                operating_status=row[10],
+                metadata=row[11],
+                created_at=row[12],
+                updated_at=row[13],
+            )
+
+    def get_latest_eia_plant_stat(self, *, plant_id: Optional[int]) -> Optional[models.EiaPlantStat]:
+        row = self._conn.execute(sqlalchemy.text(GET_LATEST_EIA_PLANT_STAT), {"p1": plant_id}).first()
+        if row is None:
+            return None
+        return models.EiaPlantStat(
+            id=row[0],
+            plant_id=row[1],
+            timestamp=row[2],
+            nameplate_capacity_mw=row[3],
+            net_summer_capacity_mw=row[4],
+            net_winter_capacity_mw=row[5],
+            planned_derate_summer_cap_mw=row[6],
+            planned_uprate_summer_cap_mw=row[7],
+            operating_year_month=row[8],
+            planned_derate_year_month=row[9],
+            planned_uprate_year_month=row[10],
+            planned_retirement_year_month=row[11],
+            source_timestamp=row[12],
+            data_period=row[13],
+            metadata=row[14],
+            created_at=row[15],
+        )
 
     def get_metric(self, *, id: int) -> Optional[models.Metric]:
         row = self._conn.execute(sqlalchemy.text(GET_METRIC), {"p1": id}).first()
@@ -212,6 +552,59 @@ class Querier:
             timestamp=row[3],
         )
 
+    def upsert_eia_entity(self, *, api_entity_id: str, name: str, description: Optional[str], metadata: Optional[Any]) -> Optional[models.EiaEntity]:
+        row = self._conn.execute(sqlalchemy.text(UPSERT_EIA_ENTITY), {
+            "p1": api_entity_id,
+            "p2": name,
+            "p3": description,
+            "p4": metadata,
+        }).first()
+        if row is None:
+            return None
+        return models.EiaEntity(
+            id=row[0],
+            api_entity_id=row[1],
+            name=row[2],
+            description=row[3],
+            metadata=row[4],
+            created_at=row[5],
+            updated_at=row[6],
+        )
+
+    def upsert_eia_power_plant(self, arg: UpsertEIAPowerPlantParams) -> Optional[models.EiaPowerPlant]:
+        row = self._conn.execute(sqlalchemy.text(UPSERT_EIA_POWER_PLANT), {
+            "p1": arg.api_plant_id,
+            "p2": arg.entity_id,
+            "p3": arg.name,
+            "p4": arg.county,
+            "p5": arg.state,
+            "p6": arg.longitude,
+            "p7": arg.latitude,
+            "p8": arg.plant_code,
+            "p9": arg.fuel_type,
+            "p10": arg.prime_mover,
+            "p11": arg.operating_status,
+            "p12": arg.metadata,
+        }).first()
+        if row is None:
+            return None
+        return models.EiaPowerPlant(
+            id=row[0],
+            api_plant_id=row[1],
+            entity_id=row[2],
+            name=row[3],
+            county=row[4],
+            state=row[5],
+            location=row[6],
+            plant_code=row[7],
+            fuel_type=row[8],
+            prime_mover=row[9],
+            operating_status=row[10],
+            metadata=row[11],
+            created_at=row[12],
+            updated_at=row[13],
+        )
+
 
 class AsyncQuerier:
     def __init__(self, conn: sqlalchemy.ext.asyncio.AsyncConnection):
@@ -235,6 +628,44 @@ class AsyncQuerier:
             "p14": arg.data,
         })
 
+    async def create_eia_plant_stat(self, arg: CreateEIAPlantStatParams) -> Optional[models.EiaPlantStat]:
+        row = (await self._conn.execute(sqlalchemy.text(CREATE_EIA_PLANT_STAT), {
+            "p1": arg.plant_id,
+            "p2": arg.timestamp,
+            "p3": arg.nameplate_capacity_mw,
+            "p4": arg.net_summer_capacity_mw,
+            "p5": arg.net_winter_capacity_mw,
+            "p6": arg.planned_derate_summer_cap_mw,
+            "p7": arg.planned_uprate_summer_cap_mw,
+            "p8": arg.operating_year_month,
+            "p9": arg.planned_derate_year_month,
+            "p10": arg.planned_uprate_year_month,
+            "p11": arg.planned_retirement_year_month,
+            "p12": arg.source_timestamp,
+            "p13": arg.data_period,
+            "p14": arg.metadata,
+        })).first()
+        if row is None:
+            return None
+        return models.EiaPlantStat(
+            id=row[0],
+            plant_id=row[1],
+            timestamp=row[2],
+            nameplate_capacity_mw=row[3],
+            net_summer_capacity_mw=row[4],
+            net_winter_capacity_mw=row[5],
+            planned_derate_summer_cap_mw=row[6],
+            planned_uprate_summer_cap_mw=row[7],
+            operating_year_month=row[8],
+            planned_derate_year_month=row[9],
+            planned_uprate_year_month=row[10],
+            planned_retirement_year_month=row[11],
+            source_timestamp=row[12],
+            data_period=row[13],
+            metadata=row[14],
+            created_at=row[15],
+        )
+
     async def create_metric(self, *, name: str, value: float, timestamp: Optional[datetime.datetime]) -> Optional[models.Metric]:
         row = (await self._conn.execute(sqlalchemy.text(CREATE_METRIC), {"p1": name, "p2": value, "p3": timestamp})).first()
         if row is None:
@@ -248,6 +679,128 @@ class AsyncQuerier:
 
     async def delete_metric(self, *, id: int) -> None:
         await self._conn.execute(sqlalchemy.text(DELETE_METRIC), {"p1": id})
+
+    async def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_EIA_ENTITY_BY_API_ID), {"p1": api_entity_id})).first()
+        if row is None:
+            return None
+        return models.EiaEntity(
+            id=row[0],
+            api_entity_id=row[1],
+            name=row[2],
+            description=row[3],
+            metadata=row[4],
+            created_at=row[5],
+            updated_at=row[6],
+        )
+
+    async def get_eia_plant_stats_by_plant_id(self, *, plant_id: Optional[int]) -> AsyncIterator[models.EiaPlantStat]:
+        result = await self._conn.stream(sqlalchemy.text(GET_EIA_PLANT_STATS_BY_PLANT_ID), {"p1": plant_id})
+        async for row in result:
+            yield models.EiaPlantStat(
+                id=row[0],
+                plant_id=row[1],
+                timestamp=row[2],
+                nameplate_capacity_mw=row[3],
+                net_summer_capacity_mw=row[4],
+                net_winter_capacity_mw=row[5],
+                planned_derate_summer_cap_mw=row[6],
+                planned_uprate_summer_cap_mw=row[7],
+                operating_year_month=row[8],
+                planned_derate_year_month=row[9],
+                planned_uprate_year_month=row[10],
+                planned_retirement_year_month=row[11],
+                source_timestamp=row[12],
+                data_period=row[13],
+                metadata=row[14],
+                created_at=row[15],
+            )
+
+    async def get_eia_plant_stats_in_time_range(self, *, plant_id: Optional[int], start_timestamp: datetime.datetime, end_timestamp: datetime.datetime) -> AsyncIterator[models.EiaPlantStat]:
+        result = await self._conn.stream(sqlalchemy.text(GET_EIA_PLANT_STATS_IN_TIME_RANGE), {"p1": plant_id, "p2": start_timestamp, "p3": end_timestamp})
+        async for row in result:
+            yield models.EiaPlantStat(
+                id=row[0],
+                plant_id=row[1],
+                timestamp=row[2],
+                nameplate_capacity_mw=row[3],
+                net_summer_capacity_mw=row[4],
+                net_winter_capacity_mw=row[5],
+                planned_derate_summer_cap_mw=row[6],
+                planned_uprate_summer_cap_mw=row[7],
+                operating_year_month=row[8],
+                planned_derate_year_month=row[9],
+                planned_uprate_year_month=row[10],
+                planned_retirement_year_month=row[11],
+                source_timestamp=row[12],
+                data_period=row[13],
+                metadata=row[14],
+                created_at=row[15],
+            )
+
+    async def get_eia_power_plant_by_api_id(self, *, api_plant_id: str) -> Optional[models.EiaPowerPlant]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_EIA_POWER_PLANT_BY_API_ID), {"p1": api_plant_id})).first()
+        if row is None:
+            return None
+        return models.EiaPowerPlant(
+            id=row[0],
+            api_plant_id=row[1],
+            entity_id=row[2],
+            name=row[3],
+            county=row[4],
+            state=row[5],
+            location=row[6],
+            plant_code=row[7],
+            fuel_type=row[8],
+            prime_mover=row[9],
+            operating_status=row[10],
+            metadata=row[11],
+            created_at=row[12],
+            updated_at=row[13],
+        )
+
+    async def get_eia_power_plants_for_entity(self, *, entity_id: Optional[int]) -> AsyncIterator[models.EiaPowerPlant]:
+        result = await self._conn.stream(sqlalchemy.text(GET_EIA_POWER_PLANTS_FOR_ENTITY), {"p1": entity_id})
+        async for row in result:
+            yield models.EiaPowerPlant(
+                id=row[0],
+                api_plant_id=row[1],
+                entity_id=row[2],
+                name=row[3],
+                county=row[4],
+                state=row[5],
+                location=row[6],
+                plant_code=row[7],
+                fuel_type=row[8],
+                prime_mover=row[9],
+                operating_status=row[10],
+                metadata=row[11],
+                created_at=row[12],
+                updated_at=row[13],
+            )
+
+    async def get_latest_eia_plant_stat(self, *, plant_id: Optional[int]) -> Optional[models.EiaPlantStat]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_LATEST_EIA_PLANT_STAT), {"p1": plant_id})).first()
+        if row is None:
+            return None
+        return models.EiaPlantStat(
+            id=row[0],
+            plant_id=row[1],
+            timestamp=row[2],
+            nameplate_capacity_mw=row[3],
+            net_summer_capacity_mw=row[4],
+            net_winter_capacity_mw=row[5],
+            planned_derate_summer_cap_mw=row[6],
+            planned_uprate_summer_cap_mw=row[7],
+            operating_year_month=row[8],
+            planned_derate_year_month=row[9],
+            planned_uprate_year_month=row[10],
+            planned_retirement_year_month=row[11],
+            source_timestamp=row[12],
+            data_period=row[13],
+            metadata=row[14],
+            created_at=row[15],
+        )
 
     async def get_metric(self, *, id: int) -> Optional[models.Metric]:
         row = (await self._conn.execute(sqlalchemy.text(GET_METRIC), {"p1": id})).first()
@@ -304,4 +857,57 @@ class AsyncQuerier:
             name=row[1],
             value=row[2],
             timestamp=row[3],
+        )
+
+    async def upsert_eia_entity(self, *, api_entity_id: str, name: str, description: Optional[str], metadata: Optional[Any]) -> Optional[models.EiaEntity]:
+        row = (await self._conn.execute(sqlalchemy.text(UPSERT_EIA_ENTITY), {
+            "p1": api_entity_id,
+            "p2": name,
+            "p3": description,
+            "p4": metadata,
+        })).first()
+        if row is None:
+            return None
+        return models.EiaEntity(
+            id=row[0],
+            api_entity_id=row[1],
+            name=row[2],
+            description=row[3],
+            metadata=row[4],
+            created_at=row[5],
+            updated_at=row[6],
+        )
+
+    async def upsert_eia_power_plant(self, arg: UpsertEIAPowerPlantParams) -> Optional[models.EiaPowerPlant]:
+        row = (await self._conn.execute(sqlalchemy.text(UPSERT_EIA_POWER_PLANT), {
+            "p1": arg.api_plant_id,
+            "p2": arg.entity_id,
+            "p3": arg.name,
+            "p4": arg.county,
+            "p5": arg.state,
+            "p6": arg.longitude,
+            "p7": arg.latitude,
+            "p8": arg.plant_code,
+            "p9": arg.fuel_type,
+            "p10": arg.prime_mover,
+            "p11": arg.operating_status,
+            "p12": arg.metadata,
+        })).first()
+        if row is None:
+            return None
+        return models.EiaPowerPlant(
+            id=row[0],
+            api_plant_id=row[1],
+            entity_id=row[2],
+            name=row[3],
+            county=row[4],
+            state=row[5],
+            location=row[6],
+            plant_code=row[7],
+            fuel_type=row[8],
+            prime_mover=row[9],
+            operating_status=row[10],
+            metadata=row[11],
+            created_at=row[12],
+            updated_at=row[13],
         )

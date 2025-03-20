@@ -39,6 +39,11 @@ interface DownloadCache {
 	[url: string]: {
 		timestamp: number;
 		filePath: string;
+		progress?: {
+			bytesProcessed: number;
+			count: number;
+			lastPosition: number;
+		}
 	}
 }
 
@@ -139,30 +144,61 @@ function parseQuarterDate(dateStr: string): Date | null {
 	return null;
 }
 
-async function electricityDataProcessing(filePath: string) {
+async function electricityDataProcessing(filePath: string, url?: string) {
 	const fileSize = fs.statSync(filePath).size;
-	const fileStream = fs.createReadStream(filePath, { encoding: 'utf8' });
+	let bytesRead = 0;
+	let count = 0;
+	let startPosition = 0;
+	
+	// Check if we have progress to resume from
+	if (url) {
+		const cache = await loadDownloadCache();
+		if (cache[url]?.progress) {
+			bytesRead = cache[url].progress.bytesProcessed;
+			count = cache[url].progress.count;
+			startPosition = cache[url].progress.lastPosition;
+			console.log(`Resuming from position ${startPosition} (${count} entries already processed)`);
+		}
+	}
+	
+	const fileStream = fs.createReadStream(filePath, { 
+		encoding: 'utf8',
+		start: startPosition
+	});
+	
 	const reader = readline.createInterface({
 		input: fileStream,
 		crlfDelay: Infinity
 	});
 
-	let bytesRead = 0;
-	let count = 0;
 	const updateInterval = 1000; // Update progress every 1000 entries
+	const saveProgressInterval = 10000; // Save progress every 10000 entries
 	const startTime = Date.now();
 
 	for await (const line of reader) {
 		try {
 			if (!line) continue;
 			count++;
-			bytesRead += Buffer.byteLength(line + '\n', 'utf8');
+			const lineSize = Buffer.byteLength(line + '\n', 'utf8');
+			bytesRead += lineSize;
 			
 			if (count % updateInterval === 0) {
 				const percent = ((bytesRead / fileSize) * 100).toFixed(2);
 				const elapsedSeconds = (Date.now() - startTime) / 1000;
 				const rate = count / elapsedSeconds;
 				process.stdout.write(`\r[ELECTRICITY] ${count} entries (${percent}%) at ${rate.toFixed(2)} entries/sec`);
+			}
+			
+			// Save progress periodically
+			if (url && count % saveProgressInterval === 0) {
+				const cache = await loadDownloadCache();
+				if (!cache[url]) cache[url] = { timestamp: Date.now(), filePath };
+				cache[url].progress = {
+					bytesProcessed: bytesRead,
+					count: count,
+					lastPosition: startPosition + bytesRead
+				};
+				await saveDownloadCache(cache);
 			}
 
 			const entry = JSON.parse(line);
@@ -186,8 +222,19 @@ async function electricityDataProcessing(filePath: string) {
 		} catch (error) {
 			console.error(`\nError processing line ${count}: |${line}|`);
 			console.error(error);
-			throw error;
 		}
+	}
+
+	// Final progress save
+	if (url) {
+		const cache = await loadDownloadCache();
+		if (!cache[url]) cache[url] = { timestamp: Date.now(), filePath };
+		cache[url].progress = {
+			bytesProcessed: bytesRead,
+			count: count,
+			lastPosition: startPosition + bytesRead
+		};
+		await saveDownloadCache(cache);
 	}
 
 	const totalTime = (Date.now() - startTime) / 1000;
@@ -203,9 +250,7 @@ export async function scrapeEIAData() {
 	]
 	const filePaths = await Promise.all(fileDownloads)
 
-	const electricityData = await electricityDataProcessing(filePaths[0])
-	console.log(electricityData)
+	await electricityDataProcessing(filePaths[0], EIA_BULK_FILE_ELEC)
 }
-
 
 scrapeEIAData()

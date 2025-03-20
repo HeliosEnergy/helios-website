@@ -83,6 +83,97 @@ func (q *Queries) CreateEIAElectricityData(ctx context.Context, arg CreateEIAEle
 	return err
 }
 
+const createEIAPlantStat = `-- name: CreateEIAPlantStat :one
+INSERT INTO eia_plant_stats (
+    plant_id,
+    timestamp,
+    nameplate_capacity_mw,
+    net_summer_capacity_mw,
+    net_winter_capacity_mw,
+    planned_derate_summer_cap_mw,
+    planned_uprate_summer_cap_mw,
+    operating_year_month,
+    planned_derate_year_month,
+    planned_uprate_year_month,
+    planned_retirement_year_month,
+    source_timestamp,
+    data_period,
+    metadata
+) VALUES (
+    $1,
+    COALESCE($2, CURRENT_TIMESTAMP),
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14
+)
+RETURNING id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
+`
+
+type CreateEIAPlantStatParams struct {
+	PlantID                    pgtype.Int4
+	Timestamp                  interface{}
+	NameplateCapacityMw        pgtype.Float8
+	NetSummerCapacityMw        pgtype.Float8
+	NetWinterCapacityMw        pgtype.Float8
+	PlannedDerateSummerCapMw   pgtype.Float8
+	PlannedUprateSummerCapMw   pgtype.Float8
+	OperatingYearMonth         pgtype.Date
+	PlannedDerateYearMonth     pgtype.Date
+	PlannedUprateYearMonth     pgtype.Date
+	PlannedRetirementYearMonth pgtype.Date
+	SourceTimestamp            pgtype.Timestamptz
+	DataPeriod                 pgtype.Text
+	Metadata                   []byte
+}
+
+func (q *Queries) CreateEIAPlantStat(ctx context.Context, arg CreateEIAPlantStatParams) (EiaPlantStat, error) {
+	row := q.db.QueryRow(ctx, createEIAPlantStat,
+		arg.PlantID,
+		arg.Timestamp,
+		arg.NameplateCapacityMw,
+		arg.NetSummerCapacityMw,
+		arg.NetWinterCapacityMw,
+		arg.PlannedDerateSummerCapMw,
+		arg.PlannedUprateSummerCapMw,
+		arg.OperatingYearMonth,
+		arg.PlannedDerateYearMonth,
+		arg.PlannedUprateYearMonth,
+		arg.PlannedRetirementYearMonth,
+		arg.SourceTimestamp,
+		arg.DataPeriod,
+		arg.Metadata,
+	)
+	var i EiaPlantStat
+	err := row.Scan(
+		&i.ID,
+		&i.PlantID,
+		&i.Timestamp,
+		&i.NameplateCapacityMw,
+		&i.NetSummerCapacityMw,
+		&i.NetWinterCapacityMw,
+		&i.PlannedDerateSummerCapMw,
+		&i.PlannedUprateSummerCapMw,
+		&i.OperatingYearMonth,
+		&i.PlannedDerateYearMonth,
+		&i.PlannedUprateYearMonth,
+		&i.PlannedRetirementYearMonth,
+		&i.SourceTimestamp,
+		&i.DataPeriod,
+		&i.Metadata,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createMetric = `-- name: CreateMetric :one
 INSERT INTO metrics (
     name,
@@ -119,6 +210,219 @@ WHERE id = $1
 func (q *Queries) DeleteMetric(ctx context.Context, id int32) error {
 	_, err := q.db.Exec(ctx, deleteMetric, id)
 	return err
+}
+
+const getEIAEntityByApiID = `-- name: GetEIAEntityByApiID :one
+
+SELECT id, api_entity_id, name, description, metadata, created_at, updated_at FROM eia_entities
+WHERE api_entity_id = $1
+`
+
+// New queries for EIA entities, plants, and stats
+func (q *Queries) GetEIAEntityByApiID(ctx context.Context, apiEntityID string) (EiaEntity, error) {
+	row := q.db.QueryRow(ctx, getEIAEntityByApiID, apiEntityID)
+	var i EiaEntity
+	err := row.Scan(
+		&i.ID,
+		&i.ApiEntityID,
+		&i.Name,
+		&i.Description,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getEIAPlantStatsByPlantID = `-- name: GetEIAPlantStatsByPlantID :many
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = $1
+ORDER BY timestamp DESC
+`
+
+func (q *Queries) GetEIAPlantStatsByPlantID(ctx context.Context, plantID pgtype.Int4) ([]EiaPlantStat, error) {
+	rows, err := q.db.Query(ctx, getEIAPlantStatsByPlantID, plantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EiaPlantStat
+	for rows.Next() {
+		var i EiaPlantStat
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlantID,
+			&i.Timestamp,
+			&i.NameplateCapacityMw,
+			&i.NetSummerCapacityMw,
+			&i.NetWinterCapacityMw,
+			&i.PlannedDerateSummerCapMw,
+			&i.PlannedUprateSummerCapMw,
+			&i.OperatingYearMonth,
+			&i.PlannedDerateYearMonth,
+			&i.PlannedUprateYearMonth,
+			&i.PlannedRetirementYearMonth,
+			&i.SourceTimestamp,
+			&i.DataPeriod,
+			&i.Metadata,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEIAPlantStatsInTimeRange = `-- name: GetEIAPlantStatsInTimeRange :many
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = $1
+AND timestamp BETWEEN $2 AND $3
+ORDER BY timestamp DESC
+`
+
+type GetEIAPlantStatsInTimeRangeParams struct {
+	PlantID        pgtype.Int4
+	StartTimestamp pgtype.Timestamptz
+	EndTimestamp   pgtype.Timestamptz
+}
+
+func (q *Queries) GetEIAPlantStatsInTimeRange(ctx context.Context, arg GetEIAPlantStatsInTimeRangeParams) ([]EiaPlantStat, error) {
+	rows, err := q.db.Query(ctx, getEIAPlantStatsInTimeRange, arg.PlantID, arg.StartTimestamp, arg.EndTimestamp)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EiaPlantStat
+	for rows.Next() {
+		var i EiaPlantStat
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlantID,
+			&i.Timestamp,
+			&i.NameplateCapacityMw,
+			&i.NetSummerCapacityMw,
+			&i.NetWinterCapacityMw,
+			&i.PlannedDerateSummerCapMw,
+			&i.PlannedUprateSummerCapMw,
+			&i.OperatingYearMonth,
+			&i.PlannedDerateYearMonth,
+			&i.PlannedUprateYearMonth,
+			&i.PlannedRetirementYearMonth,
+			&i.SourceTimestamp,
+			&i.DataPeriod,
+			&i.Metadata,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEIAPowerPlantByApiID = `-- name: GetEIAPowerPlantByApiID :one
+SELECT id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at FROM eia_power_plants
+WHERE api_plant_id = $1
+`
+
+func (q *Queries) GetEIAPowerPlantByApiID(ctx context.Context, apiPlantID string) (EiaPowerPlant, error) {
+	row := q.db.QueryRow(ctx, getEIAPowerPlantByApiID, apiPlantID)
+	var i EiaPowerPlant
+	err := row.Scan(
+		&i.ID,
+		&i.ApiPlantID,
+		&i.EntityID,
+		&i.Name,
+		&i.County,
+		&i.State,
+		&i.Location,
+		&i.PlantCode,
+		&i.FuelType,
+		&i.PrimeMover,
+		&i.OperatingStatus,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getEIAPowerPlantsForEntity = `-- name: GetEIAPowerPlantsForEntity :many
+SELECT id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at FROM eia_power_plants
+WHERE entity_id = $1
+`
+
+func (q *Queries) GetEIAPowerPlantsForEntity(ctx context.Context, entityID pgtype.Int4) ([]EiaPowerPlant, error) {
+	rows, err := q.db.Query(ctx, getEIAPowerPlantsForEntity, entityID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EiaPowerPlant
+	for rows.Next() {
+		var i EiaPowerPlant
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApiPlantID,
+			&i.EntityID,
+			&i.Name,
+			&i.County,
+			&i.State,
+			&i.Location,
+			&i.PlantCode,
+			&i.FuelType,
+			&i.PrimeMover,
+			&i.OperatingStatus,
+			&i.Metadata,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLatestEIAPlantStat = `-- name: GetLatestEIAPlantStat :one
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+WHERE plant_id = $1
+ORDER BY timestamp DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestEIAPlantStat(ctx context.Context, plantID pgtype.Int4) (EiaPlantStat, error) {
+	row := q.db.QueryRow(ctx, getLatestEIAPlantStat, plantID)
+	var i EiaPlantStat
+	err := row.Scan(
+		&i.ID,
+		&i.PlantID,
+		&i.Timestamp,
+		&i.NameplateCapacityMw,
+		&i.NetSummerCapacityMw,
+		&i.NetWinterCapacityMw,
+		&i.PlannedDerateSummerCapMw,
+		&i.PlannedUprateSummerCapMw,
+		&i.OperatingYearMonth,
+		&i.PlannedDerateYearMonth,
+		&i.PlannedUprateYearMonth,
+		&i.PlannedRetirementYearMonth,
+		&i.SourceTimestamp,
+		&i.DataPeriod,
+		&i.Metadata,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getMetric = `-- name: GetMetric :one
@@ -264,6 +568,149 @@ func (q *Queries) UpdateMetric(ctx context.Context, arg UpdateMetricParams) (Met
 		&i.Name,
 		&i.Value,
 		&i.Timestamp,
+	)
+	return i, err
+}
+
+const upsertEIAEntity = `-- name: UpsertEIAEntity :one
+INSERT INTO eia_entities (
+    api_entity_id,
+    name,
+    description,
+    metadata
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4
+)
+ON CONFLICT (api_entity_id) 
+DO UPDATE SET
+    name = EXCLUDED.name,
+    description = EXCLUDED.description,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING id, api_entity_id, name, description, metadata, created_at, updated_at
+`
+
+type UpsertEIAEntityParams struct {
+	ApiEntityID string
+	Name        string
+	Description pgtype.Text
+	Metadata    []byte
+}
+
+func (q *Queries) UpsertEIAEntity(ctx context.Context, arg UpsertEIAEntityParams) (EiaEntity, error) {
+	row := q.db.QueryRow(ctx, upsertEIAEntity,
+		arg.ApiEntityID,
+		arg.Name,
+		arg.Description,
+		arg.Metadata,
+	)
+	var i EiaEntity
+	err := row.Scan(
+		&i.ID,
+		&i.ApiEntityID,
+		&i.Name,
+		&i.Description,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const upsertEIAPowerPlant = `-- name: UpsertEIAPowerPlant :one
+INSERT INTO eia_power_plants (
+    api_plant_id,
+    entity_id,
+    name,
+    county,
+    state,
+    location,
+    plant_code,
+    fuel_type,
+    prime_mover,
+    operating_status,
+    metadata
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    ST_SetSRID(ST_MakePoint(
+        $6::float8,
+        $7::float8
+    ), 4326)::geography,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12
+)
+ON CONFLICT (api_plant_id) 
+DO UPDATE SET
+    entity_id = EXCLUDED.entity_id,
+    name = EXCLUDED.name,
+    county = EXCLUDED.county,
+    state = EXCLUDED.state,
+    location = EXCLUDED.location,
+    plant_code = EXCLUDED.plant_code,
+    fuel_type = EXCLUDED.fuel_type,
+    prime_mover = EXCLUDED.prime_mover,
+    operating_status = EXCLUDED.operating_status,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING id, api_plant_id, entity_id, name, county, state, location, plant_code, fuel_type, prime_mover, operating_status, metadata, created_at, updated_at
+`
+
+type UpsertEIAPowerPlantParams struct {
+	ApiPlantID      string
+	EntityID        pgtype.Int4
+	Name            string
+	County          pgtype.Text
+	State           pgtype.Text
+	Longitude       float64
+	Latitude        float64
+	PlantCode       pgtype.Text
+	FuelType        pgtype.Text
+	PrimeMover      pgtype.Text
+	OperatingStatus pgtype.Text
+	Metadata        []byte
+}
+
+func (q *Queries) UpsertEIAPowerPlant(ctx context.Context, arg UpsertEIAPowerPlantParams) (EiaPowerPlant, error) {
+	row := q.db.QueryRow(ctx, upsertEIAPowerPlant,
+		arg.ApiPlantID,
+		arg.EntityID,
+		arg.Name,
+		arg.County,
+		arg.State,
+		arg.Longitude,
+		arg.Latitude,
+		arg.PlantCode,
+		arg.FuelType,
+		arg.PrimeMover,
+		arg.OperatingStatus,
+		arg.Metadata,
+	)
+	var i EiaPowerPlant
+	err := row.Scan(
+		&i.ID,
+		&i.ApiPlantID,
+		&i.EntityID,
+		&i.Name,
+		&i.County,
+		&i.State,
+		&i.Location,
+		&i.PlantCode,
+		&i.FuelType,
+		&i.PrimeMover,
+		&i.OperatingStatus,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

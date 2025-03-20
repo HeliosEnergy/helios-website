@@ -26,6 +26,55 @@ class EiaElectricityDatum:
 
 
 @dataclasses.dataclass()
+class EiaEntity:
+    id: int
+    api_entity_id: str
+    name: str
+    description: Optional[str]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
+class EiaPlantStat:
+    id: int
+    plant_id: Optional[int]
+    timestamp: datetime.datetime
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_uprate_summer_cap_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    source_timestamp: Optional[datetime.datetime]
+    data_period: Optional[str]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
+class EiaPowerPlant:
+    id: int
+    api_plant_id: str
+    entity_id: Optional[int]
+    name: str
+    county: Optional[str]
+    state: Optional[str]
+    location: Optional[Any]
+    plant_code: Optional[str]
+    fuel_type: Optional[str]
+    prime_mover: Optional[str]
+    operating_status: Optional[str]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
 class KmzFeature:
     id: int
     source_id: str
