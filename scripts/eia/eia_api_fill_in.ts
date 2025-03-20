@@ -3,6 +3,8 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import postgres from 'postgres';
+import fs from "fs";
+import { default as fsp } from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,6 +20,37 @@ const sql = postgres({
 	password: process.env.DB_PASSWORD,
 	port: parseInt(process.env.DB_PORT || "5432"),
 });
+
+// Define path for saving raw API responses
+const TEMP_DIR_PATH = resolve(__dirname, '../../data/temp');
+const API_RESPONSES_FILE = resolve(TEMP_DIR_PATH, '__eia_api_responses.json');
+
+// Clear/create the API responses file at startup
+async function resetApiResponsesFile() {
+	try {
+		// Ensure temp directory exists
+		await fsp.mkdir(TEMP_DIR_PATH, { recursive: true });
+		// Create empty file (or overwrite existing)
+		await fsp.writeFile(API_RESPONSES_FILE, '', { encoding: 'utf8' });
+		console.log(`Created empty file for API responses at: ${API_RESPONSES_FILE}`);
+	} catch (error) {
+		console.error(`Error creating/clearing API responses file: ${error}`);
+		throw error;
+	}
+}
+
+// Append a record to the API responses file
+async function appendApiResponse(record: any): Promise<void> {
+	try {
+		// Convert record to JSON string with newline
+		const recordStr = JSON.stringify(record) + '\n';
+		// Append to file
+		await fsp.appendFile(API_RESPONSES_FILE, recordStr, { encoding: 'utf8' });
+	} catch (error) {
+		console.error(`Error appending record to API responses file: ${error}`);
+		// Continue execution despite error
+	}
+}
 
 // Example Request:
 // https://api.eia.gov/v2/electricity/operating-generator-capacity/data/
@@ -53,7 +86,9 @@ async function getPageOfGenerationCapacity(page: number) {
 		+ `&data[4]=net-summer-capacity-mw`
 		+ `&data[5]=net-winter-capacity-mw`
 		+ `&data[6]=operating-year-month`
-		;
+		+ `&frequency=monthly`
+		+ `&sort[0][column]=period`
+		+ `&sort[0][direction]=desc`;
 	console.log(url);
 	const response = await fetch(url);
 	const data = await response.json();
@@ -62,9 +97,14 @@ async function getPageOfGenerationCapacity(page: number) {
 
 // Function to upsert an entity and return its ID
 async function upsertEntity(entityData: any): Promise<number> {
-	// Extract entity data from API response
-	const apiEntityId = entityData.respondent_id || entityData.entity_id || `unknown_entity_${Date.now()}`;
-	const name = entityData.respondent_name || entityData.entity_name || 'Unknown Entity';
+	// Extract entity data from API response with correct field names
+	const apiEntityId = entityData.entityid || `unknown_entity_${Date.now()}`;
+	const name = entityData.entityName || 'Unknown Entity';
+	
+	// Add descriptive information
+	const description = `Energy company/utility with ID: ${apiEntityId}. Data from EIA API.`;
+	
+	console.log(`Upserting entity: ${apiEntityId} - ${name}`);
 	
 	// Check if entity exists
 	const existingEntity = await sql`
@@ -77,6 +117,7 @@ async function upsertEntity(entityData: any): Promise<number> {
 			UPDATE eia_entities
 			SET 
 				name = ${name},
+				description = ${description},
 				metadata = ${JSON.stringify(entityData)}::jsonb,
 				updated_at = CURRENT_TIMESTAMP
 			WHERE api_entity_id = ${apiEntityId}
@@ -96,7 +137,7 @@ async function upsertEntity(entityData: any): Promise<number> {
 			) VALUES (
 				${apiEntityId},
 				${name},
-				${`Entity from EIA API: ${apiEntityId}`},
+				${description},
 				${JSON.stringify(entityData)}::jsonb,
 				CURRENT_TIMESTAMP,
 				CURRENT_TIMESTAMP
@@ -108,17 +149,19 @@ async function upsertEntity(entityData: any): Promise<number> {
 
 // Function to upsert a power plant and return its ID
 async function upsertPowerPlant(plantData: any, entityId: number): Promise<number> {
-	// Extract plant data from API response
-	const apiPlantId = plantData.plant_id || `unknown_plant_${Date.now()}`;
-	const name = plantData.plant_name || 'Unknown Plant';
+	// Extract plant data from API response with correct field names
+	const apiPlantId = plantData.plantid || `unknown_plant_${Date.now()}`;
+	const name = plantData.plantName || 'Unknown Plant';
 	const county = plantData.county || null;
-	const state = plantData.state || null;
+	const state = plantData.stateid || plantData.stateName || null;
 	const latitude = parseFloat(plantData.latitude) || 0;
 	const longitude = parseFloat(plantData.longitude) || 0;
-	const plantCode = plantData.plant_code || null;
-	const fuelType = plantData.fuel_type || plantData.fuel || null;
-	const primeMover = plantData.prime_mover || null;
-	const operatingStatus = plantData.operating_status || 'unknown';
+	const plantCode = plantData.generatorid || null;
+	const fuelType = plantData.energy_source_code || plantData['energy-source-desc'] || null;
+	const primeMover = plantData.prime_mover_code || null;
+	const operatingStatus = plantData.status || plantData.statusDescription || 'unknown';
+	
+	console.log(`Upserting plant: ${apiPlantId} - ${name}, State: ${state}, Fuel: ${fuelType}, Mover: ${primeMover}`);
 	
 	// Check if plant exists
 	const existingPlant = await sql`
@@ -188,8 +231,12 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 	const nameplateCapacityMw = parseFloat(statData['nameplate-capacity-mw']) || null;
 	const netSummerCapacityMw = parseFloat(statData['net-summer-capacity-mw']) || null;
 	const netWinterCapacityMw = parseFloat(statData['net-winter-capacity-mw']) || null;
-	const plannedDerateSummerCapMw = parseFloat(statData['planned-derate-summer-cap-mw']) || null;
-	const plannedUprateSummerCapMw = parseFloat(statData['planned-uprate-summer-cap-mw']) || null;
+	
+	// We may not have these fields, but include them just in case
+	const plannedDerateSummerCapMw = statData['planned-derate-summer-cap-mw'] ? 
+		parseFloat(statData['planned-derate-summer-cap-mw']) : null;
+	const plannedUprateSummerCapMw = statData['planned-uprate-summer-cap-mw'] ? 
+		parseFloat(statData['planned-uprate-summer-cap-mw']) : null;
 	
 	// Parse dates
 	let operatingYearMonth = null;
@@ -200,7 +247,11 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 		}
 	}
 	
+	// These fields may not be present in the data
 	let plannedDerateYearMonth = null;
+	let plannedUprateYearMonth = null;
+	let plannedRetirementYearMonth = null;
+	
 	if (statData['planned-derate-year-month']) {
 		const parts = statData['planned-derate-year-month'].split('-');
 		if (parts.length === 2) {
@@ -208,7 +259,6 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 		}
 	}
 	
-	let plannedUprateYearMonth = null;
 	if (statData['planned-uprate-year-month']) {
 		const parts = statData['planned-uprate-year-month'].split('-');
 		if (parts.length === 2) {
@@ -216,7 +266,6 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 		}
 	}
 	
-	let plannedRetirementYearMonth = null;
 	if (statData['planned-retirement-year-month']) {
 		const parts = statData['planned-retirement-year-month'].split('-');
 		if (parts.length === 2) {
@@ -273,28 +322,18 @@ async function processDataBatch(data: any): Promise<number> {
 	let processedCount = 0;
 	for (const item of dataItems) {
 		try {
-			// Extract entity data
-			const entityData = {
-				respondent_id: item.respondent_id,
-				respondent_name: item.respondent_name
-			};
+			// Log first item for debugging
+			if (processedCount === 0) {
+				console.log('First item structure:');
+				console.log(JSON.stringify(item, null, 2));
+			}
 			
-			// Extract plant data
-			const plantData = {
-				plant_id: item.plant_id,
-				plant_name: item.plant_name,
-				plant_code: item.plant_code,
-				county: item.county,
-				state: item.state,
-				latitude: item.latitude,
-				longitude: item.longitude,
-				fuel: item.fuel,
-				prime_mover: item.prime_mover
-			};
+			// Save the raw API response to file
+			await appendApiResponse(item);
 			
-			// Process entity and plant
-			const entityId = await upsertEntity(entityData);
-			const plantId = await upsertPowerPlant(plantData, entityId);
+			// The item itself contains all the data we need
+			const entityId = await upsertEntity(item);
+			const plantId = await upsertPowerPlant(item, entityId);
 			
 			// Create stat record
 			await createPlantStat(plantId, item);
@@ -313,16 +352,36 @@ async function processDataBatch(data: any): Promise<number> {
 	return dataItems.length;
 }
 
+// Update main function to log the final response
 async function main() {
 	try {
+		// Reset the API responses file at the start
+		await resetApiResponsesFile();
+		
+		// First, get the data and log the structure
+		const sampleData = await getPageOfGenerationCapacity(0);
+		
+		console.log('API Response Structure:');
+		console.log('Response keys:', Object.keys(sampleData.response || {}));
+		
+		if (sampleData.response && sampleData.response.data && sampleData.response.data.length > 0) {
+			console.log('First item keys:', Object.keys(sampleData.response.data[0]));
+			console.log('First item sample:', JSON.stringify(sampleData.response.data[0], null, 2));
+		}
+		
+		// Now continue with normal processing
 		let page = 0;
 		let totalProcessed = 0;
 		let hasMoreData = true;
+		let finalResponse = null;
 		
 		console.log("Starting EIA API data import...");
 		
 		while (hasMoreData) {
 			const data = await getPageOfGenerationCapacity(page);
+			
+			// Store this response - it will become the final one when the loop exits
+			finalResponse = data;
 			
 			// Check if we got valid data
 			if (!data.response || !data.response.data || data.response.data.length === 0) {
@@ -351,7 +410,18 @@ async function main() {
 			await new Promise(resolve => setTimeout(resolve, 1000));
 		}
 		
+		// Log the final response in its entirety
+		console.log("\n\n====== FINAL API RESPONSE ======");
+		console.log(JSON.stringify(finalResponse, null, 2));
+		console.log("================================\n\n");
+		
+		// Save final response to a dedicated file for easier inspection
+		const finalResponsePath = resolve(TEMP_DIR_PATH, '__eia_final_response.json');
+		await fsp.writeFile(finalResponsePath, JSON.stringify(finalResponse, null, 2), { encoding: 'utf8' });
+		console.log(`Final response saved to: ${finalResponsePath}`);
+		
 		console.log(`Import complete! Total processed: ${totalProcessed} records`);
+		console.log(`Raw API responses saved to: ${API_RESPONSES_FILE}`);
 	} catch (error) {
 		console.error("Error in main process:", error);
 	} finally {
