@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import postgres from "postgres";
+import cors from "cors";
+
 // Import the query functions
 import { 
 	createMetric,
@@ -30,6 +32,7 @@ async function main() {
 	const PORT = 4777;
 	const app = express();
 	app.use(express.json());
+	app.use(cors());
 
 	app.get("/", (req: Request, res: Response) => {
 		res.send("Hello World");

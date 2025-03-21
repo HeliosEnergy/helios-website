@@ -41,31 +41,43 @@ export async function httpGetPowerPlantData(sql: postgres.Sql<{}>): Promise<(req
 
 			// Transform the data to include geographical coordinates
 			const formattedPowerPlants = powerPlants.map((plant: any) => {
+				// Extract metadata from JSON strings if they exist
+				let plantMetadata = plant.plant_metadata ? 
+					(typeof plant.plant_metadata === 'string' ? 
+						JSON.parse(plant.plant_metadata) : plant.plant_metadata) : {};
+				
+				let statMetadata = plant.stat_metadata ? 
+					(typeof plant.stat_metadata === 'string' ? 
+						JSON.parse(plant.stat_metadata) : plant.stat_metadata) : {};
+/* 
+
+				console.log("CAPACITY:", JSON.stringify(plant, null, 2)); */
+					
 				return {
 					id: plant.id,
-					api_plant_id: plant.api_plant_id,
-					entity_id: plant.entity_id,
+					api_plant_id: plant.apiPlantId,
+					entity_id: plant.entityId,
 					name: plant.name,
 					county: plant.county,
 					state: plant.state,
-					latitude: plant.latitude,
-					longitude: plant.longitude,
-					plant_code: plant.plant_code,
-					fuel_type: plant.fuel_type,
-					prime_mover: plant.prime_mover,
-					operating_status: plant.operating_status,
-					nameplate_capacity_mw: plant.nameplate_capacity_mw,
-					net_summer_capacity_mw: plant.net_summer_capacity_mw,
-					net_winter_capacity_mw: plant.net_winter_capacity_mw,
-					planned_derate_summer_cap_mw: plant.planned_derate_summer_cap_mw,
-					planned_uprate_summer_cap_mw: plant.planned_uprate_summer_cap_mw,
-					operating_year_month: plant.operating_year_month,
-					planned_derate_year_month: plant.planned_derate_year_month,
-					planned_uprate_year_month: plant.planned_uprate_year_month,
-					planned_retirement_year_month: plant.planned_retirement_year_month,
-					last_updated: plant.stat_timestamp || plant.plant_updated_at,
-					plant_metadata: plant.plant_metadata,
-					stat_metadata: plant.stat_metadata
+					latitude: parseFloat(plant.latitude),
+					longitude: parseFloat(plant.longitude),
+					plant_code: plant.plantCode,
+					fuel_type: plant.fuelType,
+					prime_mover: plant.primeMover,
+					operating_status: plant.operatingStatus,
+					nameplate_capacity_mw: plant.nameplateCapacityMw ? parseFloat(String(plant.nameplateCapacityMw)) : null,
+					net_summer_capacity_mw: plant.netSummerCapacityMw ? parseFloat(String(plant.netSummerCapacityMw)) : null,
+					net_winter_capacity_mw: plant.netWinterCapacityMw ? parseFloat(String(plant.netWinterCapacityMw)) : null,
+					planned_derate_summer_cap_mw: plant.plannedDerateSummerCapMw,
+					planned_uprate_summer_cap_mw: plant.plannedUprateSummerCapMw,
+					operating_year_month: plant.operatingYearMonth,
+					planned_derate_year_month: plant.plannedDerateYearMonth,
+					planned_uprate_year_month: plant.plannedUprateYearMonth,
+					planned_retirement_year_month: plant.plannedRetirementYearMonth,
+					last_updated: plant.statTimestamp || plant.plantUpdatedAt,
+					plant_metadata: plantMetadata,
+					stat_metadata: statMetadata
 				};
 			});
 

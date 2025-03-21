@@ -231,13 +231,12 @@ SELECT
     s.data_period,
     s.metadata AS stat_metadata,
     s.timestamp AS stat_timestamp
-FROM eia_power_plants p
-LEFT JOIN LATERAL (
-    SELECT * FROM eia_plant_stats
-    WHERE plant_id = p.id
-    ORDER BY timestamp DESC
-    LIMIT 1
-) s ON true
+FROM eia_power_plants as p
+LEFT JOIN (
+    SELECT DISTINCT ON (plant_id) *
+    FROM eia_plant_stats
+    ORDER BY plant_id, timestamp DESC
+) as s ON s.plant_id = p.id
 WHERE 
     (sqlc.narg(fuel_type)::text IS NULL OR p.fuel_type = sqlc.narg(fuel_type))
     AND (sqlc.narg(state)::text IS NULL OR p.state = sqlc.narg(state))

@@ -7,6 +7,20 @@ interface MapLeftSidebarProps {
 	setShowSummerCapacity: (show: boolean) => void;
 	sizeMultiplier: number;
 	setSizeMultiplier: (multiplier: number) => void;
+	filters: {
+		fuel_type: string | null;
+		state: string | null;
+		operating_status: string | null;
+		min_capacity: number | null;
+		max_capacity: number | null;
+	};
+	setFilters: React.Dispatch<React.SetStateAction<{
+		fuel_type: string | null;
+		state: string | null;
+		operating_status: string | null;
+		min_capacity: number | null;
+		max_capacity: number | null;
+	}>>;
 }
 
 export function MapLeftSidebar({ 
@@ -15,109 +29,173 @@ export function MapLeftSidebar({
 	showSummerCapacity, 
 	setShowSummerCapacity,
 	sizeMultiplier,
-	setSizeMultiplier
+	setSizeMultiplier,
+	filters,
+	setFilters
 }: MapLeftSidebarProps) {
+	// Common fuel types
+	const fuelTypes = [
+		{ value: null, label: 'All Fuel Types' },
+		{ value: 'SUN', label: 'Solar' },
+		{ value: 'WND', label: 'Wind' },
+		{ value: 'BIT', label: 'Bituminous Coal' },
+		{ value: 'SUB', label: 'Subbituminous Coal' },
+		{ value: 'LIG', label: 'Lignite Coal' },
+		{ value: 'NG', label: 'Natural Gas' },
+		{ value: 'WAT', label: 'Hydro' },
+		{ value: 'GEO', label: 'Geothermal' },
+		{ value: 'DFO', label: 'Fuel Oil' },
+		{ value: 'LFG', label: 'Landfill Gas' },
+		{ value: 'WDS', label: 'Wood/Biomass' }
+	];
+
+	// Common states
+	const states = [
+		{ value: null, label: 'All States' },
+		{ value: 'CA', label: 'California' },
+		{ value: 'TX', label: 'Texas' },
+		{ value: 'NY', label: 'New York' },
+		{ value: 'FL', label: 'Florida' },
+		{ value: 'IL', label: 'Illinois' },
+		{ value: 'OH', label: 'Ohio' },
+		{ value: 'GA', label: 'Georgia' },
+		{ value: 'PA', label: 'Pennsylvania' },
+		{ value: 'NC', label: 'North Carolina' },
+		{ value: 'MI', label: 'Michigan' }
+	];
+
+	// Operating statuses
+	const operatingStatuses = [
+		{ value: null, label: 'All Statuses' },
+		{ value: 'OP', label: 'Operating' },
+		{ value: 'SB', label: 'Standby/Backup' },
+		{ value: 'OS', label: 'Out of Service' }
+	];
+
+	const handleFilterChange = (key: string, value: any) => {
+		setFilters(prev => ({
+			...prev,
+			[key]: value
+		}));
+	};
+
 	return (
-		<div style={{ width: '100%', height: '100%', padding: '16px', color: 'white' }}>
+		<div style={{ width: '100%', height: '100%', overflow: 'auto', color: 'white', padding: '16px', boxSizing: 'border-box' }}>
 			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-				<h2>Map Controls</h2>
+				<h2 style={{ margin: 0 }}>Power Plant Map</h2>
 				<button onClick={() => setOpen(false)}>{'<'}</button>
 			</div>
 
 			<div style={{ marginBottom: '20px' }}>
-				<h3>Filter Options</h3>
-				{/* Add your filter options here */}
-			</div>
-
-			{/* Circle Size Control */}
-			<div style={{ marginBottom: '20px' }}>
-				<h3>Circle Size</h3>
-				<div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+				<h3>Display Settings</h3>
+				
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Circle Size Multiplier: {sizeMultiplier}x</label>
 					<input 
 						type="range" 
-						min="0.25" 
-						max="20" 
-						step="0.25" 
-						value={sizeMultiplier} 
-						onChange={(e) => setSizeMultiplier(parseFloat(e.target.value))}
+						min="1" 
+						max="30" 
+						value={sizeMultiplier}
+						onChange={(e) => setSizeMultiplier(parseInt(e.target.value))}
 						style={{ width: '100%' }}
 					/>
-					<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-						<span>0.25x</span>
-						<span>{sizeMultiplier.toFixed(2)}x</span>
-						<span>20x</span>
-					</div>
+				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label>
+						<input 
+							type="checkbox" 
+							checked={showSummerCapacity} 
+							onChange={() => setShowSummerCapacity(!showSummerCapacity)}
+						/>
+						{' '}
+						Show Summer Capacity (for Solar)
+					</label>
 				</div>
 			</div>
 
 			<div style={{ marginBottom: '20px' }}>
-				<h3>Solar Capacity Display</h3>
-				<div style={{ 
-					display: 'flex', 
-					alignItems: 'center',
-					background: '#333',
-					borderRadius: '20px',
-					padding: '5px',
-					width: 'fit-content'
-				}}>
-					<button 
-						onClick={() => setShowSummerCapacity(true)}
-						style={{
-							padding: '8px 16px',
-							borderRadius: '15px',
-							border: 'none',
-							backgroundColor: showSummerCapacity ? '#4CAF50' : 'transparent',
-							color: showSummerCapacity ? 'white' : '#ccc',
-							fontWeight: showSummerCapacity ? 'bold' : 'normal',
-							cursor: 'pointer'
-						}}
+				<h3>Filters</h3>
+				
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Fuel Type:</label>
+					<select 
+						value={filters.fuel_type || ''} 
+						onChange={(e) => handleFilterChange('fuel_type', e.target.value || null)}
+						style={{ width: '100%', padding: '5px' }}
 					>
-						Summer
-					</button>
-					<button 
-						onClick={() => setShowSummerCapacity(false)}
-						style={{
-							padding: '8px 16px',
-							borderRadius: '15px',
-							border: 'none',
-							backgroundColor: !showSummerCapacity ? '#2196F3' : 'transparent',
-							color: !showSummerCapacity ? 'white' : '#ccc',
-							fontWeight: !showSummerCapacity ? 'bold' : 'normal',
-							cursor: 'pointer'
-						}}
-					>
-						Winter
-					</button>
+						{fuelTypes.map(option => (
+							<option key={option.label} value={option.value || ''}>{option.label}</option>
+						))}
+					</select>
 				</div>
-				<p style={{ fontSize: '0.8rem', marginTop: '5px' }}>
-					Toggle between summer and winter capacity for solar plants
-				</p>
-			</div>
 
-			<div>
-				<h3>Legend</h3>
-				<div style={{ marginTop: '10px' }}>
-					{Object.entries({
-						'SOLAR': '#FFD700',
-						'WIND': '#87CEEB',
-						'COAL': '#A9A9A9',
-						'NATURAL GAS': '#4682B4',
-						'NUCLEAR': '#FF6347',
-						'HYDRO': '#1E90FF',
-						'OTHER': '#808080'
-					}).map(([type, color]) => (
-						<div key={type} style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
-							<div style={{ 
-								width: '15px', 
-								height: '15px', 
-								backgroundColor: color as string, 
-								marginRight: '10px',
-								borderRadius: '50%'
-							}} />
-							<span>{type}</span>
-						</div>
-					))}
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>State:</label>
+					<select 
+						value={filters.state || ''} 
+						onChange={(e) => handleFilterChange('state', e.target.value || null)}
+						style={{ width: '100%', padding: '5px' }}
+					>
+						{states.map(option => (
+							<option key={option.label} value={option.value || ''}>{option.label}</option>
+						))}
+					</select>
 				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Operating Status:</label>
+					<select 
+						value={filters.operating_status || ''} 
+						onChange={(e) => handleFilterChange('operating_status', e.target.value || null)}
+						style={{ width: '100%', padding: '5px' }}
+					>
+						{operatingStatuses.map(option => (
+							<option key={option.label} value={option.value || ''}>{option.label}</option>
+						))}
+					</select>
+				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Min Capacity (MW):</label>
+					<input 
+						type="number" 
+						value={filters.min_capacity || ''} 
+						onChange={(e) => handleFilterChange('min_capacity', e.target.value ? parseFloat(e.target.value) : null)}
+						style={{ width: '100%', padding: '5px' }}
+					/>
+				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Max Capacity (MW):</label>
+					<input 
+						type="number" 
+						value={filters.max_capacity || ''} 
+						onChange={(e) => handleFilterChange('max_capacity', e.target.value ? parseFloat(e.target.value) : null)}
+						style={{ width: '100%', padding: '5px' }}
+					/>
+				</div>
+				
+				<button 
+					onClick={() => setFilters({
+						fuel_type: null,
+						state: null,
+						operating_status: null,
+						min_capacity: null,
+						max_capacity: null
+					})}
+					style={{ 
+						width: '100%', 
+						padding: '8px', 
+						backgroundColor: '#444', 
+						color: 'white', 
+						border: 'none', 
+						borderRadius: '4px',
+						cursor: 'pointer'
+					}}
+				>
+					Reset Filters
+				</button>
 			</div>
 		</div>
 	);

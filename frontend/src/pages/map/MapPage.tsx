@@ -28,72 +28,62 @@ function MapUpdater() {
 	return null;
 }
 
-// Define colors for different fuel types
-const fuelTypeColors = {
-	'SOLAR': '#FFD700', // Gold
-	'WIND': '#87CEEB', // Sky Blue
-	'COAL': '#A9A9A9', // Dark Gray
-	'NATURAL GAS': '#4682B4', // Steel Blue
-	'NUCLEAR': '#FF6347', // Tomato
-	'HYDRO': '#1E90FF', // Dodger Blue
-	'GEOTHERMAL': '#8B4513', // Saddle Brown
-	'BIOMASS': '#228B22', // Forest Green
-	'OIL': '#000000', // Black
-	'OTHER': '#808080', // Gray
+// Define colors for different fuel types based on energy source code
+const fuelTypeColors: {[key: string]: string} = {
+	'SUN': '#FFD700',   // Solar - Gold
+	'WND': '#87CEEB',   // Wind - Sky Blue
+	'BIT': '#A9A9A9',   // Bituminous Coal - Dark Gray
+	'SUB': '#A9A9A9',   // Subbituminous Coal - Dark Gray
+	'LIG': '#A9A9A9',   // Lignite Coal - Dark Gray
+	'NG': '#4682B4',    // Natural Gas - Steel Blue
+	'DFO': '#000000',   // Distillate Fuel Oil - Black
+	'WAT': '#1E90FF',   // Water/Hydro - Dodger Blue
+	'GEO': '#8B4513',   // Geothermal - Saddle Brown
+	'LFG': '#228B22',   // Landfill Gas - Forest Green
+	'WDS': '#228B22',   // Wood Waste Solids - Forest Green
+	'BLQ': '#228B22',   // Black Liquor - Forest Green
+	'OTHER': '#808080', // Other - Gray
 };
 
-// Sample power plant data
-const samplePowerPlants = [
-	{
-		id: 1,
-		name: "Solar Farm Alpha",
-		latitude: 37.7749,
-		longitude: -122.4194,
-		fuel_type: "SOLAR",
-		nameplate_capacity_mw: 150,
-		net_summer_capacity_mw: 180,
-		net_winter_capacity_mw: 120,
-		operating_status: "operating"
-	},
-	{
-		id: 2,
-		name: "Wind Park Beta",
-		latitude: 37.7649,
-		longitude: -122.4294,
-		fuel_type: "WIND",
-		nameplate_capacity_mw: 100,
-		operating_status: "operating"
-	},
-	{
-		id: 3,
-		name: "Coal Plant Gamma",
-		latitude: 37.7849,
-		longitude: -122.4094,
-		fuel_type: "COAL",
-		nameplate_capacity_mw: 500,
-		operating_status: "operating"
-	},
-	{
-		id: 4,
-		name: "Natural Gas Plant Delta",
-		latitude: 37.7949,
-		longitude: -122.3994,
-		fuel_type: "NATURAL GAS",
-		nameplate_capacity_mw: 350,
-		operating_status: "operating"
-	},
-	{
-		id: 5,
-		name: "Solar Farm Epsilon",
-		latitude: 37.7549,
-		longitude: -122.4394,
-		fuel_type: "SOLAR",
-		nameplate_capacity_mw: 200,
-		net_summer_capacity_mw: 240,
-		net_winter_capacity_mw: 160,
-		operating_status: "operating"
-	}
-];
+// Map for fuel type display names
+const fuelTypeDisplayNames = {
+	'SUN': 'Solar',
+	'WND': 'Wind',
+	'BIT': 'Bituminous Coal',
+	'SUB': 'Subbituminous Coal',
+	'LIG': 'Lignite Coal',
+	'NG': 'Natural Gas',
+	'DFO': 'Fuel Oil',
+	'WAT': 'Hydro',
+	'GEO': 'Geothermal',
+	'LFG': 'Landfill Gas',
+	'WDS': 'Wood/Biomass',
+	'BLQ': 'Black Liquor',
+};
+
+// Map for operating status display names
+const operatingStatusDisplayNames = {
+	'OP': 'Operating',
+	'SB': 'Standby/Backup',
+	'OS': 'Out of Service',
+	'RE': 'Retired',
+};
+
+// Define the power plant data interface
+interface PowerPlant {
+	id: number;
+	name: string;
+	latitude: number;
+	longitude: number;
+	fuel_type: string;
+	nameplate_capacity_mw: number;
+	net_summer_capacity_mw?: number;
+	net_winter_capacity_mw?: number;
+	operating_status: string;
+	county?: string;
+	state?: string;
+	last_updated?: string;
+}
 
 // Function to calculate radius based on capacity
 const getRadiusByCapacity = (capacity: number, scaleFactor: number = 0.05, sizeMultiplier: number = 15) => {
@@ -101,7 +91,7 @@ const getRadiusByCapacity = (capacity: number, scaleFactor: number = 0.05, sizeM
 	const baseRadius = 5;
 	// Scale factor - adjust this to get appropriate circle sizes
 	// Apply the size multiplier to scale the circles
-	return (baseRadius + Math.sqrt(capacity) * scaleFactor) * sizeMultiplier;
+	return (baseRadius + Math.sqrt(capacity || 1) * scaleFactor) * sizeMultiplier;
 };
 
 export default function MapPage() {
@@ -114,6 +104,20 @@ export default function MapPage() {
 	
 	// Add state for circle size multiplier (default to 15x)
 	const [sizeMultiplier, setSizeMultiplier] = useState(15);
+
+	// Add states for power plant data
+	const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	
+	// Add state for filters
+	const [filters, setFilters] = useState({
+		fuel_type: null as string | null,
+		state: null as string | null,
+		operating_status: null as string | null,
+		min_capacity: null as number | null,
+		max_capacity: null as number | null
+	});
 	
 	// Force remount of map component once 
 	useEffect(() => {
@@ -124,6 +128,55 @@ export default function MapPage() {
 		
 		return () => clearTimeout(timer);
 	}, []);
+	
+	// Fetch power plant data from the API
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsLoading(true);
+			setError(null);
+			
+			try {
+				// Build query string from filters
+				const queryParams = new URLSearchParams();
+				if (filters.fuel_type) queryParams.append('fuel_type', filters.fuel_type);
+				if (filters.state) queryParams.append('state', filters.state);
+				if (filters.operating_status) queryParams.append('operating_status', filters.operating_status);
+				if (filters.min_capacity !== null) queryParams.append('min_capacity', filters.min_capacity.toString());
+				if (filters.max_capacity !== null) queryParams.append('max_capacity', filters.max_capacity.toString());
+				
+				// Get API URL from environment variable or use default
+				const API_SERVER_URL = import.meta.env.API_SERVER_URL || 'http://localhost:4777';
+				const url = `${API_SERVER_URL}/api/map_data/power_plants?${queryParams.toString()}`;
+				
+				const response = await fetch(url);
+				
+				if (!response.ok) {
+					throw new Error(`API request failed with status ${response.status}`);
+				}
+				
+				const data = await response.json();
+				
+				if (data.success && Array.isArray(data.data)) {
+					// Log the first item to see what fields are available
+					if (data.data.length > 0) {
+						console.log("First plant data sample:", data.data[0]);
+					}
+					setPowerPlants(data.data);
+				} else {
+					throw new Error('Invalid response format from API');
+				}
+			} catch (err) {
+				console.error('Error fetching power plant data:', err);
+				setError(err instanceof Error ? err.message : 'Unknown error occurred');
+				// Keep showing the previous data if available, or set empty array
+				setPowerPlants(prev => prev.length > 0 ? prev : []);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		
+		fetchData();
+	}, [filters]);
 	
 	return (
 		<div style={{ 
@@ -159,6 +212,8 @@ export default function MapPage() {
 							setShowSummerCapacity={setShowSummerCapacity}
 							sizeMultiplier={sizeMultiplier}
 							setSizeMultiplier={setSizeMultiplier}
+							filters={filters}
+							setFilters={setFilters}
 						/>
 					) : (
 						<button onClick={() => setLeftPanelOpen(!leftPanelOpen)}>{'>'}</button>
@@ -166,41 +221,51 @@ export default function MapPage() {
 				}
 			</div>
 
-
-
-{/* 			<div style={{
-				position: "absolute",
-				top: 0,
-				right: 0,
-				backgroundColor: "rgba(0, 0, 0, 0.5)",
-				borderLeft: "2px solid black",
-				boxSizing: "border-box",
-				zIndex: 1000,
-				display: "flex",
-				flexDirection: "row",
-				justifyContent: "center",
-				alignItems: "center",
-				width: rightPanelOpen ? rightSideBarOpenWidth : rightSideBarClosedWidth,
-				height: "100vh"
-			}}>
-				<button onClick={() => setRightPanelOpen(!rightPanelOpen)}>{'<'}</button>
-			</div> */}
-
-
 			<div style={{ 
 				position: "absolute",
 				top: 0,
 				left: leftPanelOpen ? leftSideBarOpenWidth : leftSideBarClosedWidth,
-				/* right: (rightPanelOpen ? rightSideBarOpenWidth : rightSideBarClosedWidth) - 3, */
 				right: 0,
 				bottom: 0
 			}}>
+				{isLoading && !powerPlants.length && (
+					<div style={{
+						position: 'absolute',
+						top: '50%',
+						left: '50%',
+						transform: 'translate(-50%, -50%)',
+						backgroundColor: 'rgba(0, 0, 0, 0.7)',
+						color: 'white',
+						padding: '20px',
+						borderRadius: '5px',
+						zIndex: 1001
+					}}>
+						Loading power plant data...
+					</div>
+				)}
+				
+				{error && !powerPlants.length && (
+					<div style={{
+						position: 'absolute',
+						top: '50%',
+						left: '50%',
+						transform: 'translate(-50%, -50%)',
+						backgroundColor: 'rgba(255, 0, 0, 0.7)',
+						color: 'white',
+						padding: '20px',
+						borderRadius: '5px',
+						zIndex: 1001
+					}}>
+						Error: {error}
+					</div>
+				)}
+				
 				<MapContainer 
 					key={mapKey}
 					center={position} 
-					zoom={13} 
+					zoom={5} // Change to a lower zoom level to show more of the map
 					scrollWheelZoom={true} 
-					zoomControl={false}
+					zoomControl={true}
 					style={{ height: "100%", width: "100%" }}
 				>
 					<MapUpdater />
@@ -210,45 +275,46 @@ export default function MapPage() {
 					/>
 					
 					{/* Render power plants as circles */}
-					{samplePowerPlants.map(plant => {
-						// Determine capacity to use for circle size
-						let capacityToUse = plant.nameplate_capacity_mw;
-						
-						// For solar plants, use summer or winter capacity if toggle is active
-						if (plant.fuel_type === 'SOLAR') {
-							if (showSummerCapacity && plant.net_summer_capacity_mw) {
-								capacityToUse = plant.net_summer_capacity_mw;
-							} else if (!showSummerCapacity && plant.net_winter_capacity_mw) {
-								capacityToUse = plant.net_winter_capacity_mw;
-							}
+					{powerPlants.map(plant => {
+						// Skip plants without valid coordinates
+						if (!plant.latitude || !plant.longitude) {
+							return null;
 						}
 						
-						// Color based on fuel type
-						const color = fuelTypeColors[plant.fuel_type as keyof typeof fuelTypeColors] || fuelTypeColors.OTHER;
+						// Set a default color since fuel_type seems to be missing
+						const defaultColor = '#3388ff'; // A nice blue as default
+						
+						// Use a fixed radius since capacity data might be missing
+						const radius = plant.nameplate_capacity_mw 
+							? getRadiusByCapacity(plant.nameplate_capacity_mw, 0.05, sizeMultiplier)
+							: 10 * sizeMultiplier / 15; // Default 10px radius scaled by multiplier
 						
 						return (
 							<CircleMarker 
 								key={plant.id}
 								center={[plant.latitude, plant.longitude]}
-								radius={getRadiusByCapacity(capacityToUse, 0.05, sizeMultiplier)}
-								fillColor={color}
-								color={color}
-								weight={Math.max(1, Math.log(plant.nameplate_capacity_mw) / 2)}
-								opacity={0.4}
-								fillOpacity={0.6}
+								radius={radius}
+								fillColor={defaultColor}
+								color="#000"
+								weight={2}
+								opacity={1}
+								fillOpacity={0.8}
 							>
 								<Popup>
 									<div>
 										<h3>{plant.name}</h3>
-										<p><strong>Fuel Type:</strong> {plant.fuel_type}</p>
-										<p><strong>Nameplate Capacity:</strong> {plant.nameplate_capacity_mw} MW</p>
-										{plant.fuel_type === 'SOLAR' && (
-											<>
-												<p><strong>Summer Capacity:</strong> {plant.net_summer_capacity_mw} MW</p>
-												<p><strong>Winter Capacity:</strong> {plant.net_winter_capacity_mw} MW</p>
-											</>
-										)}
-										<p><strong>Status:</strong> {plant.operating_status}</p>
+										<p><strong>ID:</strong> {plant.id}</p>
+										<p><strong>Location:</strong> {plant.county ? `${plant.county} County, ` : ''}{plant.state || ''}</p>
+										<p><strong>Coordinates:</strong> {plant.latitude}, {plant.longitude}</p>
+										
+										{/* Show all available fields for debugging */}
+										<hr />
+										<details>
+											<summary>Debug Info</summary>
+											<pre style={{maxHeight: '150px', overflow: 'auto'}}>
+												{JSON.stringify(plant, null, 2)}
+											</pre>
+										</details>
 									</div>
 								</Popup>
 							</CircleMarker>

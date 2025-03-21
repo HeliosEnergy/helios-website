@@ -168,13 +168,12 @@ SELECT
     s.data_period,
     s.metadata AS stat_metadata,
     s.timestamp AS stat_timestamp
-FROM eia_power_plants p
-LEFT JOIN LATERAL (
-    SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
-    WHERE plant_id = p.id
-    ORDER BY timestamp DESC
-    LIMIT 1
-) s ON true
+FROM eia_power_plants as p
+LEFT JOIN (
+    SELECT DISTINCT ON (plant_id) id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
+    FROM eia_plant_stats
+    ORDER BY plant_id, timestamp DESC
+) as s ON s.plant_id = p.id
 WHERE 
     (:p1\\:\\:text IS NULL OR p.fuel_type = :p1)
     AND (:p2\\:\\:text IS NULL OR p.state = :p2)
