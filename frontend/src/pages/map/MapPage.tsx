@@ -109,14 +109,14 @@ interface PowerPlant {
 }
 
 // Function to calculate radius based on capacity and zoom level
-const getRadiusByCapacity = (capacity: number, zoomLevel: number, scaleFactor: number, sizeMultiplier: number) => {
+const getRadiusByCapacity = (capacity: number, zoomLevel: number, scaleFactor: number, sizeMultiplier: number, capacityWeight: number) => {
 	const zoomBaseFactor = Math.pow(1.5, zoomLevel);
 	const zoomCapacityFactor = Math.pow(1.75, zoomLevel);
 	console.log("ZOOM FACTOR:", zoomBaseFactor, zoomLevel);
 
 	const baseRadius = 1 * scaleFactor * zoomBaseFactor;
-	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.9) * zoomCapacityFactor; 
-	return ((baseRadius + capacityComponent) * sizeMultiplier / 15);
+	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.75) * zoomCapacityFactor * capacityWeight; 
+	return ((baseRadius + capacityComponent) * sizeMultiplier) / 100;
 };
 
 export default function MapPage() {
@@ -129,6 +129,9 @@ export default function MapPage() {
 	
 	// Add state for circle size multiplier (default to 15x)
 	const [sizeMultiplier, setSizeMultiplier] = useState(15);
+	
+	// Add state for capacity weight factor (default to 1.0)
+	const [capacityWeight, setCapacityWeight] = useState(1.0);
 
 	// Add states for power plant data
 	const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
@@ -146,6 +149,9 @@ export default function MapPage() {
 	
 	// Add zoom level state
 	const [zoomLevel, setZoomLevel] = useState(5); // Default zoom level
+	
+	// Add this state to track which popup is currently open
+	const [openPopupId, setOpenPopupId] = useState<number | null>(null);
 	
 	// Force remount of map component once 
 	useEffect(() => {
@@ -240,6 +246,8 @@ export default function MapPage() {
 							setShowSummerCapacity={setShowSummerCapacity}
 							sizeMultiplier={sizeMultiplier}
 							setSizeMultiplier={setSizeMultiplier}
+							capacityWeight={capacityWeight}
+							setCapacityWeight={setCapacityWeight}
 							filters={filters}
 							setFilters={setFilters}
 						/>
@@ -315,10 +323,10 @@ export default function MapPage() {
 							? fuelTypeColors[plant.fuel_type] 
 							: '#3388ff'; // Default blue color
 						
-						// Use nameplate capacity for sizing, now including zoom level
+						// Use nameplate capacity for sizing, now including zoom level and capacity weight
 						const radius = plant.nameplate_capacity_mw 
-							? getRadiusByCapacity(plant.nameplate_capacity_mw, zoomLevel, 0.5, sizeMultiplier)
-							: Math.max(1, zoomLevel - 3) * sizeMultiplier / 15; // Base size directly tied to zoom level
+							? getRadiusByCapacity(plant.nameplate_capacity_mw, zoomLevel, 0.5, sizeMultiplier, capacityWeight)
+							: Math.max(1, zoomLevel - 3) * sizeMultiplier / 15;
 						
 						return (
 							<CircleMarker 
@@ -330,25 +338,39 @@ export default function MapPage() {
 								weight={2}
 								opacity={1}
 								fillOpacity={0.8}
+								eventHandlers={{
+									popupopen: () => setOpenPopupId(plant.id),
+									popupclose: () => setOpenPopupId(null)
+								}}
 							>
-								<Popup>
+								<Popup minWidth={200} maxWidth={300} autoPan={false}>
 									<div>
 										<h3>{plant.name}</h3>
 										<p><strong>ID:</strong> {plant.id}</p>
 										<p><strong>Location:</strong> {plant.county ? `${plant.county} County, ` : ''}{plant.state || ''}</p>
-										<p><strong>Coordinates:</strong> {plant.latitude}, {plant.longitude}</p>
 										<p><strong>Fuel Type:</strong> {plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type as keyof typeof fuelTypeDisplayNames] || plant.fuel_type) : 'Unknown'}</p>
 										<p><strong>Capacity:</strong> {plant.nameplate_capacity_mw ? `${plant.nameplate_capacity_mw} MW` : 'Unknown'}</p>
 										<p><strong>Status:</strong> {plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status as keyof typeof operatingStatusDisplayNames] || plant.operating_status) : 'Unknown'}</p>
 										
-										{/* Show all available fields for debugging */}
-										<hr />
-										<details>
-											<summary>Debug Info</summary>
-											<pre style={{maxHeight: '150px', overflow: 'auto'}}>
-												{JSON.stringify(plant, null, 2)}
-											</pre>
-										</details>
+										{/* Only render detail content when popup is open */}
+										{openPopupId === plant.id && (
+											<>
+												<hr />
+												<details>
+													<summary>Debug Info</summary>
+													<pre style={{maxHeight: '150px', overflow: 'auto'}}>
+														{JSON.stringify({
+															id: plant.id,
+															name: plant.name,
+															coordinates: [plant.latitude, plant.longitude],
+															fuel_type: plant.fuel_type,
+															capacity: plant.nameplate_capacity_mw,
+															status: plant.operating_status,
+														}, null, 2)}
+													</pre>
+												</details>
+											</>
+										)}
 									</div>
 								</Popup>
 							</CircleMarker>

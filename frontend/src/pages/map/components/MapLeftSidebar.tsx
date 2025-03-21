@@ -7,6 +7,8 @@ interface MapLeftSidebarProps {
 	setShowSummerCapacity: (show: boolean) => void;
 	sizeMultiplier: number;
 	setSizeMultiplier: (multiplier: number) => void;
+	capacityWeight: number;
+	setCapacityWeight: (weight: number) => void;
 	filters: {
 		fuel_type: string | null;
 		state: string | null;
@@ -30,6 +32,8 @@ export function MapLeftSidebar({
 	setShowSummerCapacity,
 	sizeMultiplier,
 	setSizeMultiplier,
+	capacityWeight,
+	setCapacityWeight,
 	filters,
 	setFilters
 }: MapLeftSidebarProps) {
@@ -99,6 +103,22 @@ export function MapLeftSidebar({
 						onChange={(e) => setSizeMultiplier(parseInt(e.target.value))}
 						style={{ width: '100%' }}
 					/>
+				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Capacity Weight: {capacityWeight.toFixed(1)}</label>
+					<input 
+						type="range" 
+						min="0" 
+						max="3" 
+						step="0.1"
+						value={capacityWeight}
+						onChange={(e) => setCapacityWeight(parseFloat(e.target.value))}
+						style={{ width: '100%' }}
+					/>
+					<small style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: '#aaa' }}>
+						Controls how much a plant's capacity affects its size (0 = uniform size, 1 = normal, 3 = capacity emphasized)
+					</small>
 				</div>
 
 				<div style={{ marginBottom: '10px' }}>
