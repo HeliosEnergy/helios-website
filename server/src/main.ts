@@ -10,7 +10,7 @@ import {
 	updateMetric,
 	deleteMetric,
 	getMetricsByName
-} from "@helios/analysis_db/schema/analysis_db/query_sql";
+} from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +27,10 @@ const sql = postgres({
 const PORT = 4777;
 const app = express();
 app.use(express.json());
+
+app.get("/", (req: Request, res: Response) => {
+	res.send("Hello World");
+});
 
 const api = express.Router();
 {

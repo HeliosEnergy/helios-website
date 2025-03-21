@@ -2,9 +2,10 @@
 	"name": "server",
 	"version": "1.0.0",
 	"main": "dist/main.js",
+	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "ts-node src/main.ts",
+		"start": "NODE_OPTIONS=--loader=ts-node/esm ts-node src/main.ts",
 		"build": "tsc"
 	},
 	"dependencies": {
