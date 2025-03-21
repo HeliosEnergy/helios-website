@@ -281,10 +281,12 @@ export default function MapPage() {
 							return null;
 						}
 						
-						// Set a default color since fuel_type seems to be missing
-						const defaultColor = '#3388ff'; // A nice blue as default
+						// Use fuel type color from the map, or default to blue if fuel_type is missing
+						const color = plant.fuel_type && fuelTypeColors[plant.fuel_type] 
+							? fuelTypeColors[plant.fuel_type] 
+							: '#3388ff'; // Default blue color
 						
-						// Use a fixed radius since capacity data might be missing
+						// Use nameplate capacity for sizing
 						const radius = plant.nameplate_capacity_mw 
 							? getRadiusByCapacity(plant.nameplate_capacity_mw, 0.05, sizeMultiplier)
 							: 10 * sizeMultiplier / 15; // Default 10px radius scaled by multiplier
@@ -294,7 +296,7 @@ export default function MapPage() {
 								key={plant.id}
 								center={[plant.latitude, plant.longitude]}
 								radius={radius}
-								fillColor={defaultColor}
+								fillColor={color}
 								color="#000"
 								weight={2}
 								opacity={1}
@@ -306,6 +308,9 @@ export default function MapPage() {
 										<p><strong>ID:</strong> {plant.id}</p>
 										<p><strong>Location:</strong> {plant.county ? `${plant.county} County, ` : ''}{plant.state || ''}</p>
 										<p><strong>Coordinates:</strong> {plant.latitude}, {plant.longitude}</p>
+										<p><strong>Fuel Type:</strong> {plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type as keyof typeof fuelTypeDisplayNames] || plant.fuel_type) : 'Unknown'}</p>
+										<p><strong>Capacity:</strong> {plant.nameplate_capacity_mw ? `${plant.nameplate_capacity_mw} MW` : 'Unknown'}</p>
+										<p><strong>Status:</strong> {plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status as keyof typeof operatingStatusDisplayNames] || plant.operating_status) : 'Unknown'}</p>
 										
 										{/* Show all available fields for debugging */}
 										<hr />
