@@ -212,6 +212,154 @@ func (q *Queries) DeleteMetric(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllPowerPlantsWithLatestStats = `-- name: GetAllPowerPlantsWithLatestStats :many
+SELECT 
+    p.id, 
+    p.api_plant_id, 
+    p.entity_id, 
+    p.name, 
+    p.county, 
+    p.state,
+    ST_X(p.location::geometry) AS longitude,
+    ST_Y(p.location::geometry) AS latitude,
+    p.plant_code,
+    p.fuel_type,
+    p.prime_mover,
+    p.operating_status,
+    p.metadata AS plant_metadata,
+    p.created_at AS plant_created_at,
+    p.updated_at AS plant_updated_at,
+    s.id AS stat_id,
+    s.nameplate_capacity_mw,
+    s.net_summer_capacity_mw,
+    s.net_winter_capacity_mw,
+    s.planned_derate_summer_cap_mw,
+    s.planned_uprate_summer_cap_mw,
+    s.operating_year_month,
+    s.planned_derate_year_month,
+    s.planned_uprate_year_month,
+    s.planned_retirement_year_month,
+    s.source_timestamp,
+    s.data_period,
+    s.metadata AS stat_metadata,
+    s.timestamp AS stat_timestamp
+FROM eia_power_plants p
+LEFT JOIN LATERAL (
+    SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+    WHERE plant_id = p.id
+    ORDER BY timestamp DESC
+    LIMIT 1
+) s ON true
+WHERE 
+    ($1::text IS NULL OR p.fuel_type = $1)
+    AND ($2::text IS NULL OR p.state = $2)
+    AND ($3::text IS NULL OR p.operating_status = $3)
+    AND (
+        $4::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= $4)
+    )
+    AND (
+        $5::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= $5)
+    )
+`
+
+type GetAllPowerPlantsWithLatestStatsParams struct {
+	FuelType        pgtype.Text
+	State           pgtype.Text
+	OperatingStatus pgtype.Text
+	MinCapacity     pgtype.Float8
+	MaxCapacity     pgtype.Float8
+}
+
+type GetAllPowerPlantsWithLatestStatsRow struct {
+	ID                         int32
+	ApiPlantID                 string
+	EntityID                   pgtype.Int4
+	Name                       string
+	County                     pgtype.Text
+	State                      pgtype.Text
+	Longitude                  interface{}
+	Latitude                   interface{}
+	PlantCode                  pgtype.Text
+	FuelType                   pgtype.Text
+	PrimeMover                 pgtype.Text
+	OperatingStatus            pgtype.Text
+	PlantMetadata              []byte
+	PlantCreatedAt             pgtype.Timestamptz
+	PlantUpdatedAt             pgtype.Timestamptz
+	StatID                     int32
+	NameplateCapacityMw        pgtype.Float8
+	NetSummerCapacityMw        pgtype.Float8
+	NetWinterCapacityMw        pgtype.Float8
+	PlannedDerateSummerCapMw   pgtype.Float8
+	PlannedUprateSummerCapMw   pgtype.Float8
+	OperatingYearMonth         pgtype.Date
+	PlannedDerateYearMonth     pgtype.Date
+	PlannedUprateYearMonth     pgtype.Date
+	PlannedRetirementYearMonth pgtype.Date
+	SourceTimestamp            pgtype.Timestamptz
+	DataPeriod                 pgtype.Text
+	StatMetadata               []byte
+	StatTimestamp              pgtype.Timestamptz
+}
+
+func (q *Queries) GetAllPowerPlantsWithLatestStats(ctx context.Context, arg GetAllPowerPlantsWithLatestStatsParams) ([]GetAllPowerPlantsWithLatestStatsRow, error) {
+	rows, err := q.db.Query(ctx, getAllPowerPlantsWithLatestStats,
+		arg.FuelType,
+		arg.State,
+		arg.OperatingStatus,
+		arg.MinCapacity,
+		arg.MaxCapacity,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPowerPlantsWithLatestStatsRow
+	for rows.Next() {
+		var i GetAllPowerPlantsWithLatestStatsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ApiPlantID,
+			&i.EntityID,
+			&i.Name,
+			&i.County,
+			&i.State,
+			&i.Longitude,
+			&i.Latitude,
+			&i.PlantCode,
+			&i.FuelType,
+			&i.PrimeMover,
+			&i.OperatingStatus,
+			&i.PlantMetadata,
+			&i.PlantCreatedAt,
+			&i.PlantUpdatedAt,
+			&i.StatID,
+			&i.NameplateCapacityMw,
+			&i.NetSummerCapacityMw,
+			&i.NetWinterCapacityMw,
+			&i.PlannedDerateSummerCapMw,
+			&i.PlannedUprateSummerCapMw,
+			&i.OperatingYearMonth,
+			&i.PlannedDerateYearMonth,
+			&i.PlannedUprateYearMonth,
+			&i.PlannedRetirementYearMonth,
+			&i.SourceTimestamp,
+			&i.DataPeriod,
+			&i.StatMetadata,
+			&i.StatTimestamp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getEIAEntityByApiID = `-- name: GetEIAEntityByApiID :one
 
 SELECT id, api_entity_id, name, description, metadata, created_at, updated_at FROM eia_entities

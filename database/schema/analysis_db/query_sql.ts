@@ -774,3 +774,128 @@ export async function getEIAPowerPlantsForEntity(sql: Sql, args: GetEIAPowerPlan
     }));
 }
 
+export const getAllPowerPlantsWithLatestStatsQuery = `-- name: GetAllPowerPlantsWithLatestStats :many
+SELECT 
+    p.id, 
+    p.api_plant_id, 
+    p.entity_id, 
+    p.name, 
+    p.county, 
+    p.state,
+    ST_X(p.location::geometry) AS longitude,
+    ST_Y(p.location::geometry) AS latitude,
+    p.plant_code,
+    p.fuel_type,
+    p.prime_mover,
+    p.operating_status,
+    p.metadata AS plant_metadata,
+    p.created_at AS plant_created_at,
+    p.updated_at AS plant_updated_at,
+    s.id AS stat_id,
+    s.nameplate_capacity_mw,
+    s.net_summer_capacity_mw,
+    s.net_winter_capacity_mw,
+    s.planned_derate_summer_cap_mw,
+    s.planned_uprate_summer_cap_mw,
+    s.operating_year_month,
+    s.planned_derate_year_month,
+    s.planned_uprate_year_month,
+    s.planned_retirement_year_month,
+    s.source_timestamp,
+    s.data_period,
+    s.metadata AS stat_metadata,
+    s.timestamp AS stat_timestamp
+FROM eia_power_plants p
+LEFT JOIN LATERAL (
+    SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+    WHERE plant_id = p.id
+    ORDER BY timestamp DESC
+    LIMIT 1
+) s ON true
+WHERE 
+    ($1::text IS NULL OR p.fuel_type = $1)
+    AND ($2::text IS NULL OR p.state = $2)
+    AND ($3::text IS NULL OR p.operating_status = $3)
+    AND (
+        $4::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= $4)
+    )
+    AND (
+        $5::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= $5)
+    )`;
+
+export interface GetAllPowerPlantsWithLatestStatsArgs {
+    fuelType: string | null;
+    state: string | null;
+    operatingStatus: string | null;
+    minCapacity: number | null;
+    maxCapacity: number | null;
+}
+
+export interface GetAllPowerPlantsWithLatestStatsRow {
+    id: number;
+    apiPlantId: string;
+    entityId: number | null;
+    name: string;
+    county: string | null;
+    state: string | null;
+    longitude: string | null;
+    latitude: string | null;
+    plantCode: string | null;
+    fuelType: string | null;
+    primeMover: string | null;
+    operatingStatus: string | null;
+    plantMetadata: any | null;
+    plantCreatedAt: Date | null;
+    plantUpdatedAt: Date | null;
+    statId: number;
+    nameplateCapacityMw: number | null;
+    netSummerCapacityMw: number | null;
+    netWinterCapacityMw: number | null;
+    plannedDerateSummerCapMw: number | null;
+    plannedUprateSummerCapMw: number | null;
+    operatingYearMonth: Date | null;
+    plannedDerateYearMonth: Date | null;
+    plannedUprateYearMonth: Date | null;
+    plannedRetirementYearMonth: Date | null;
+    sourceTimestamp: Date | null;
+    dataPeriod: string | null;
+    statMetadata: any | null;
+    statTimestamp: Date;
+}
+
+export async function getAllPowerPlantsWithLatestStats(sql: Sql, args: GetAllPowerPlantsWithLatestStatsArgs): Promise<GetAllPowerPlantsWithLatestStatsRow[]> {
+    return (await sql.unsafe(getAllPowerPlantsWithLatestStatsQuery, [args.fuelType, args.state, args.operatingStatus, args.minCapacity, args.maxCapacity]).values()).map(row => ({
+        id: row[0],
+        apiPlantId: row[1],
+        entityId: row[2],
+        name: row[3],
+        county: row[4],
+        state: row[5],
+        longitude: row[6],
+        latitude: row[7],
+        plantCode: row[8],
+        fuelType: row[9],
+        primeMover: row[10],
+        operatingStatus: row[11],
+        plantMetadata: row[12],
+        plantCreatedAt: row[13],
+        plantUpdatedAt: row[14],
+        statId: row[15],
+        nameplateCapacityMw: row[16],
+        netSummerCapacityMw: row[17],
+        netWinterCapacityMw: row[18],
+        plannedDerateSummerCapMw: row[19],
+        plannedUprateSummerCapMw: row[20],
+        operatingYearMonth: row[21],
+        plannedDerateYearMonth: row[22],
+        plannedUprateYearMonth: row[23],
+        plannedRetirementYearMonth: row[24],
+        sourceTimestamp: row[25],
+        dataPeriod: row[26],
+        statMetadata: row[27],
+        statTimestamp: row[28]
+    }));
+}
+

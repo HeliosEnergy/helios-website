@@ -137,6 +137,101 @@ WHERE id = :p1
 """
 
 
+GET_ALL_POWER_PLANTS_WITH_LATEST_STATS = """-- name: get_all_power_plants_with_latest_stats \\:many
+SELECT 
+    p.id, 
+    p.api_plant_id, 
+    p.entity_id, 
+    p.name, 
+    p.county, 
+    p.state,
+    ST_X(p.location\\:\\:geometry) AS longitude,
+    ST_Y(p.location\\:\\:geometry) AS latitude,
+    p.plant_code,
+    p.fuel_type,
+    p.prime_mover,
+    p.operating_status,
+    p.metadata AS plant_metadata,
+    p.created_at AS plant_created_at,
+    p.updated_at AS plant_updated_at,
+    s.id AS stat_id,
+    s.nameplate_capacity_mw,
+    s.net_summer_capacity_mw,
+    s.net_winter_capacity_mw,
+    s.planned_derate_summer_cap_mw,
+    s.planned_uprate_summer_cap_mw,
+    s.operating_year_month,
+    s.planned_derate_year_month,
+    s.planned_uprate_year_month,
+    s.planned_retirement_year_month,
+    s.source_timestamp,
+    s.data_period,
+    s.metadata AS stat_metadata,
+    s.timestamp AS stat_timestamp
+FROM eia_power_plants p
+LEFT JOIN LATERAL (
+    SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+    WHERE plant_id = p.id
+    ORDER BY timestamp DESC
+    LIMIT 1
+) s ON true
+WHERE 
+    (:p1\\:\\:text IS NULL OR p.fuel_type = :p1)
+    AND (:p2\\:\\:text IS NULL OR p.state = :p2)
+    AND (:p3\\:\\:text IS NULL OR p.operating_status = :p3)
+    AND (
+        :p4\\:\\:float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= :p4)
+    )
+    AND (
+        :p5\\:\\:float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= :p5)
+    )
+"""
+
+
+@dataclasses.dataclass()
+class GetAllPowerPlantsWithLatestStatsParams:
+    fuel_type: Optional[str]
+    state: Optional[str]
+    operating_status: Optional[str]
+    min_capacity: Optional[float]
+    max_capacity: Optional[float]
+
+
+@dataclasses.dataclass()
+class GetAllPowerPlantsWithLatestStatsRow:
+    id: int
+    api_plant_id: str
+    entity_id: Optional[int]
+    name: str
+    county: Optional[str]
+    state: Optional[str]
+    longitude: Optional[Any]
+    latitude: Optional[Any]
+    plant_code: Optional[str]
+    fuel_type: Optional[str]
+    prime_mover: Optional[str]
+    operating_status: Optional[str]
+    plant_metadata: Optional[Any]
+    plant_created_at: Optional[datetime.datetime]
+    plant_updated_at: Optional[datetime.datetime]
+    stat_id: int
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_uprate_summer_cap_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    source_timestamp: Optional[datetime.datetime]
+    data_period: Optional[str]
+    stat_metadata: Optional[Any]
+    stat_timestamp: datetime.datetime
+
+
 GET_EIA_ENTITY_BY_API_ID = """-- name: get_eia_entity_by_api_id \\:one
 
 SELECT id, api_entity_id, name, description, metadata, created_at, updated_at FROM eia_entities
@@ -372,6 +467,47 @@ class Querier:
 
     def delete_metric(self, *, id: int) -> None:
         self._conn.execute(sqlalchemy.text(DELETE_METRIC), {"p1": id})
+
+    def get_all_power_plants_with_latest_stats(self, arg: GetAllPowerPlantsWithLatestStatsParams) -> Iterator[GetAllPowerPlantsWithLatestStatsRow]:
+        result = self._conn.execute(sqlalchemy.text(GET_ALL_POWER_PLANTS_WITH_LATEST_STATS), {
+            "p1": arg.fuel_type,
+            "p2": arg.state,
+            "p3": arg.operating_status,
+            "p4": arg.min_capacity,
+            "p5": arg.max_capacity,
+        })
+        for row in result:
+            yield GetAllPowerPlantsWithLatestStatsRow(
+                id=row[0],
+                api_plant_id=row[1],
+                entity_id=row[2],
+                name=row[3],
+                county=row[4],
+                state=row[5],
+                longitude=row[6],
+                latitude=row[7],
+                plant_code=row[8],
+                fuel_type=row[9],
+                prime_mover=row[10],
+                operating_status=row[11],
+                plant_metadata=row[12],
+                plant_created_at=row[13],
+                plant_updated_at=row[14],
+                stat_id=row[15],
+                nameplate_capacity_mw=row[16],
+                net_summer_capacity_mw=row[17],
+                net_winter_capacity_mw=row[18],
+                planned_derate_summer_cap_mw=row[19],
+                planned_uprate_summer_cap_mw=row[20],
+                operating_year_month=row[21],
+                planned_derate_year_month=row[22],
+                planned_uprate_year_month=row[23],
+                planned_retirement_year_month=row[24],
+                source_timestamp=row[25],
+                data_period=row[26],
+                stat_metadata=row[27],
+                stat_timestamp=row[28],
+            )
 
     def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:
         row = self._conn.execute(sqlalchemy.text(GET_EIA_ENTITY_BY_API_ID), {"p1": api_entity_id}).first()
@@ -679,6 +815,47 @@ class AsyncQuerier:
 
     async def delete_metric(self, *, id: int) -> None:
         await self._conn.execute(sqlalchemy.text(DELETE_METRIC), {"p1": id})
+
+    async def get_all_power_plants_with_latest_stats(self, arg: GetAllPowerPlantsWithLatestStatsParams) -> AsyncIterator[GetAllPowerPlantsWithLatestStatsRow]:
+        result = await self._conn.stream(sqlalchemy.text(GET_ALL_POWER_PLANTS_WITH_LATEST_STATS), {
+            "p1": arg.fuel_type,
+            "p2": arg.state,
+            "p3": arg.operating_status,
+            "p4": arg.min_capacity,
+            "p5": arg.max_capacity,
+        })
+        async for row in result:
+            yield GetAllPowerPlantsWithLatestStatsRow(
+                id=row[0],
+                api_plant_id=row[1],
+                entity_id=row[2],
+                name=row[3],
+                county=row[4],
+                state=row[5],
+                longitude=row[6],
+                latitude=row[7],
+                plant_code=row[8],
+                fuel_type=row[9],
+                prime_mover=row[10],
+                operating_status=row[11],
+                plant_metadata=row[12],
+                plant_created_at=row[13],
+                plant_updated_at=row[14],
+                stat_id=row[15],
+                nameplate_capacity_mw=row[16],
+                net_summer_capacity_mw=row[17],
+                net_winter_capacity_mw=row[18],
+                planned_derate_summer_cap_mw=row[19],
+                planned_uprate_summer_cap_mw=row[20],
+                operating_year_month=row[21],
+                planned_derate_year_month=row[22],
+                planned_uprate_year_month=row[23],
+                planned_retirement_year_month=row[24],
+                source_timestamp=row[25],
+                data_period=row[26],
+                stat_metadata=row[27],
+                stat_timestamp=row[28],
+            )
 
     async def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:
         row = (await self._conn.execute(sqlalchemy.text(GET_EIA_ENTITY_BY_API_ID), {"p1": api_entity_id})).first()

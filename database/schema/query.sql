@@ -199,3 +199,54 @@ LIMIT 1;
 -- name: GetEIAPowerPlantsForEntity :many
 SELECT * FROM eia_power_plants
 WHERE entity_id = sqlc.arg(entity_id);
+
+-- name: GetAllPowerPlantsWithLatestStats :many
+SELECT 
+    p.id, 
+    p.api_plant_id, 
+    p.entity_id, 
+    p.name, 
+    p.county, 
+    p.state,
+    ST_X(p.location::geometry) AS longitude,
+    ST_Y(p.location::geometry) AS latitude,
+    p.plant_code,
+    p.fuel_type,
+    p.prime_mover,
+    p.operating_status,
+    p.metadata AS plant_metadata,
+    p.created_at AS plant_created_at,
+    p.updated_at AS plant_updated_at,
+    s.id AS stat_id,
+    s.nameplate_capacity_mw,
+    s.net_summer_capacity_mw,
+    s.net_winter_capacity_mw,
+    s.planned_derate_summer_cap_mw,
+    s.planned_uprate_summer_cap_mw,
+    s.operating_year_month,
+    s.planned_derate_year_month,
+    s.planned_uprate_year_month,
+    s.planned_retirement_year_month,
+    s.source_timestamp,
+    s.data_period,
+    s.metadata AS stat_metadata,
+    s.timestamp AS stat_timestamp
+FROM eia_power_plants p
+LEFT JOIN LATERAL (
+    SELECT * FROM eia_plant_stats
+    WHERE plant_id = p.id
+    ORDER BY timestamp DESC
+    LIMIT 1
+) s ON true
+WHERE 
+    (sqlc.narg(fuel_type)::text IS NULL OR p.fuel_type = sqlc.narg(fuel_type))
+    AND (sqlc.narg(state)::text IS NULL OR p.state = sqlc.narg(state))
+    AND (sqlc.narg(operating_status)::text IS NULL OR p.operating_status = sqlc.narg(operating_status))
+    AND (
+        sqlc.narg(min_capacity)::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= sqlc.narg(min_capacity))
+    )
+    AND (
+        sqlc.narg(max_capacity)::float IS NULL 
+        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= sqlc.narg(max_capacity))
+    );
