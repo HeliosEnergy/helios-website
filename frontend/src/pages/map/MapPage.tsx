@@ -28,6 +28,29 @@ function MapUpdater() {
 	return null;
 }
 
+// Add this new component to track zoom level
+function ZoomLevelTracker({ setZoomLevel }: { setZoomLevel: (zoom: number) => void }) {
+	const map = useMap();
+	
+	useEffect(() => {
+		// Set initial zoom level
+		setZoomLevel(map.getZoom());
+		
+		// Update zoom level on zoom events
+		const onZoom = () => {
+			setZoomLevel(map.getZoom());
+		};
+		
+		map.on('zoom', onZoom);
+		
+		return () => {
+			map.off('zoom', onZoom);
+		};
+	}, [map, setZoomLevel]);
+	
+	return null;
+}
+
 // Define colors for different fuel types based on energy source code
 const fuelTypeColors: {[key: string]: string} = {
 	'SUN': '#FFD700',   // Solar - Gold
@@ -85,13 +108,15 @@ interface PowerPlant {
 	last_updated?: string;
 }
 
-// Function to calculate radius based on capacity
-const getRadiusByCapacity = (capacity: number, scaleFactor: number = 0.05, sizeMultiplier: number = 15) => {
-	// Base minimum radius
-	const baseRadius = 5;
-	// Scale factor - adjust this to get appropriate circle sizes
-	// Apply the size multiplier to scale the circles
-	return (baseRadius + Math.sqrt(capacity || 1) * scaleFactor) * sizeMultiplier;
+// Function to calculate radius based on capacity and zoom level
+const getRadiusByCapacity = (capacity: number, zoomLevel: number, scaleFactor: number, sizeMultiplier: number) => {
+	const zoomBaseFactor = Math.pow(1.5, zoomLevel);
+	const zoomCapacityFactor = Math.pow(1.75, zoomLevel);
+	console.log("ZOOM FACTOR:", zoomBaseFactor, zoomLevel);
+
+	const baseRadius = 1 * scaleFactor * zoomBaseFactor;
+	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.9) * zoomCapacityFactor; 
+	return ((baseRadius + capacityComponent) * sizeMultiplier / 15);
 };
 
 export default function MapPage() {
@@ -118,6 +143,9 @@ export default function MapPage() {
 		min_capacity: null as number | null,
 		max_capacity: null as number | null
 	});
+	
+	// Add zoom level state
+	const [zoomLevel, setZoomLevel] = useState(5); // Default zoom level
 	
 	// Force remount of map component once 
 	useEffect(() => {
@@ -263,12 +291,13 @@ export default function MapPage() {
 				<MapContainer 
 					key={mapKey}
 					center={position} 
-					zoom={5} // Change to a lower zoom level to show more of the map
+					zoom={5}
 					scrollWheelZoom={true} 
 					zoomControl={true}
 					style={{ height: "100%", width: "100%" }}
 				>
 					<MapUpdater />
+					<ZoomLevelTracker setZoomLevel={setZoomLevel} />
 					<TileLayer
 						attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 						url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -286,10 +315,10 @@ export default function MapPage() {
 							? fuelTypeColors[plant.fuel_type] 
 							: '#3388ff'; // Default blue color
 						
-						// Use nameplate capacity for sizing
+						// Use nameplate capacity for sizing, now including zoom level
 						const radius = plant.nameplate_capacity_mw 
-							? getRadiusByCapacity(plant.nameplate_capacity_mw, 0.05, sizeMultiplier)
-							: 10 * sizeMultiplier / 15; // Default 10px radius scaled by multiplier
+							? getRadiusByCapacity(plant.nameplate_capacity_mw, zoomLevel, 0.5, sizeMultiplier)
+							: Math.max(1, zoomLevel - 3) * sizeMultiplier / 15; // Base size directly tied to zoom level
 						
 						return (
 							<CircleMarker 
