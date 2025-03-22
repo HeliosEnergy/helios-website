@@ -1,4 +1,5 @@
 import React from 'react';
+import Select from 'react-select';
 
 interface MapLeftSidebarProps {
 	open: boolean;
@@ -11,14 +12,14 @@ interface MapLeftSidebarProps {
 	setCapacityWeight: (weight: number) => void;
 	filters: {
 		fuel_type: string | null;
-		state: string | null;
+		state: string[] | null;
 		operating_status: string | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
 	};
 	setFilters: React.Dispatch<React.SetStateAction<{
 		fuel_type: string | null;
-		state: string | null;
+		state: string[] | null;
 		operating_status: string | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
@@ -53,19 +54,60 @@ export function MapLeftSidebar({
 		{ value: 'WDS', label: 'Wood/Biomass' }
 	];
 
-	// Common states
+	// Complete list of US states
 	const states = [
 		{ value: null, label: 'All States' },
+		{ value: 'AL', label: 'Alabama' },
+		{ value: 'AK', label: 'Alaska' },
+		{ value: 'AZ', label: 'Arizona' },
+		{ value: 'AR', label: 'Arkansas' },
 		{ value: 'CA', label: 'California' },
-		{ value: 'TX', label: 'Texas' },
-		{ value: 'NY', label: 'New York' },
+		{ value: 'CO', label: 'Colorado' },
+		{ value: 'CT', label: 'Connecticut' },
+		{ value: 'DE', label: 'Delaware' },
 		{ value: 'FL', label: 'Florida' },
-		{ value: 'IL', label: 'Illinois' },
-		{ value: 'OH', label: 'Ohio' },
 		{ value: 'GA', label: 'Georgia' },
-		{ value: 'PA', label: 'Pennsylvania' },
+		{ value: 'HI', label: 'Hawaii' },
+		{ value: 'ID', label: 'Idaho' },
+		{ value: 'IL', label: 'Illinois' },
+		{ value: 'IN', label: 'Indiana' },
+		{ value: 'IA', label: 'Iowa' },
+		{ value: 'KS', label: 'Kansas' },
+		{ value: 'KY', label: 'Kentucky' },
+		{ value: 'LA', label: 'Louisiana' },
+		{ value: 'ME', label: 'Maine' },
+		{ value: 'MD', label: 'Maryland' },
+		{ value: 'MA', label: 'Massachusetts' },
+		{ value: 'MI', label: 'Michigan' },
+		{ value: 'MN', label: 'Minnesota' },
+		{ value: 'MS', label: 'Mississippi' },
+		{ value: 'MO', label: 'Missouri' },
+		{ value: 'MT', label: 'Montana' },
+		{ value: 'NE', label: 'Nebraska' },
+		{ value: 'NV', label: 'Nevada' },
+		{ value: 'NH', label: 'New Hampshire' },
+		{ value: 'NJ', label: 'New Jersey' },
+		{ value: 'NM', label: 'New Mexico' },
+		{ value: 'NY', label: 'New York' },
 		{ value: 'NC', label: 'North Carolina' },
-		{ value: 'MI', label: 'Michigan' }
+		{ value: 'ND', label: 'North Dakota' },
+		{ value: 'OH', label: 'Ohio' },
+		{ value: 'OK', label: 'Oklahoma' },
+		{ value: 'OR', label: 'Oregon' },
+		{ value: 'PA', label: 'Pennsylvania' },
+		{ value: 'RI', label: 'Rhode Island' },
+		{ value: 'SC', label: 'South Carolina' },
+		{ value: 'SD', label: 'South Dakota' },
+		{ value: 'TN', label: 'Tennessee' },
+		{ value: 'TX', label: 'Texas' },
+		{ value: 'UT', label: 'Utah' },
+		{ value: 'VT', label: 'Vermont' },
+		{ value: 'VA', label: 'Virginia' },
+		{ value: 'WA', label: 'Washington' },
+		{ value: 'WV', label: 'West Virginia' },
+		{ value: 'WI', label: 'Wisconsin' },
+		{ value: 'WY', label: 'Wyoming' },
+		{ value: 'DC', label: 'District of Columbia' }
 	];
 
 	// Operating statuses
@@ -83,12 +125,43 @@ export function MapLeftSidebar({
 		}));
 	};
 
+	// Convert states array to react-select format
+	const handleStateChange = (selectedOptions: any) => {
+		if (!selectedOptions || selectedOptions.length === 0) {
+			handleFilterChange('state', null);
+		} else {
+			// Extract just the state codes into an array
+			const stateValues = selectedOptions.map((option: any) => option.value);
+			handleFilterChange('state', stateValues);
+		}
+	};
+
+	// Transform current state filter into the format react-select expects
+	const getSelectedStates = () => {
+		if (!filters.state) return [];
+		if (!Array.isArray(filters.state)) return [];
+		
+		return filters.state.map(stateCode => 
+			states.find(state => state.value === stateCode)
+		).filter(Boolean);
+	};
+
 	return (
 		<div style={{ width: '100%', height: '100%', overflow: 'auto', color: 'white', padding: '16px', boxSizing: 'border-box' }}>
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-				<h2 style={{ margin: 0 }}>Power Plant Map</h2>
-				<button onClick={() => setOpen(false)}>{'<'}</button>
+			<div style={{width:"100%", height: "30px"}}>
+				<div style={{height: 0}}>
+				<img src="/white_logo.png" alt="logo" style={{ height: '50px', position: "relative", left: "30px" }} />
+				</div>
+
+
+				<button style={{
+					position: "absolute",
+					right: "16px",
+					top: "30px"
+				}} onClick={() => setOpen(false)}>{'<'}</button>
 			</div>
+
+			<h4>Monopolizing Optimal AI Territory</h4>
 
 			<div style={{ marginBottom: '20px' }}>
 				<h3>Display Settings</h3>
@@ -98,7 +171,7 @@ export function MapLeftSidebar({
 					<input 
 						type="range" 
 						min="1" 
-						max="30" 
+						max="50" 
 						value={sizeMultiplier}
 						onChange={(e) => setSizeMultiplier(parseInt(e.target.value))}
 						style={{ width: '100%' }}
@@ -110,8 +183,8 @@ export function MapLeftSidebar({
 					<input 
 						type="range" 
 						min="0" 
-						max="3" 
-						step="0.1"
+						max="4" 
+						step="0.02"
 						value={capacityWeight}
 						onChange={(e) => setCapacityWeight(parseFloat(e.target.value))}
 						style={{ width: '100%' }}
@@ -150,17 +223,23 @@ export function MapLeftSidebar({
 					</select>
 				</div>
 
-				<div style={{ marginBottom: '10px' }}>
+				<div style={{ marginBottom: '10px', color: "black" }}>
 					<label style={{ display: 'block', marginBottom: '5px' }}>State:</label>
-					<select 
-						value={filters.state || ''} 
-						onChange={(e) => handleFilterChange('state', e.target.value || null)}
-						style={{ width: '100%', padding: '5px' }}
-					>
-						{states.map(option => (
-							<option key={option.label} value={option.value || ''}>{option.label}</option>
-						))}
-					</select>
+					<Select
+						isMulti
+						options={states.filter(state => state.value !== null)}
+						value={getSelectedStates()}
+						onChange={handleStateChange}
+						placeholder="Select states..."
+						isClearable={true}
+						className="react-select-container"
+						classNamePrefix="react-select"
+					/>
+					{filters.state && filters.state.length > 0 && (
+						<small style={{ marginTop: '5px', display: 'block' }}>
+							{filters.state.length} state(s) selected
+						</small>
+					)}
 				</div>
 
 				<div style={{ marginBottom: '10px' }}>
@@ -220,3 +299,6 @@ export function MapLeftSidebar({
 		</div>
 	);
 }
+
+
+export default MapLeftSidebar;

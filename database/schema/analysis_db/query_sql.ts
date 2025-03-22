@@ -185,7 +185,7 @@ export async function getMetricsByName(sql: Sql, args: GetMetricsByNameArgs): Pr
 }
 
 export const createEIAElectricityDataQuery = `-- name: CreateEIAElectricityData :exec
-INSERT INTO eia_electricity_data (
+INSERT INTO eia_bulk_electricity_data (
     series_id,
     name,
     units,
@@ -479,7 +479,7 @@ export async function upsertEIAPowerPlant(sql: Sql, args: UpsertEIAPowerPlantArg
 }
 
 export const createEIAPlantStatQuery = `-- name: CreateEIAPlantStat :one
-INSERT INTO eia_plant_stats (
+INSERT INTO eia_plant_capacity (
     plant_id,
     timestamp,
     nameplate_capacity_mw,
@@ -575,7 +575,7 @@ export async function createEIAPlantStat(sql: Sql, args: CreateEIAPlantStatArgs)
 }
 
 export const getEIAPlantStatsByPlantIDQuery = `-- name: GetEIAPlantStatsByPlantID :many
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
 WHERE plant_id = $1
 ORDER BY timestamp DESC`;
 
@@ -624,7 +624,7 @@ export async function getEIAPlantStatsByPlantID(sql: Sql, args: GetEIAPlantStats
 }
 
 export const getEIAPlantStatsInTimeRangeQuery = `-- name: GetEIAPlantStatsInTimeRange :many
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
 WHERE plant_id = $1
 AND timestamp BETWEEN $2 AND $3
 ORDER BY timestamp DESC`;
@@ -676,7 +676,7 @@ export async function getEIAPlantStatsInTimeRange(sql: Sql, args: GetEIAPlantSta
 }
 
 export const getLatestEIAPlantStatQuery = `-- name: GetLatestEIAPlantStat :one
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
 WHERE plant_id = $1
 ORDER BY timestamp DESC
 LIMIT 1`;
@@ -808,12 +808,16 @@ SELECT
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT DISTINCT ON (plant_id) id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
-    FROM eia_plant_stats
+    FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
 WHERE 
     ($1::text IS NULL OR p.fuel_type = $1)
-    AND ($2::text IS NULL OR p.state = $2)
+    AND (
+        $2::text[] IS NULL 
+        OR $2::text[] = '{}'::text[] 
+        OR p.state = ANY($2::text[])
+    )
     AND ($3::text IS NULL OR p.operating_status = $3)
     AND (
         $4::float IS NULL 
@@ -826,7 +830,7 @@ WHERE
 
 export interface GetAllPowerPlantsWithLatestStatsArgs {
     fuelType: string | null;
-    state: string | null;
+    states: string[] | null;
     operatingStatus: string | null;
     minCapacity: number | null;
     maxCapacity: number | null;
@@ -865,7 +869,7 @@ export interface GetAllPowerPlantsWithLatestStatsRow {
 }
 
 export async function getAllPowerPlantsWithLatestStats(sql: Sql, args: GetAllPowerPlantsWithLatestStatsArgs): Promise<GetAllPowerPlantsWithLatestStatsRow[]> {
-    return (await sql.unsafe(getAllPowerPlantsWithLatestStatsQuery, [args.fuelType, args.state, args.operatingStatus, args.minCapacity, args.maxCapacity]).values()).map(row => ({
+    return (await sql.unsafe(getAllPowerPlantsWithLatestStatsQuery, [args.fuelType, args.states, args.operatingStatus, args.minCapacity, args.maxCapacity]).values()).map(row => ({
         id: row[0],
         apiPlantId: row[1],
         entityId: row[2],
@@ -896,5 +900,312 @@ export async function getAllPowerPlantsWithLatestStats(sql: Sql, args: GetAllPow
         statMetadata: row[27],
         statTimestamp: row[28]
     }));
+}
+
+export const createEIAPlantGenerationQuery = `-- name: CreateEIAPlantGeneration :one
+INSERT INTO eia_plant_generation (
+    plant_id,
+    timestamp,
+    period,
+    generation,
+    generation_units,
+    gross_generation,
+    gross_generation_units,
+    consumption_for_eg,
+    consumption_for_eg_units,
+    consumption_for_eg_btu,
+    consumption_for_eg_btu_units,
+    total_consumption,
+    total_consumption_units,
+    total_consumption_btu,
+    total_consumption_btu_units,
+    average_heat_content,
+    average_heat_content_units,
+    source_timestamp,
+    metadata
+) VALUES (
+    $1,
+    COALESCE($2, CURRENT_TIMESTAMP),
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19
+)
+RETURNING id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at`;
+
+export interface CreateEIAPlantGenerationArgs {
+    plantId: number | null;
+    timestamp: string | null;
+    period: string | null;
+    generation: number | null;
+    generationUnits: string | null;
+    grossGeneration: number | null;
+    grossGenerationUnits: string | null;
+    consumptionForEg: number | null;
+    consumptionForEgUnits: string | null;
+    consumptionForEgBtu: number | null;
+    consumptionForEgBtuUnits: string | null;
+    totalConsumption: number | null;
+    totalConsumptionUnits: string | null;
+    totalConsumptionBtu: number | null;
+    totalConsumptionBtuUnits: string | null;
+    averageHeatContent: number | null;
+    averageHeatContentUnits: string | null;
+    sourceTimestamp: Date | null;
+    metadata: any | null;
+}
+
+export interface CreateEIAPlantGenerationRow {
+    id: number;
+    plantId: number | null;
+    timestamp: Date;
+    period: string | null;
+    generation: number | null;
+    generationUnits: string | null;
+    grossGeneration: number | null;
+    grossGenerationUnits: string | null;
+    consumptionForEg: number | null;
+    consumptionForEgUnits: string | null;
+    consumptionForEgBtu: number | null;
+    consumptionForEgBtuUnits: string | null;
+    totalConsumption: number | null;
+    totalConsumptionUnits: string | null;
+    totalConsumptionBtu: number | null;
+    totalConsumptionBtuUnits: string | null;
+    averageHeatContent: number | null;
+    averageHeatContentUnits: string | null;
+    sourceTimestamp: Date | null;
+    metadata: any | null;
+    createdAt: Date | null;
+}
+
+export async function createEIAPlantGeneration(sql: Sql, args: CreateEIAPlantGenerationArgs): Promise<CreateEIAPlantGenerationRow | null> {
+    const rows = await sql.unsafe(createEIAPlantGenerationQuery, [args.plantId, args.timestamp, args.period, args.generation, args.generationUnits, args.grossGeneration, args.grossGenerationUnits, args.consumptionForEg, args.consumptionForEgUnits, args.consumptionForEgBtu, args.consumptionForEgBtuUnits, args.totalConsumption, args.totalConsumptionUnits, args.totalConsumptionBtu, args.totalConsumptionBtuUnits, args.averageHeatContent, args.averageHeatContentUnits, args.sourceTimestamp, args.metadata]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        plantId: row[1],
+        timestamp: row[2],
+        period: row[3],
+        generation: row[4],
+        generationUnits: row[5],
+        grossGeneration: row[6],
+        grossGenerationUnits: row[7],
+        consumptionForEg: row[8],
+        consumptionForEgUnits: row[9],
+        consumptionForEgBtu: row[10],
+        consumptionForEgBtuUnits: row[11],
+        totalConsumption: row[12],
+        totalConsumptionUnits: row[13],
+        totalConsumptionBtu: row[14],
+        totalConsumptionBtuUnits: row[15],
+        averageHeatContent: row[16],
+        averageHeatContentUnits: row[17],
+        sourceTimestamp: row[18],
+        metadata: row[19],
+        createdAt: row[20]
+    };
+}
+
+export const getEIAPlantGenerationByPlantIDQuery = `-- name: GetEIAPlantGenerationByPlantID :many
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+WHERE plant_id = $1
+ORDER BY timestamp DESC`;
+
+export interface GetEIAPlantGenerationByPlantIDArgs {
+    plantId: number | null;
+}
+
+export interface GetEIAPlantGenerationByPlantIDRow {
+    id: number;
+    plantId: number | null;
+    timestamp: Date;
+    period: string | null;
+    generation: number | null;
+    generationUnits: string | null;
+    grossGeneration: number | null;
+    grossGenerationUnits: string | null;
+    consumptionForEg: number | null;
+    consumptionForEgUnits: string | null;
+    consumptionForEgBtu: number | null;
+    consumptionForEgBtuUnits: string | null;
+    totalConsumption: number | null;
+    totalConsumptionUnits: string | null;
+    totalConsumptionBtu: number | null;
+    totalConsumptionBtuUnits: string | null;
+    averageHeatContent: number | null;
+    averageHeatContentUnits: string | null;
+    sourceTimestamp: Date | null;
+    metadata: any | null;
+    createdAt: Date | null;
+}
+
+export async function getEIAPlantGenerationByPlantID(sql: Sql, args: GetEIAPlantGenerationByPlantIDArgs): Promise<GetEIAPlantGenerationByPlantIDRow[]> {
+    return (await sql.unsafe(getEIAPlantGenerationByPlantIDQuery, [args.plantId]).values()).map(row => ({
+        id: row[0],
+        plantId: row[1],
+        timestamp: row[2],
+        period: row[3],
+        generation: row[4],
+        generationUnits: row[5],
+        grossGeneration: row[6],
+        grossGenerationUnits: row[7],
+        consumptionForEg: row[8],
+        consumptionForEgUnits: row[9],
+        consumptionForEgBtu: row[10],
+        consumptionForEgBtuUnits: row[11],
+        totalConsumption: row[12],
+        totalConsumptionUnits: row[13],
+        totalConsumptionBtu: row[14],
+        totalConsumptionBtuUnits: row[15],
+        averageHeatContent: row[16],
+        averageHeatContentUnits: row[17],
+        sourceTimestamp: row[18],
+        metadata: row[19],
+        createdAt: row[20]
+    }));
+}
+
+export const getEIAPlantGenerationInTimeRangeQuery = `-- name: GetEIAPlantGenerationInTimeRange :many
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+WHERE plant_id = $1
+AND timestamp BETWEEN $2 AND $3
+ORDER BY timestamp DESC`;
+
+export interface GetEIAPlantGenerationInTimeRangeArgs {
+    plantId: number | null;
+    startTimestamp: Date;
+    endTimestamp: Date;
+}
+
+export interface GetEIAPlantGenerationInTimeRangeRow {
+    id: number;
+    plantId: number | null;
+    timestamp: Date;
+    period: string | null;
+    generation: number | null;
+    generationUnits: string | null;
+    grossGeneration: number | null;
+    grossGenerationUnits: string | null;
+    consumptionForEg: number | null;
+    consumptionForEgUnits: string | null;
+    consumptionForEgBtu: number | null;
+    consumptionForEgBtuUnits: string | null;
+    totalConsumption: number | null;
+    totalConsumptionUnits: string | null;
+    totalConsumptionBtu: number | null;
+    totalConsumptionBtuUnits: string | null;
+    averageHeatContent: number | null;
+    averageHeatContentUnits: string | null;
+    sourceTimestamp: Date | null;
+    metadata: any | null;
+    createdAt: Date | null;
+}
+
+export async function getEIAPlantGenerationInTimeRange(sql: Sql, args: GetEIAPlantGenerationInTimeRangeArgs): Promise<GetEIAPlantGenerationInTimeRangeRow[]> {
+    return (await sql.unsafe(getEIAPlantGenerationInTimeRangeQuery, [args.plantId, args.startTimestamp, args.endTimestamp]).values()).map(row => ({
+        id: row[0],
+        plantId: row[1],
+        timestamp: row[2],
+        period: row[3],
+        generation: row[4],
+        generationUnits: row[5],
+        grossGeneration: row[6],
+        grossGenerationUnits: row[7],
+        consumptionForEg: row[8],
+        consumptionForEgUnits: row[9],
+        consumptionForEgBtu: row[10],
+        consumptionForEgBtuUnits: row[11],
+        totalConsumption: row[12],
+        totalConsumptionUnits: row[13],
+        totalConsumptionBtu: row[14],
+        totalConsumptionBtuUnits: row[15],
+        averageHeatContent: row[16],
+        averageHeatContentUnits: row[17],
+        sourceTimestamp: row[18],
+        metadata: row[19],
+        createdAt: row[20]
+    }));
+}
+
+export const getLatestEIAPlantGenerationQuery = `-- name: GetLatestEIAPlantGeneration :one
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+WHERE plant_id = $1
+ORDER BY timestamp DESC
+LIMIT 1`;
+
+export interface GetLatestEIAPlantGenerationArgs {
+    plantId: number | null;
+}
+
+export interface GetLatestEIAPlantGenerationRow {
+    id: number;
+    plantId: number | null;
+    timestamp: Date;
+    period: string | null;
+    generation: number | null;
+    generationUnits: string | null;
+    grossGeneration: number | null;
+    grossGenerationUnits: string | null;
+    consumptionForEg: number | null;
+    consumptionForEgUnits: string | null;
+    consumptionForEgBtu: number | null;
+    consumptionForEgBtuUnits: string | null;
+    totalConsumption: number | null;
+    totalConsumptionUnits: string | null;
+    totalConsumptionBtu: number | null;
+    totalConsumptionBtuUnits: string | null;
+    averageHeatContent: number | null;
+    averageHeatContentUnits: string | null;
+    sourceTimestamp: Date | null;
+    metadata: any | null;
+    createdAt: Date | null;
+}
+
+export async function getLatestEIAPlantGeneration(sql: Sql, args: GetLatestEIAPlantGenerationArgs): Promise<GetLatestEIAPlantGenerationRow | null> {
+    const rows = await sql.unsafe(getLatestEIAPlantGenerationQuery, [args.plantId]).values();
+    if (rows.length !== 1) {
+        return null;
+    }
+    const row = rows[0];
+    return {
+        id: row[0],
+        plantId: row[1],
+        timestamp: row[2],
+        period: row[3],
+        generation: row[4],
+        generationUnits: row[5],
+        grossGeneration: row[6],
+        grossGenerationUnits: row[7],
+        consumptionForEg: row[8],
+        consumptionForEgUnits: row[9],
+        consumptionForEgBtu: row[10],
+        consumptionForEgBtuUnits: row[11],
+        totalConsumption: row[12],
+        totalConsumptionUnits: row[13],
+        totalConsumptionBtu: row[14],
+        totalConsumptionBtuUnits: row[15],
+        averageHeatContent: row[16],
+        averageHeatContentUnits: row[17],
+        sourceTimestamp: row[18],
+        metadata: row[19],
+        createdAt: row[20]
+    };
 }
 

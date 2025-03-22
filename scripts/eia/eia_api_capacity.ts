@@ -3,7 +3,6 @@ import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import postgres from 'postgres';
-import fs from "fs";
 import { default as fsp } from "fs/promises";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +22,7 @@ const sql = postgres({
 
 // Define path for saving raw API responses
 const TEMP_DIR_PATH = resolve(__dirname, '../../data/temp');
-const API_RESPONSES_FILE = resolve(TEMP_DIR_PATH, '__eia_api_responses.json');
+const API_RESPONSES_FILE = resolve(TEMP_DIR_PATH, '__eia_api_capacity_responses.json');
 
 // Clear/create the API responses file at startup
 async function resetApiResponsesFile() {
@@ -72,7 +71,6 @@ async function appendApiResponse(record: any): Promise<void> {
 // 		&offset=0
 // 		&length=5000
 const API_URL_GENERATION_CAPACITY = "https://api.eia.gov/v2/electricity/operating-generator-capacity/data/";
-
 
 async function getPageOfGenerationCapacity(page: number) {
 	const url = `${API_URL_GENERATION_CAPACITY}`
@@ -275,7 +273,7 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 	
 	// Insert new stat record
 	await sql`
-		INSERT INTO eia_plant_stats (
+		INSERT INTO eia_plant_capacity (
 			plant_id,
 			timestamp,
 			nameplate_capacity_mw,
@@ -352,7 +350,6 @@ async function processDataBatch(data: any): Promise<number> {
 	return dataItems.length;
 }
 
-// Update main function to log the final response
 async function main() {
 	try {
 		// Reset the API responses file at the start
@@ -375,7 +372,7 @@ async function main() {
 		let hasMoreData = true;
 		let finalResponse = null;
 		
-		console.log("Starting EIA API data import...");
+		console.log("Starting EIA API capacity data import...");
 		
 		while (hasMoreData) {
 			const data = await getPageOfGenerationCapacity(page);
@@ -416,12 +413,13 @@ async function main() {
 		console.log("================================\n\n");
 		
 		// Save final response to a dedicated file for easier inspection
-		const finalResponsePath = resolve(TEMP_DIR_PATH, '__eia_final_response.json');
+		const finalResponsePath = resolve(TEMP_DIR_PATH, '__eia_final_capacity_response.json');
 		await fsp.writeFile(finalResponsePath, JSON.stringify(finalResponse, null, 2), { encoding: 'utf8' });
 		console.log(`Final response saved to: ${finalResponsePath}`);
 		
-		console.log(`Import complete! Total processed: ${totalProcessed} records`);
+		console.log(`Capacity import complete! Total processed: ${totalProcessed} records`);
 		console.log(`Raw API responses saved to: ${API_RESPONSES_FILE}`);
+		
 	} catch (error) {
 		console.error("Error in main process:", error);
 	} finally {

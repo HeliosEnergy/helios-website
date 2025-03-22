@@ -21,10 +21,26 @@ export async function httpGetPowerPlantData(sql: postgres.Sql<{}>): Promise<(req
 				max_capacity 
 			} = request.query;
 
+			// Handle state as either a single value or an array
+			let statesArray: string[] | null = null;
+			if (state) {
+				// If state is an array, map it to strings
+				if (Array.isArray(state)) {
+					statesArray = state.map(s => String(s));
+				} else {
+					// If it's a single value, make it a one-item array
+					statesArray = [String(state)];
+				}
+				// If the array is empty or contains only empty strings, set to null
+				if (statesArray.length === 0 || (statesArray.length === 1 && !statesArray[0])) {
+					statesArray = null;
+				}
+			}
+
 			// Build parameters object for the SQL query
 			const params = {
 				fuel_type: fuel_type ? String(fuel_type) : null,
-				state: state ? String(state) : null,
+				states: statesArray,
 				operating_status: operating_status ? String(operating_status) : null,
 				min_capacity: min_capacity ? parseFloat(String(min_capacity)) : null,
 				max_capacity: max_capacity ? parseFloat(String(max_capacity)) : null
@@ -33,7 +49,7 @@ export async function httpGetPowerPlantData(sql: postgres.Sql<{}>): Promise<(req
 			// Execute the query
 			const powerPlants = await getAllPowerPlantsWithLatestStats(sql, {
 				fuelType: params.fuel_type,
-				state: params.state,
+				states: params.states,
 				operatingStatus: params.operating_status,
 				minCapacity: params.min_capacity,
 				maxCapacity: params.max_capacity

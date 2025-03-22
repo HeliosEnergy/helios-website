@@ -38,7 +38,7 @@ WHERE name = $1
 ORDER BY timestamp DESC;
 
 -- name: CreateEIAElectricityData :exec
-INSERT INTO eia_electricity_data (
+INSERT INTO eia_bulk_electricity_data (
     series_id,
     name,
     units,
@@ -146,7 +146,7 @@ DO UPDATE SET
 RETURNING *;
 
 -- name: CreateEIAPlantStat :one
-INSERT INTO eia_plant_stats (
+INSERT INTO eia_plant_capacity (
     plant_id,
     timestamp,
     nameplate_capacity_mw,
@@ -180,18 +180,18 @@ INSERT INTO eia_plant_stats (
 RETURNING *;
 
 -- name: GetEIAPlantStatsByPlantID :many
-SELECT * FROM eia_plant_stats
+SELECT * FROM eia_plant_capacity
 WHERE plant_id = sqlc.arg(plant_id)
 ORDER BY timestamp DESC;
 
 -- name: GetEIAPlantStatsInTimeRange :many
-SELECT * FROM eia_plant_stats
+SELECT * FROM eia_plant_capacity
 WHERE plant_id = sqlc.arg(plant_id)
 AND timestamp BETWEEN sqlc.arg(start_timestamp) AND sqlc.arg(end_timestamp)
 ORDER BY timestamp DESC;
 
 -- name: GetLatestEIAPlantStat :one
-SELECT * FROM eia_plant_stats
+SELECT * FROM eia_plant_capacity
 WHERE plant_id = sqlc.arg(plant_id)
 ORDER BY timestamp DESC
 LIMIT 1;
@@ -234,12 +234,16 @@ SELECT
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT DISTINCT ON (plant_id) *
-    FROM eia_plant_stats
+    FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
 WHERE 
     (sqlc.narg(fuel_type)::text IS NULL OR p.fuel_type = sqlc.narg(fuel_type))
-    AND (sqlc.narg(state)::text IS NULL OR p.state = sqlc.narg(state))
+    AND (
+        sqlc.narg(states)::text[] IS NULL 
+        OR sqlc.narg(states)::text[] = '{}'::text[] 
+        OR p.state = ANY(sqlc.narg(states)::text[])
+    )
     AND (sqlc.narg(operating_status)::text IS NULL OR p.operating_status = sqlc.narg(operating_status))
     AND (
         sqlc.narg(min_capacity)::float IS NULL 
@@ -249,3 +253,64 @@ WHERE
         sqlc.narg(max_capacity)::float IS NULL 
         OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= sqlc.narg(max_capacity))
     );
+
+-- name: CreateEIAPlantGeneration :one
+INSERT INTO eia_plant_generation (
+    plant_id,
+    timestamp,
+    period,
+    generation,
+    generation_units,
+    gross_generation,
+    gross_generation_units,
+    consumption_for_eg,
+    consumption_for_eg_units,
+    consumption_for_eg_btu,
+    consumption_for_eg_btu_units,
+    total_consumption,
+    total_consumption_units,
+    total_consumption_btu,
+    total_consumption_btu_units,
+    average_heat_content,
+    average_heat_content_units,
+    source_timestamp,
+    metadata
+) VALUES (
+    sqlc.arg(plant_id),
+    COALESCE(sqlc.arg(timestamp), CURRENT_TIMESTAMP),
+    sqlc.arg(period),
+    sqlc.arg(generation),
+    sqlc.arg(generation_units),
+    sqlc.arg(gross_generation),
+    sqlc.arg(gross_generation_units),
+    sqlc.arg(consumption_for_eg),
+    sqlc.arg(consumption_for_eg_units),
+    sqlc.arg(consumption_for_eg_btu),
+    sqlc.arg(consumption_for_eg_btu_units),
+    sqlc.arg(total_consumption),
+    sqlc.arg(total_consumption_units),
+    sqlc.arg(total_consumption_btu),
+    sqlc.arg(total_consumption_btu_units),
+    sqlc.arg(average_heat_content),
+    sqlc.arg(average_heat_content_units),
+    sqlc.arg(source_timestamp),
+    sqlc.arg(metadata)
+)
+RETURNING *;
+
+-- name: GetEIAPlantGenerationByPlantID :many
+SELECT * FROM eia_plant_generation
+WHERE plant_id = sqlc.arg(plant_id)
+ORDER BY timestamp DESC;
+
+-- name: GetEIAPlantGenerationInTimeRange :many
+SELECT * FROM eia_plant_generation
+WHERE plant_id = sqlc.arg(plant_id)
+AND timestamp BETWEEN sqlc.arg(start_timestamp) AND sqlc.arg(end_timestamp)
+ORDER BY timestamp DESC;
+
+-- name: GetLatestEIAPlantGeneration :one
+SELECT * FROM eia_plant_generation
+WHERE plant_id = sqlc.arg(plant_id)
+ORDER BY timestamp DESC
+LIMIT 1;

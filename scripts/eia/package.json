@@ -5,7 +5,9 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"bulk": "node --loader ts-node/esm eia_bulk_file.ts",
-		"fill-in": "node --loader ts-node/esm eia_api_fill_in.ts"
+		"fill-in": "node --loader ts-node/esm eia_api_fill_in.ts",
+		"capacity": "node --loader ts-node/esm eia_api_capacity.ts",
+		"generation": "node --loader ts-node/esm eia_api_generation.ts"
 	},
 	"author": "",
 	"license": "ISC",

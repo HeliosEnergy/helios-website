@@ -2,7 +2,10 @@ import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaf
 import { LatLngExpression } from "leaflet";
 import { useState, useEffect } from "react";
 import 'leaflet/dist/leaflet.css'; // Make sure this is imported
-import { MapLeftSidebar } from './components/MapLeftSidebar';
+import React from 'react';
+import { Helmet } from 'react-helmet';
+
+const MapLeftSidebar = React.lazy(() => import('./components/MapLeftSidebar'));
 
 const leftSideBarClosedWidth = 32;
 const leftSideBarOpenWidth = 300;
@@ -58,14 +61,26 @@ const fuelTypeColors: {[key: string]: string} = {
 	'BIT': '#A9A9A9',   // Bituminous Coal - Dark Gray
 	'SUB': '#A9A9A9',   // Subbituminous Coal - Dark Gray
 	'LIG': '#A9A9A9',   // Lignite Coal - Dark Gray
-	'NG': '#4682B4',    // Natural Gas - Steel Blue
+	'NG': '#d9ff33',    // Natural Gas - Steel Blue
 	'DFO': '#000000',   // Distillate Fuel Oil - Black
-	'WAT': '#1E90FF',   // Water/Hydro - Dodger Blue
+	'WAT': '#001fff',   // Water/Hydro - Dodger Blue
 	'GEO': '#8B4513',   // Geothermal - Saddle Brown
 	'LFG': '#228B22',   // Landfill Gas - Forest Green
 	'WDS': '#228B22',   // Wood Waste Solids - Forest Green
 	'BLQ': '#228B22',   // Black Liquor - Forest Green
-	'OTHER': '#808080', // Other - Gray
+	'NUC': '#4eff33',   // Nuclear - Lime Green
+	'MSW': '#996836',   // Municipal Solid Waste - Forest Green
+	'MWH': '#996836',   // Municipal Waste Heat - Forest Green
+	'OBS': '#996836',   // Other Biomass - Forest Green
+	'OBG': '#33fc00',   // Other Gas - Forest Green
+	'WH': '#fc7f00',   // Waste Heat - Forest Green
+	'OG': '#33fc00',   // Other Gas - Forest Green
+	'WDL': '#ead6b2',   // Waste to Liquids - Forest Green
+	'RC': '#c86e33',   // Refuse Combustion - Forest Green
+	'SGC': '#ffc000',   // Solar Thermal - Forest Green
+	'RFO': '#000000',   // Residual Fuel Oil - Forest Green
+	'PC': '#000000',   // Petroleum Coke - Forest Green
+	'OTHER': '#FFFFFF', // Other - Gray
 };
 
 // Map for fuel type display names
@@ -82,7 +97,20 @@ const fuelTypeDisplayNames = {
 	'LFG': 'Landfill Gas',
 	'WDS': 'Wood/Biomass',
 	'BLQ': 'Black Liquor',
+	'NUC': 'Nuclear',
+	'MSW': 'Municipal Solid Waste',
+	'MWH': 'Municipal Waste Heat',
+	'OBS': 'Other Biomass',
+	'OBG': 'Other Gas',
+	'WH': 'Waste Heat',
+	'OG': 'Other Gas',
+	'WDL': 'Waste to Liquids',
+	'RC': 'Refuse Combustion',
+	'SGC': 'Solar Thermal',
+	'RFO': 'Residual Fuel Oil',
+	'OTHER': 'Other',
 };
+
 
 // Map for operating status display names
 const operatingStatusDisplayNames = {
@@ -114,7 +142,7 @@ const getRadiusByCapacity = (capacity: number, zoomLevel: number, scaleFactor: n
 	const zoomCapacityFactor = Math.pow(1.75, zoomLevel);
 	console.log("ZOOM FACTOR:", zoomBaseFactor, zoomLevel);
 
-	const baseRadius = 1 * scaleFactor * zoomBaseFactor;
+	const baseRadius = Math.pow(2, scaleFactor) * zoomBaseFactor;
 	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.75) * zoomCapacityFactor * capacityWeight; 
 	return ((baseRadius + capacityComponent) * sizeMultiplier) / 100;
 };
@@ -137,11 +165,11 @@ export default function MapPage() {
 	const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	
+
 	// Add state for filters
 	const [filters, setFilters] = useState({
 		fuel_type: null as string | null,
-		state: null as string | null,
+		state: null as string[] | null,
 		operating_status: null as string | null,
 		min_capacity: null as number | null,
 		max_capacity: null as number | null
@@ -173,7 +201,14 @@ export default function MapPage() {
 				// Build query string from filters
 				const queryParams = new URLSearchParams();
 				if (filters.fuel_type) queryParams.append('fuel_type', filters.fuel_type);
-				if (filters.state) queryParams.append('state', filters.state);
+				
+				// Handle state array
+				if (filters.state && Array.isArray(filters.state)) {
+					filters.state.forEach(stateCode => {
+						queryParams.append('state', stateCode);
+					});
+				}
+				
 				if (filters.operating_status) queryParams.append('operating_status', filters.operating_status);
 				if (filters.min_capacity !== null) queryParams.append('min_capacity', filters.min_capacity.toString());
 				if (filters.max_capacity !== null) queryParams.append('max_capacity', filters.max_capacity.toString());
@@ -222,21 +257,28 @@ export default function MapPage() {
 			overflow: "hidden" 
 		}}>
 
+			
 			<div style={{
-				position: "absolute",
-				top: 0,
-				left: 0,
-				backgroundColor: "rgb(30, 30, 37)",
-				borderRight: "2px solid grey",
-				boxSizing: "border-box",
-				zIndex: 1000,
-				display: "flex",
-				flexDirection: "row",
-				justifyContent: "center",
-				alignItems: "center",
-				width: leftPanelOpen ? leftSideBarOpenWidth : leftSideBarClosedWidth,
-				height: "100vh"
-			}}>
+					position: "absolute",
+					top: 0,
+					left: 0,
+					backgroundColor: "rgb(30, 30, 37)",
+					borderRight: "2px solid grey",
+					boxSizing: "border-box",
+					zIndex: 1000,
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					alignItems: "center",
+					width: leftPanelOpen ? leftSideBarOpenWidth : leftSideBarClosedWidth,
+					height: "100vh"
+				}}
+				onClick={() => {
+					if (!leftPanelOpen) {
+						setLeftPanelOpen(true)
+					}
+				}}
+			>
 				{
 					leftPanelOpen ? (
 						<MapLeftSidebar 
@@ -252,7 +294,7 @@ export default function MapPage() {
 							setFilters={setFilters}
 						/>
 					) : (
-						<button onClick={() => setLeftPanelOpen(!leftPanelOpen)}>{'>'}</button>
+						<button>{'>'}</button>
 					)
 				}
 			</div>

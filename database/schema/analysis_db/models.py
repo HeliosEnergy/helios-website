@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 
 @dataclasses.dataclass()
-class EiaElectricityDatum:
+class EiaBulkElectricityDatum:
     id: int
     series_id: str
     name: str
@@ -37,7 +37,7 @@ class EiaEntity:
 
 
 @dataclasses.dataclass()
-class EiaPlantStat:
+class EiaPlantCapacity:
     id: int
     plant_id: Optional[int]
     timestamp: datetime.datetime
@@ -52,6 +52,31 @@ class EiaPlantStat:
     planned_retirement_year_month: Optional[datetime.date]
     source_timestamp: Optional[datetime.datetime]
     data_period: Optional[str]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
+class EiaPlantGeneration:
+    id: int
+    plant_id: Optional[int]
+    timestamp: datetime.datetime
+    period: Optional[str]
+    generation: Optional[float]
+    generation_units: Optional[str]
+    gross_generation: Optional[float]
+    gross_generation_units: Optional[str]
+    consumption_for_eg: Optional[float]
+    consumption_for_eg_units: Optional[str]
+    consumption_for_eg_btu: Optional[float]
+    consumption_for_eg_btu_units: Optional[str]
+    total_consumption: Optional[float]
+    total_consumption_units: Optional[str]
+    total_consumption_btu: Optional[float]
+    total_consumption_btu_units: Optional[str]
+    average_heat_content: Optional[float]
+    average_heat_content_units: Optional[str]
+    source_timestamp: Optional[datetime.datetime]
     metadata: Optional[Any]
     created_at: Optional[datetime.datetime]
 

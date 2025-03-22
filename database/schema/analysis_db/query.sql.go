@@ -12,7 +12,7 @@ import (
 )
 
 const createEIAElectricityData = `-- name: CreateEIAElectricityData :exec
-INSERT INTO eia_electricity_data (
+INSERT INTO eia_bulk_electricity_data (
     series_id,
     name,
     units,
@@ -83,8 +83,124 @@ func (q *Queries) CreateEIAElectricityData(ctx context.Context, arg CreateEIAEle
 	return err
 }
 
+const createEIAPlantGeneration = `-- name: CreateEIAPlantGeneration :one
+INSERT INTO eia_plant_generation (
+    plant_id,
+    timestamp,
+    period,
+    generation,
+    generation_units,
+    gross_generation,
+    gross_generation_units,
+    consumption_for_eg,
+    consumption_for_eg_units,
+    consumption_for_eg_btu,
+    consumption_for_eg_btu_units,
+    total_consumption,
+    total_consumption_units,
+    total_consumption_btu,
+    total_consumption_btu_units,
+    average_heat_content,
+    average_heat_content_units,
+    source_timestamp,
+    metadata
+) VALUES (
+    $1,
+    COALESCE($2, CURRENT_TIMESTAMP),
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19
+)
+RETURNING id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
+`
+
+type CreateEIAPlantGenerationParams struct {
+	PlantID                  pgtype.Int4
+	Timestamp                interface{}
+	Period                   pgtype.Text
+	Generation               pgtype.Float8
+	GenerationUnits          pgtype.Text
+	GrossGeneration          pgtype.Float8
+	GrossGenerationUnits     pgtype.Text
+	ConsumptionForEg         pgtype.Float8
+	ConsumptionForEgUnits    pgtype.Text
+	ConsumptionForEgBtu      pgtype.Float8
+	ConsumptionForEgBtuUnits pgtype.Text
+	TotalConsumption         pgtype.Float8
+	TotalConsumptionUnits    pgtype.Text
+	TotalConsumptionBtu      pgtype.Float8
+	TotalConsumptionBtuUnits pgtype.Text
+	AverageHeatContent       pgtype.Float8
+	AverageHeatContentUnits  pgtype.Text
+	SourceTimestamp          pgtype.Timestamptz
+	Metadata                 []byte
+}
+
+func (q *Queries) CreateEIAPlantGeneration(ctx context.Context, arg CreateEIAPlantGenerationParams) (EiaPlantGeneration, error) {
+	row := q.db.QueryRow(ctx, createEIAPlantGeneration,
+		arg.PlantID,
+		arg.Timestamp,
+		arg.Period,
+		arg.Generation,
+		arg.GenerationUnits,
+		arg.GrossGeneration,
+		arg.GrossGenerationUnits,
+		arg.ConsumptionForEg,
+		arg.ConsumptionForEgUnits,
+		arg.ConsumptionForEgBtu,
+		arg.ConsumptionForEgBtuUnits,
+		arg.TotalConsumption,
+		arg.TotalConsumptionUnits,
+		arg.TotalConsumptionBtu,
+		arg.TotalConsumptionBtuUnits,
+		arg.AverageHeatContent,
+		arg.AverageHeatContentUnits,
+		arg.SourceTimestamp,
+		arg.Metadata,
+	)
+	var i EiaPlantGeneration
+	err := row.Scan(
+		&i.ID,
+		&i.PlantID,
+		&i.Timestamp,
+		&i.Period,
+		&i.Generation,
+		&i.GenerationUnits,
+		&i.GrossGeneration,
+		&i.GrossGenerationUnits,
+		&i.ConsumptionForEg,
+		&i.ConsumptionForEgUnits,
+		&i.ConsumptionForEgBtu,
+		&i.ConsumptionForEgBtuUnits,
+		&i.TotalConsumption,
+		&i.TotalConsumptionUnits,
+		&i.TotalConsumptionBtu,
+		&i.TotalConsumptionBtuUnits,
+		&i.AverageHeatContent,
+		&i.AverageHeatContentUnits,
+		&i.SourceTimestamp,
+		&i.Metadata,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const createEIAPlantStat = `-- name: CreateEIAPlantStat :one
-INSERT INTO eia_plant_stats (
+INSERT INTO eia_plant_capacity (
     plant_id,
     timestamp,
     nameplate_capacity_mw,
@@ -135,7 +251,7 @@ type CreateEIAPlantStatParams struct {
 	Metadata                   []byte
 }
 
-func (q *Queries) CreateEIAPlantStat(ctx context.Context, arg CreateEIAPlantStatParams) (EiaPlantStat, error) {
+func (q *Queries) CreateEIAPlantStat(ctx context.Context, arg CreateEIAPlantStatParams) (EiaPlantCapacity, error) {
 	row := q.db.QueryRow(ctx, createEIAPlantStat,
 		arg.PlantID,
 		arg.Timestamp,
@@ -152,7 +268,7 @@ func (q *Queries) CreateEIAPlantStat(ctx context.Context, arg CreateEIAPlantStat
 		arg.DataPeriod,
 		arg.Metadata,
 	)
-	var i EiaPlantStat
+	var i EiaPlantCapacity
 	err := row.Scan(
 		&i.ID,
 		&i.PlantID,
@@ -246,12 +362,16 @@ SELECT
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT DISTINCT ON (plant_id) id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
-    FROM eia_plant_stats
+    FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
 WHERE 
     ($1::text IS NULL OR p.fuel_type = $1)
-    AND ($2::text IS NULL OR p.state = $2)
+    AND (
+        $2::text[] IS NULL 
+        OR $2::text[] = '{}'::text[] 
+        OR p.state = ANY($2::text[])
+    )
     AND ($3::text IS NULL OR p.operating_status = $3)
     AND (
         $4::float IS NULL 
@@ -265,7 +385,7 @@ WHERE
 
 type GetAllPowerPlantsWithLatestStatsParams struct {
 	FuelType        pgtype.Text
-	State           pgtype.Text
+	States          []string
 	OperatingStatus pgtype.Text
 	MinCapacity     pgtype.Float8
 	MaxCapacity     pgtype.Float8
@@ -306,7 +426,7 @@ type GetAllPowerPlantsWithLatestStatsRow struct {
 func (q *Queries) GetAllPowerPlantsWithLatestStats(ctx context.Context, arg GetAllPowerPlantsWithLatestStatsParams) ([]GetAllPowerPlantsWithLatestStatsRow, error) {
 	rows, err := q.db.Query(ctx, getAllPowerPlantsWithLatestStats,
 		arg.FuelType,
-		arg.State,
+		arg.States,
 		arg.OperatingStatus,
 		arg.MinCapacity,
 		arg.MaxCapacity,
@@ -381,21 +501,124 @@ func (q *Queries) GetEIAEntityByApiID(ctx context.Context, apiEntityID string) (
 	return i, err
 }
 
-const getEIAPlantStatsByPlantID = `-- name: GetEIAPlantStatsByPlantID :many
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+const getEIAPlantGenerationByPlantID = `-- name: GetEIAPlantGenerationByPlantID :many
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
 WHERE plant_id = $1
 ORDER BY timestamp DESC
 `
 
-func (q *Queries) GetEIAPlantStatsByPlantID(ctx context.Context, plantID pgtype.Int4) ([]EiaPlantStat, error) {
+func (q *Queries) GetEIAPlantGenerationByPlantID(ctx context.Context, plantID pgtype.Int4) ([]EiaPlantGeneration, error) {
+	rows, err := q.db.Query(ctx, getEIAPlantGenerationByPlantID, plantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EiaPlantGeneration
+	for rows.Next() {
+		var i EiaPlantGeneration
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlantID,
+			&i.Timestamp,
+			&i.Period,
+			&i.Generation,
+			&i.GenerationUnits,
+			&i.GrossGeneration,
+			&i.GrossGenerationUnits,
+			&i.ConsumptionForEg,
+			&i.ConsumptionForEgUnits,
+			&i.ConsumptionForEgBtu,
+			&i.ConsumptionForEgBtuUnits,
+			&i.TotalConsumption,
+			&i.TotalConsumptionUnits,
+			&i.TotalConsumptionBtu,
+			&i.TotalConsumptionBtuUnits,
+			&i.AverageHeatContent,
+			&i.AverageHeatContentUnits,
+			&i.SourceTimestamp,
+			&i.Metadata,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEIAPlantGenerationInTimeRange = `-- name: GetEIAPlantGenerationInTimeRange :many
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+WHERE plant_id = $1
+AND timestamp BETWEEN $2 AND $3
+ORDER BY timestamp DESC
+`
+
+type GetEIAPlantGenerationInTimeRangeParams struct {
+	PlantID        pgtype.Int4
+	StartTimestamp pgtype.Timestamptz
+	EndTimestamp   pgtype.Timestamptz
+}
+
+func (q *Queries) GetEIAPlantGenerationInTimeRange(ctx context.Context, arg GetEIAPlantGenerationInTimeRangeParams) ([]EiaPlantGeneration, error) {
+	rows, err := q.db.Query(ctx, getEIAPlantGenerationInTimeRange, arg.PlantID, arg.StartTimestamp, arg.EndTimestamp)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []EiaPlantGeneration
+	for rows.Next() {
+		var i EiaPlantGeneration
+		if err := rows.Scan(
+			&i.ID,
+			&i.PlantID,
+			&i.Timestamp,
+			&i.Period,
+			&i.Generation,
+			&i.GenerationUnits,
+			&i.GrossGeneration,
+			&i.GrossGenerationUnits,
+			&i.ConsumptionForEg,
+			&i.ConsumptionForEgUnits,
+			&i.ConsumptionForEgBtu,
+			&i.ConsumptionForEgBtuUnits,
+			&i.TotalConsumption,
+			&i.TotalConsumptionUnits,
+			&i.TotalConsumptionBtu,
+			&i.TotalConsumptionBtuUnits,
+			&i.AverageHeatContent,
+			&i.AverageHeatContentUnits,
+			&i.SourceTimestamp,
+			&i.Metadata,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEIAPlantStatsByPlantID = `-- name: GetEIAPlantStatsByPlantID :many
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
+WHERE plant_id = $1
+ORDER BY timestamp DESC
+`
+
+func (q *Queries) GetEIAPlantStatsByPlantID(ctx context.Context, plantID pgtype.Int4) ([]EiaPlantCapacity, error) {
 	rows, err := q.db.Query(ctx, getEIAPlantStatsByPlantID, plantID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []EiaPlantStat
+	var items []EiaPlantCapacity
 	for rows.Next() {
-		var i EiaPlantStat
+		var i EiaPlantCapacity
 		if err := rows.Scan(
 			&i.ID,
 			&i.PlantID,
@@ -425,7 +648,7 @@ func (q *Queries) GetEIAPlantStatsByPlantID(ctx context.Context, plantID pgtype.
 }
 
 const getEIAPlantStatsInTimeRange = `-- name: GetEIAPlantStatsInTimeRange :many
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
 WHERE plant_id = $1
 AND timestamp BETWEEN $2 AND $3
 ORDER BY timestamp DESC
@@ -437,15 +660,15 @@ type GetEIAPlantStatsInTimeRangeParams struct {
 	EndTimestamp   pgtype.Timestamptz
 }
 
-func (q *Queries) GetEIAPlantStatsInTimeRange(ctx context.Context, arg GetEIAPlantStatsInTimeRangeParams) ([]EiaPlantStat, error) {
+func (q *Queries) GetEIAPlantStatsInTimeRange(ctx context.Context, arg GetEIAPlantStatsInTimeRangeParams) ([]EiaPlantCapacity, error) {
 	rows, err := q.db.Query(ctx, getEIAPlantStatsInTimeRange, arg.PlantID, arg.StartTimestamp, arg.EndTimestamp)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []EiaPlantStat
+	var items []EiaPlantCapacity
 	for rows.Next() {
-		var i EiaPlantStat
+		var i EiaPlantCapacity
 		if err := rows.Scan(
 			&i.ID,
 			&i.PlantID,
@@ -541,16 +764,52 @@ func (q *Queries) GetEIAPowerPlantsForEntity(ctx context.Context, entityID pgtyp
 	return items, nil
 }
 
-const getLatestEIAPlantStat = `-- name: GetLatestEIAPlantStat :one
-SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_stats
+const getLatestEIAPlantGeneration = `-- name: GetLatestEIAPlantGeneration :one
+SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
 WHERE plant_id = $1
 ORDER BY timestamp DESC
 LIMIT 1
 `
 
-func (q *Queries) GetLatestEIAPlantStat(ctx context.Context, plantID pgtype.Int4) (EiaPlantStat, error) {
+func (q *Queries) GetLatestEIAPlantGeneration(ctx context.Context, plantID pgtype.Int4) (EiaPlantGeneration, error) {
+	row := q.db.QueryRow(ctx, getLatestEIAPlantGeneration, plantID)
+	var i EiaPlantGeneration
+	err := row.Scan(
+		&i.ID,
+		&i.PlantID,
+		&i.Timestamp,
+		&i.Period,
+		&i.Generation,
+		&i.GenerationUnits,
+		&i.GrossGeneration,
+		&i.GrossGenerationUnits,
+		&i.ConsumptionForEg,
+		&i.ConsumptionForEgUnits,
+		&i.ConsumptionForEgBtu,
+		&i.ConsumptionForEgBtuUnits,
+		&i.TotalConsumption,
+		&i.TotalConsumptionUnits,
+		&i.TotalConsumptionBtu,
+		&i.TotalConsumptionBtuUnits,
+		&i.AverageHeatContent,
+		&i.AverageHeatContentUnits,
+		&i.SourceTimestamp,
+		&i.Metadata,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getLatestEIAPlantStat = `-- name: GetLatestEIAPlantStat :one
+SELECT id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at FROM eia_plant_capacity
+WHERE plant_id = $1
+ORDER BY timestamp DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestEIAPlantStat(ctx context.Context, plantID pgtype.Int4) (EiaPlantCapacity, error) {
 	row := q.db.QueryRow(ctx, getLatestEIAPlantStat, plantID)
-	var i EiaPlantStat
+	var i EiaPlantCapacity
 	err := row.Scan(
 		&i.ID,
 		&i.PlantID,

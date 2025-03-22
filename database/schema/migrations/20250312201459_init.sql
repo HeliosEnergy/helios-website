@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS kmz_features (
 CREATE INDEX kmz_features_geometry_idx ON kmz_features USING GIST (geometry);
 CREATE INDEX kmz_features_source_id_idx ON kmz_features (source_id);
 
-CREATE TABLE IF NOT EXISTS eia_electricity_data (
+
+
+CREATE TABLE IF NOT EXISTS eia_bulk_electricity_data (
     id SERIAL PRIMARY KEY,
     series_id VARCHAR(255) NOT NULL,
     name TEXT NOT NULL,
@@ -38,10 +40,11 @@ CREATE TABLE IF NOT EXISTS eia_electricity_data (
     data JSONB,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX eia_electricity_data_series_id_idx ON eia_electricity_data (series_id);
-CREATE INDEX eia_electricity_data_location_idx ON eia_electricity_data USING GIST (location);
+CREATE INDEX eia_bulk_electricity_data_series_id_idx ON eia_bulk_electricity_data (series_id);
+CREATE INDEX eia_bulk_electricity_data_location_idx ON eia_bulk_electricity_data USING GIST (location);
 
--- New tables for EIA API data structure
+
+
 CREATE TABLE IF NOT EXISTS eia_entities (
     id SERIAL PRIMARY KEY,
     api_entity_id VARCHAR(255) NOT NULL UNIQUE,
@@ -51,7 +54,10 @@ CREATE TABLE IF NOT EXISTS eia_entities (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX eia_entities_api_entity_id_idx ON eia_entities (api_entity_id);
+CREATE INDEX eia_entities_api_entity_id_idx ON eia_entities USING HASH (api_entity_id);
+CREATE INDEX eia_entities_created_at_idx ON eia_entities (created_at);
+
+
 
 CREATE TABLE IF NOT EXISTS eia_power_plants (
     id SERIAL PRIMARY KEY,
@@ -69,11 +75,18 @@ CREATE TABLE IF NOT EXISTS eia_power_plants (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX eia_power_plants_api_plant_id_idx ON eia_power_plants (api_plant_id);
-CREATE INDEX eia_power_plants_entity_id_idx ON eia_power_plants (entity_id);
+CREATE INDEX eia_power_plants_api_plant_id_idx ON eia_power_plants USING HASH (api_plant_id);
+CREATE INDEX eia_power_plants_entity_id_idx ON eia_power_plants USING HASH (entity_id);
 CREATE INDEX eia_power_plants_location_idx ON eia_power_plants USING GIST (location);
+CREATE INDEX eia_power_plants_created_at_idx ON eia_power_plants (created_at);
+CREATE INDEX eia_power_plants_updated_at_idx ON eia_power_plants (updated_at);
+CREATE INDEX eia_power_plants_state_idx ON eia_power_plants USING HASH (state);
+CREATE INDEX eia_power_plants_fuel_type_idx ON eia_power_plants USING HASH (fuel_type);
+CREATE INDEX eia_power_plants_operating_status_idx ON eia_power_plants USING HASH (operating_status);
 
-CREATE TABLE IF NOT EXISTS eia_plant_stats (
+
+
+CREATE TABLE IF NOT EXISTS eia_plant_capacity (
     id SERIAL PRIMARY KEY,
     plant_id INTEGER REFERENCES eia_power_plants(id),
     timestamp TIMESTAMPTZ NOT NULL,
@@ -91,16 +104,60 @@ CREATE TABLE IF NOT EXISTS eia_plant_stats (
     metadata JSONB,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX eia_plant_stats_plant_id_timestamp_idx ON eia_plant_stats (plant_id, timestamp);
+CREATE INDEX eia_plant_capacity_plant_id_timestamp_idx ON eia_plant_capacity (plant_id, timestamp);
+CREATE INDEX eia_plant_capacity_created_at_idx ON eia_plant_capacity (created_at);
+CREATE INDEX eia_plant_capacity_timestamp_idx ON eia_plant_capacity (timestamp);
+CREATE INDEX eia_plant_capacity_nameplate_capacity_mw_idx ON eia_plant_capacity (nameplate_capacity_mw);
+CREATE INDEX eia_plant_capacity_net_summer_capacity_mw_idx ON eia_plant_capacity (net_summer_capacity_mw);
+CREATE INDEX eia_plant_capacity_net_winter_capacity_mw_idx ON eia_plant_capacity (net_winter_capacity_mw);
+CREATE INDEX eia_plant_capacity_planned_derate_summer_cap_mw_idx ON eia_plant_capacity (planned_derate_summer_cap_mw);
+CREATE INDEX eia_plant_capacity_planned_uprate_summer_cap_mw_idx ON eia_plant_capacity (planned_uprate_summer_cap_mw);
+CREATE INDEX eia_plant_capacity_planned_derate_year_month_idx ON eia_plant_capacity (planned_derate_year_month);
+CREATE INDEX eia_plant_capacity_planned_uprate_year_month_idx ON eia_plant_capacity (planned_uprate_year_month);
+
+
+
+CREATE TABLE IF NOT EXISTS eia_plant_generation (
+    id SERIAL PRIMARY KEY,
+    plant_id INTEGER REFERENCES eia_power_plants(id),
+    timestamp TIMESTAMPTZ NOT NULL,
+    period VARCHAR(255),
+    generation FLOAT,
+    generation_units VARCHAR(255),
+    gross_generation FLOAT,
+    gross_generation_units VARCHAR(255),
+    consumption_for_eg FLOAT,
+    consumption_for_eg_units VARCHAR(255),
+    consumption_for_eg_btu FLOAT,
+    consumption_for_eg_btu_units VARCHAR(255),
+    total_consumption FLOAT,
+    total_consumption_units VARCHAR(255),
+    total_consumption_btu FLOAT,
+    total_consumption_btu_units VARCHAR(255),
+    average_heat_content FLOAT,
+    average_heat_content_units VARCHAR(255),
+    source_timestamp TIMESTAMPTZ,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX eia_plant_generation_plant_id_timestamp_idx ON eia_plant_generation (plant_id, timestamp);
+CREATE INDEX eia_plant_generation_created_at_idx ON eia_plant_generation (created_at);
+CREATE INDEX eia_plant_generation_timestamp_idx ON eia_plant_generation (timestamp);
+CREATE INDEX eia_plant_generation_period_idx ON eia_plant_generation (period);
+CREATE INDEX eia_plant_generation_generation_idx ON eia_plant_generation (generation);
+
+
+
 
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS eia_plant_stats;
+DROP TABLE IF EXISTS eia_plant_generation;
+DROP TABLE IF EXISTS eia_plant_capacity;
 DROP TABLE IF EXISTS eia_power_plants;
 DROP TABLE IF EXISTS eia_entities;
-DROP TABLE IF EXISTS eia_electricity_data;
+DROP TABLE IF EXISTS eia_bulk_electricity_data;
 DROP TABLE IF EXISTS kmz_features;
 DROP TABLE IF EXISTS metrics;
 -- +goose StatementEnd

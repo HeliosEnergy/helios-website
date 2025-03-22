@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type EiaElectricityDatum struct {
+type EiaBulkElectricityDatum struct {
 	ID          int32
 	SeriesID    string
 	Name        string
@@ -36,7 +36,7 @@ type EiaEntity struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-type EiaPlantStat struct {
+type EiaPlantCapacity struct {
 	ID                         int32
 	PlantID                    pgtype.Int4
 	Timestamp                  pgtype.Timestamptz
@@ -53,6 +53,30 @@ type EiaPlantStat struct {
 	DataPeriod                 pgtype.Text
 	Metadata                   []byte
 	CreatedAt                  pgtype.Timestamptz
+}
+
+type EiaPlantGeneration struct {
+	ID                       int32
+	PlantID                  pgtype.Int4
+	Timestamp                pgtype.Timestamptz
+	Period                   pgtype.Text
+	Generation               pgtype.Float8
+	GenerationUnits          pgtype.Text
+	GrossGeneration          pgtype.Float8
+	GrossGenerationUnits     pgtype.Text
+	ConsumptionForEg         pgtype.Float8
+	ConsumptionForEgUnits    pgtype.Text
+	ConsumptionForEgBtu      pgtype.Float8
+	ConsumptionForEgBtuUnits pgtype.Text
+	TotalConsumption         pgtype.Float8
+	TotalConsumptionUnits    pgtype.Text
+	TotalConsumptionBtu      pgtype.Float8
+	TotalConsumptionBtuUnits pgtype.Text
+	AverageHeatContent       pgtype.Float8
+	AverageHeatContentUnits  pgtype.Text
+	SourceTimestamp          pgtype.Timestamptz
+	Metadata                 []byte
+	CreatedAt                pgtype.Timestamptz
 }
 
 type EiaPowerPlant struct {
