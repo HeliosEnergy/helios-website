@@ -167,7 +167,7 @@ export function MapLeftSidebar({
 				<h3>Display Settings</h3>
 				
 				<div style={{ marginBottom: '10px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>Circle Size Multiplier: {sizeMultiplier}x</label>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Base Weight: {sizeMultiplier}x</label>
 					<input 
 						type="range" 
 						min="1" 
