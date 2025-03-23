@@ -3,11 +3,11 @@
 	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
 		"bulk": "node --loader ts-node/esm eia_bulk_file.ts",
 		"fill-in": "node --loader ts-node/esm eia_api_fill_in.ts",
 		"capacity": "node --loader ts-node/esm eia_api_capacity.ts",
-		"generation": "node --loader ts-node/esm eia_api_generation.ts"
+		"generation": "node --loader ts-node/esm eia_api_generation.ts",
+		"test": "node --loader ts-node/esm test.ts"
 	},
 	"author": "",
 	"license": "ISC",

@@ -11,6 +11,10 @@ const __dirname = dirname(__filename);
 // Load environment variables from root .env file
 dotenv.config({ path: resolve(__dirname, '../../.env') });
 
+
+const PAGE_SIZE = 2500
+;
+
 // Initialize database connection
 const sql = postgres({
 	host: process.env.DB_HOST,
@@ -54,11 +58,11 @@ async function appendApiResponse(record: any): Promise<void> {
 // Define API endpoint for facility-fuel data
 const API_URL_GENERATION = "https://api.eia.gov/v2/electricity/facility-fuel/data";
 
-async function getPageOfGeneration(page: number) {
+async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE) {
 	const url = `${API_URL_GENERATION}`
 		+ `?api_key=${process.env.EIA_API_KEY}`
-		+ `&offset=${page * 5000}`
-		+ `&length=2500`
+		+ `&offset=${page * pageSize}`
+		+ `&length=${pageSize}`
 		+ `&data[0]=average-heat-content`
 		+ `&data[1]=consumption-for-eg`
 		+ `&data[2]=consumption-for-eg-btu`
@@ -236,10 +240,10 @@ async function main() {
 		await resetApiResponsesFile();
 		
 		// First, get a sample to log the structure
-		const sampleData = await getPageOfGeneration(0);
+		const sampleData = await getPageOfGeneration(0, 3);
 		
 		console.log('Generation API Response Structure:');
-		console.log('Response keys:', Object.keys(sampleData.response || {}));
+		console.log('Response keys:', JSON.stringify(sampleData, null, 4));
 		
 		if (sampleData.response && sampleData.response.data && sampleData.response.data.length > 0) {
 			console.log('First generation item keys:', Object.keys(sampleData.response.data[0]));

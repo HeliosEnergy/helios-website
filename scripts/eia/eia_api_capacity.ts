@@ -8,6 +8,8 @@ import { default as fsp } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const PAGE_SIZE = 2500;
+
 // Load environment variables from root .env file
 dotenv.config({ path: resolve(__dirname, '../../.env') });
 
@@ -72,11 +74,11 @@ async function appendApiResponse(record: any): Promise<void> {
 // 		&length=5000
 const API_URL_GENERATION_CAPACITY = "https://api.eia.gov/v2/electricity/operating-generator-capacity/data/";
 
-async function getPageOfGenerationCapacity(page: number) {
+async function getPageOfGenerationCapacity(page: number, pageSize: number = PAGE_SIZE) {
 	const url = `${API_URL_GENERATION_CAPACITY}`
 		+ `?api_key=${process.env.EIA_API_KEY}`
-		+ `&offset=${page * 5000}`
-		+ `&length=2500`
+		+ `&offset=${page}`
+		+ `&length=${pageSize}`
 		+ `&data[0]=county`
 		+ `&data[1]=latitude`
 		+ `&data[2]=longitude`
@@ -88,9 +90,21 @@ async function getPageOfGenerationCapacity(page: number) {
 		+ `&sort[0][column]=period`
 		+ `&sort[0][direction]=desc`;
 	console.log(url);
-	const response = await fetch(url);
-	const data = await response.json();
-	return data;
+	try {
+		const response = await fetch(url);
+		const data = await response.json();
+		
+		// Check if we got an error response
+		if (data.error) {
+			console.log(`API returned error: ${data.error} (code: ${data.code})`);
+			return { response: { data: [] } }; // Return empty data to signal end of pagination
+		}
+		
+		return data;
+	} catch (error) {
+		console.error(`Error fetching data from API: ${error}`);
+		return { response: { data: [] } }; // Return empty data to signal end of pagination
+	}
 }
 
 // Function to upsert an entity and return its ID
@@ -167,6 +181,7 @@ async function upsertPowerPlant(plantData: any, entityId: number): Promise<numbe
 	`;
 	
 	if (existingPlant.length > 0) {
+		console.log(`Plant ${apiPlantId} already exists`);
 		// Update existing plant
 		const updatedPlant = await sql`
 			UPDATE eia_power_plants
@@ -356,10 +371,10 @@ async function main() {
 		await resetApiResponsesFile();
 		
 		// First, get the data and log the structure
-		const sampleData = await getPageOfGenerationCapacity(0);
+		const sampleData = await getPageOfGenerationCapacity(0, 3);
 		
 		console.log('API Response Structure:');
-		console.log('Response keys:', Object.keys(sampleData.response || {}));
+		console.log('Response keys:', JSON.stringify(sampleData, null, 4));
 		
 		if (sampleData.response && sampleData.response.data && sampleData.response.data.length > 0) {
 			console.log('First item keys:', Object.keys(sampleData.response.data[0]));
