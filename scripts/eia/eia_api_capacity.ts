@@ -8,7 +8,7 @@ import { default as fsp } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PAGE_SIZE = 2500;
+const PAGE_SIZE = 5000;
 
 // Load environment variables from root .env file
 dotenv.config({ path: resolve(__dirname, '../../.env') });
@@ -78,7 +78,7 @@ async function getPageOfGenerationCapacity(page: number, pageSize: number = PAGE
 	const url = `${API_URL_GENERATION_CAPACITY}`
 		+ `?api_key=${process.env.EIA_API_KEY}`
 		+ `&offset=${page}`
-		+ `&length=${pageSize}`
+		+ `&length=${pageSize * pageSize}`
 		+ `&data[0]=county`
 		+ `&data[1]=latitude`
 		+ `&data[2]=longitude`
@@ -238,6 +238,143 @@ async function upsertPowerPlant(plantData: any, entityId: number): Promise<numbe
 	}
 }
 
+// Function to upsert a generator and return its ID
+async function upsertGenerator(generatorData: any, plantId: number): Promise<number> {
+	// Extract plant and generator IDs to create a compound ID
+	const plantCode = generatorData.plantCode || generatorData.plantid || 'unknown';
+	const generatorCode = generatorData.generatorid || generatorData.generator_id || 'unknown';
+	const compoundId = `${plantCode}_${generatorCode}`;
+	
+	// Since generators may not have a dedicated name field, create one from available data
+	// Use the plant name + generator ID or technology info if available
+	const plantName = generatorData.plantName || 'Unknown Plant';
+	const technologyDesc = generatorData.technology_description || 
+						  generatorData['technology-desc'] || '';
+	const energySourceDesc = generatorData['energy-source-desc'] || 
+							generatorData.energy_source_description || '';
+	
+	// Construct a name using available information
+	const name = `${plantName} - Generator ${generatorCode} (${technologyDesc || energySourceDesc || 'Unnamed'})`.trim();
+	
+	// Capacity data
+	const nameplateCapacityMw = parseFloat(generatorData['nameplate-capacity-mw']) || null;
+	const netSummerCapacityMw = parseFloat(generatorData['net-summer-capacity-mw']) || null;
+	const netWinterCapacityMw = parseFloat(generatorData['net-winter-capacity-mw']) || null;
+	
+	// Parse dates
+	let operatingYearMonth = null;
+	if (generatorData['operating-year-month']) {
+		const parts = generatorData['operating-year-month'].split('-');
+		if (parts.length === 2) {
+			operatingYearMonth = new Date(`${parts[0]}-${parts[1]}-01`);
+		}
+	}
+	
+	// These fields may not be present
+	let plannedDerateYearMonth = null;
+	let plannedUprateYearMonth = null;
+	let plannedRetirementYearMonth = null;
+	
+	if (generatorData['planned-derate-year-month']) {
+		const parts = generatorData['planned-derate-year-month'].split('-');
+		if (parts.length === 2) {
+			plannedDerateYearMonth = new Date(`${parts[0]}-${parts[1]}-01`);
+		}
+	}
+	
+	if (generatorData['planned-uprate-year-month']) {
+		const parts = generatorData['planned-uprate-year-month'].split('-');
+		if (parts.length === 2) {
+			plannedUprateYearMonth = new Date(`${parts[0]}-${parts[1]}-01`);
+		}
+	}
+	
+	if (generatorData['planned-retirement-year-month']) {
+		const parts = generatorData['planned-retirement-year-month'].split('-');
+		if (parts.length === 2) {
+			plannedRetirementYearMonth = new Date(`${parts[0]}-${parts[1]}-01`);
+		}
+	}
+	
+	console.log(`Upserting generator: ${compoundId} - ${name}, Energy: ${energySourceDesc}, Mover: ${generatorCode}`);
+	
+	// Upsert the generator
+	const result = await sql`
+		INSERT INTO eia_generators (
+			compound_id,
+			plant_id,
+			generator_code,
+			name,
+			technology_description,
+			energy_source_code,
+			energy_source_description,
+			prime_mover_code,
+			prime_mover_description,
+			operating_status,
+			nameplate_capacity_mw,
+			net_summer_capacity_mw,
+			net_winter_capacity_mw,
+			operating_year_month,
+			planned_derate_summer_cap_mw,
+			planned_derate_year_month,
+			planned_uprate_summer_cap_mw,
+			planned_uprate_year_month,
+			planned_retirement_year_month,
+			metadata,
+			created_at,
+			updated_at
+		) VALUES (
+			${compoundId},
+			${plantId},
+			${generatorCode},
+			${name},
+			${technologyDesc},
+			${energySourceDesc},
+			${energySourceDesc},
+			${generatorCode},
+			${generatorCode},
+			${generatorData.status || generatorData.statusDescription || 'unknown'},
+			${nameplateCapacityMw},
+			${netSummerCapacityMw},
+			${netWinterCapacityMw},
+			${operatingYearMonth},
+			${generatorData['planned-derate-summer-cap-mw'] ? parseFloat(generatorData['planned-derate-summer-cap-mw']) : null},
+			${plannedDerateYearMonth},
+			${generatorData['planned-uprate-summer-cap-mw'] ? parseFloat(generatorData['planned-uprate-summer-cap-mw']) : null},
+			${plannedUprateYearMonth},
+			${plannedRetirementYearMonth},
+			${JSON.stringify(generatorData)}::jsonb,
+			CURRENT_TIMESTAMP,
+			CURRENT_TIMESTAMP
+		)
+		ON CONFLICT (compound_id) 
+		DO UPDATE SET
+			plant_id = EXCLUDED.plant_id,
+			generator_code = EXCLUDED.generator_code,
+			name = EXCLUDED.name,
+			technology_description = EXCLUDED.technology_description,
+			energy_source_code = EXCLUDED.energy_source_code,
+			energy_source_description = EXCLUDED.energy_source_description,
+			prime_mover_code = EXCLUDED.prime_mover_code,
+			prime_mover_description = EXCLUDED.prime_mover_description,
+			operating_status = EXCLUDED.operating_status,
+			nameplate_capacity_mw = EXCLUDED.nameplate_capacity_mw,
+			net_summer_capacity_mw = EXCLUDED.net_summer_capacity_mw,
+			net_winter_capacity_mw = EXCLUDED.net_winter_capacity_mw,
+			operating_year_month = EXCLUDED.operating_year_month,
+			planned_derate_summer_cap_mw = EXCLUDED.planned_derate_summer_cap_mw,
+			planned_derate_year_month = EXCLUDED.planned_derate_year_month,
+			planned_uprate_summer_cap_mw = EXCLUDED.planned_uprate_summer_cap_mw,
+			planned_uprate_year_month = EXCLUDED.planned_uprate_year_month,
+			planned_retirement_year_month = EXCLUDED.planned_retirement_year_month,
+			metadata = EXCLUDED.metadata,
+			updated_at = CURRENT_TIMESTAMP
+		RETURNING id
+	`;
+	
+	return result[0].id;
+}
+
 // Function to insert plant statistics
 async function createPlantStat(plantId: number, statData: any): Promise<void> {
 	// Extract stats data from API response
@@ -322,7 +459,7 @@ async function createPlantStat(plantId: number, statData: any): Promise<void> {
 	`;
 }
 
-// Function to process a batch of data
+// Modify processDataBatch to handle generators
 async function processDataBatch(data: any): Promise<number> {
 	if (!data.response || !data.response.data) {
 		console.log("No data in response");
@@ -332,32 +469,64 @@ async function processDataBatch(data: any): Promise<number> {
 	const dataItems = data.response.data;
 	console.log(`Processing ${dataItems.length} items`);
 	
-	let processedCount = 0;
+	// Group items by plant ID to handle multiple generators per plant
+	const plantGroups: { [key: string]: any[] } = {};
+	
+	// First, group all items by plant ID
 	for (const item of dataItems) {
+		const plantId = item.plantid || item.plantCode || 'unknown';
+		if (!plantGroups[plantId]) {
+			plantGroups[plantId] = [];
+		}
+		plantGroups[plantId].push(item);
+	}
+	
+	let processedCount = 0;
+	
+	// Process each plant and its generators
+	for (const [plantId, items] of Object.entries(plantGroups)) {
 		try {
-			// Log first item for debugging
-			if (processedCount === 0) {
-				console.log('First item structure:');
-				console.log(JSON.stringify(item, null, 2));
+			// Save the raw API responses to file
+			for (const item of items) {
+				await appendApiResponse(item);
 			}
 			
-			// Save the raw API response to file
-			await appendApiResponse(item);
+			// Use the first item for plant-level data
+			const plantData = items[0];
 			
-			// The item itself contains all the data we need
-			const entityId = await upsertEntity(item);
-			const plantId = await upsertPowerPlant(item, entityId);
+			// Upsert entity and plant
+			const entityId = await upsertEntity(plantData);
+			const dbPlantId = await upsertPowerPlant(plantData, entityId);
 			
-			// Create stat record
-			await createPlantStat(plantId, item);
-			
-			processedCount++;
-			if (processedCount % 100 === 0) {
-				console.log(`Processed ${processedCount}/${dataItems.length} items`);
+			// Process each generator for this plant
+			for (const item of items) {
+				await upsertGenerator(item, dbPlantId);
 			}
+			
+			// Calculate aggregate plant capacity from all generators
+			let totalNameplateCapacity = 0;
+			let totalNetSummerCapacity = 0;
+			let totalNetWinterCapacity = 0;
+			
+			for (const item of items) {
+				totalNameplateCapacity += parseFloat(item['nameplate-capacity-mw'] || '0') || 0;
+				totalNetSummerCapacity += parseFloat(item['net-summer-capacity-mw'] || '0') || 0;
+				totalNetWinterCapacity += parseFloat(item['net-winter-capacity-mw'] || '0') || 0;
+			}
+			
+			// Create aggregated plant stat record
+			await createPlantStat(dbPlantId, {
+				...plantData,
+				'nameplate-capacity-mw': totalNameplateCapacity,
+				'net-summer-capacity-mw': totalNetSummerCapacity,
+				'net-winter-capacity-mw': totalNetWinterCapacity,
+				// Keep other fields from the first item
+			});
+			
+			processedCount += items.length;
+			console.log(`Processed plant ${plantId} with ${items.length} generators`);
 		} catch (error) {
-			console.error(`Error processing item:`, error);
-			console.error(`Item data:`, JSON.stringify(item).substring(0, 200) + "...");
+			console.error(`Error processing plant ${plantId}:`, error);
 		}
 	}
 	

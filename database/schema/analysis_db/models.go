@@ -36,6 +36,32 @@ type EiaEntity struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type EiaGenerator struct {
+	ID                         int32
+	CompoundID                 string
+	PlantID                    pgtype.Int4
+	GeneratorCode              string
+	Name                       pgtype.Text
+	TechnologyDescription      pgtype.Text
+	EnergySourceCode           pgtype.Text
+	EnergySourceDescription    pgtype.Text
+	PrimeMoverCode             pgtype.Text
+	PrimeMoverDescription      pgtype.Text
+	OperatingStatus            pgtype.Text
+	NameplateCapacityMw        pgtype.Float8
+	NetSummerCapacityMw        pgtype.Float8
+	NetWinterCapacityMw        pgtype.Float8
+	OperatingYearMonth         pgtype.Date
+	PlannedDerateSummerCapMw   pgtype.Float8
+	PlannedDerateYearMonth     pgtype.Date
+	PlannedUprateSummerCapMw   pgtype.Float8
+	PlannedUprateYearMonth     pgtype.Date
+	PlannedRetirementYearMonth pgtype.Date
+	Metadata                   []byte
+	CreatedAt                  pgtype.Timestamptz
+	UpdatedAt                  pgtype.Timestamptz
+}
+
 type EiaPlantCapacity struct {
 	ID                         int32
 	PlantID                    pgtype.Int4
@@ -58,6 +84,7 @@ type EiaPlantCapacity struct {
 type EiaPlantGeneration struct {
 	ID                       int32
 	PlantID                  pgtype.Int4
+	GeneratorID              pgtype.Int4
 	Timestamp                pgtype.Timestamptz
 	Period                   pgtype.Text
 	Generation               pgtype.Float8

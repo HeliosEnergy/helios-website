@@ -69,6 +69,7 @@ class CreateEIAElectricityDataParams:
 CREATE_EIA_PLANT_GENERATION = """-- name: create_eia_plant_generation \\:one
 INSERT INTO eia_plant_generation (
     plant_id,
+    generator_id,
     timestamp,
     period,
     generation,
@@ -89,8 +90,8 @@ INSERT INTO eia_plant_generation (
     metadata
 ) VALUES (
     :p1,
-    COALESCE(:p2, CURRENT_TIMESTAMP),
-    :p3,
+    :p2,
+    COALESCE(:p3, CURRENT_TIMESTAMP),
     :p4,
     :p5,
     :p6,
@@ -106,15 +107,17 @@ INSERT INTO eia_plant_generation (
     :p16,
     :p17,
     :p18,
-    :p19
+    :p19,
+    :p20
 )
-RETURNING id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
+RETURNING id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
 """
 
 
 @dataclasses.dataclass()
 class CreateEIAPlantGenerationParams:
     plant_id: Optional[int]
+    generator_id: Optional[int]
     timestamp: Optional[Any]
     period: Optional[str]
     generation: Optional[float]
@@ -223,10 +226,10 @@ SELECT
     p.metadata AS plant_metadata,
     p.created_at AS plant_created_at,
     p.updated_at AS plant_updated_at,
+    g.nameplate_capacity_mw,
+    g.net_summer_capacity_mw,
+    g.net_winter_capacity_mw,
     s.id AS stat_id,
-    s.nameplate_capacity_mw,
-    s.net_summer_capacity_mw,
-    s.net_winter_capacity_mw,
     s.planned_derate_summer_cap_mw,
     s.planned_uprate_summer_cap_mw,
     s.operating_year_month,
@@ -238,6 +241,16 @@ SELECT
     s.metadata AS stat_metadata,
     s.timestamp AS stat_timestamp
 FROM eia_power_plants as p
+LEFT JOIN (
+    SELECT 
+        plant_id,
+        SUM(nameplate_capacity_mw) AS nameplate_capacity_mw,
+        SUM(net_summer_capacity_mw) AS net_summer_capacity_mw,
+        SUM(net_winter_capacity_mw) AS net_winter_capacity_mw,
+        MAX(updated_at) AS latest_update
+    FROM eia_generators
+    GROUP BY plant_id
+) AS g ON g.plant_id = p.id
 LEFT JOIN (
     SELECT DISTINCT ON (plant_id) id, plant_id, timestamp, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, planned_derate_summer_cap_mw, planned_uprate_summer_cap_mw, operating_year_month, planned_derate_year_month, planned_uprate_year_month, planned_retirement_year_month, source_timestamp, data_period, metadata, created_at
     FROM eia_plant_capacity
@@ -253,11 +266,11 @@ WHERE
     AND (:p3\\:\\:text IS NULL OR p.operating_status = :p3)
     AND (
         :p4\\:\\:float IS NULL 
-        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= :p4)
+        OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw >= :p4)
     )
     AND (
         :p5\\:\\:float IS NULL 
-        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= :p5)
+        OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw <= :p5)
     )
 """
 
@@ -288,10 +301,10 @@ class GetAllPowerPlantsWithLatestStatsRow:
     plant_metadata: Optional[Any]
     plant_created_at: Optional[datetime.datetime]
     plant_updated_at: Optional[datetime.datetime]
+    nameplate_capacity_mw: int
+    net_summer_capacity_mw: int
+    net_winter_capacity_mw: int
     stat_id: int
-    nameplate_capacity_mw: Optional[float]
-    net_summer_capacity_mw: Optional[float]
-    net_winter_capacity_mw: Optional[float]
     planned_derate_summer_cap_mw: Optional[float]
     planned_uprate_summer_cap_mw: Optional[float]
     operating_year_month: Optional[datetime.date]
@@ -311,15 +324,27 @@ WHERE api_entity_id = :p1
 """
 
 
+GET_EIA_GENERATOR_BY_COMPOUND_ID = """-- name: get_eia_generator_by_compound_id \\:one
+SELECT id, compound_id, plant_id, generator_code, name, technology_description, energy_source_code, energy_source_description, prime_mover_code, prime_mover_description, operating_status, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, operating_year_month, planned_derate_summer_cap_mw, planned_derate_year_month, planned_uprate_summer_cap_mw, planned_uprate_year_month, planned_retirement_year_month, metadata, created_at, updated_at FROM eia_generators
+WHERE compound_id = :p1
+"""
+
+
+GET_EIA_GENERATORS_BY_PLANT_ID = """-- name: get_eia_generators_by_plant_id \\:many
+SELECT id, compound_id, plant_id, generator_code, name, technology_description, energy_source_code, energy_source_description, prime_mover_code, prime_mover_description, operating_status, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, operating_year_month, planned_derate_summer_cap_mw, planned_derate_year_month, planned_uprate_summer_cap_mw, planned_uprate_year_month, planned_retirement_year_month, metadata, created_at, updated_at FROM eia_generators
+WHERE plant_id = :p1
+"""
+
+
 GET_EIA_PLANT_GENERATION_BY_PLANT_ID = """-- name: get_eia_plant_generation_by_plant_id \\:many
-SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+SELECT id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
 WHERE plant_id = :p1
 ORDER BY timestamp DESC
 """
 
 
 GET_EIA_PLANT_GENERATION_IN_TIME_RANGE = """-- name: get_eia_plant_generation_in_time_range \\:many
-SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+SELECT id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
 WHERE plant_id = :p1
 AND timestamp BETWEEN :p2 AND :p3
 ORDER BY timestamp DESC
@@ -354,7 +379,7 @@ WHERE entity_id = :p1
 
 
 GET_LATEST_EIA_PLANT_GENERATION = """-- name: get_latest_eia_plant_generation \\:one
-SELECT id, plant_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
+SELECT id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at FROM eia_plant_generation
 WHERE plant_id = :p1
 ORDER BY timestamp DESC
 LIMIT 1
@@ -367,6 +392,48 @@ WHERE plant_id = :p1
 ORDER BY timestamp DESC
 LIMIT 1
 """
+
+
+GET_LATEST_GENERATORS_BY_PLANT = """-- name: get_latest_generators_by_plant \\:many
+SELECT 
+    g.id, g.compound_id, g.plant_id, g.generator_code, g.name, g.technology_description, g.energy_source_code, g.energy_source_description, g.prime_mover_code, g.prime_mover_description, g.operating_status, g.nameplate_capacity_mw, g.net_summer_capacity_mw, g.net_winter_capacity_mw, g.operating_year_month, g.planned_derate_summer_cap_mw, g.planned_derate_year_month, g.planned_uprate_summer_cap_mw, g.planned_uprate_year_month, g.planned_retirement_year_month, g.metadata, g.created_at, g.updated_at,
+    p.name AS plant_name,
+    p.state,
+    p.county
+FROM eia_generators g
+JOIN eia_power_plants p ON g.plant_id = p.id
+WHERE p.id = :p1
+"""
+
+
+@dataclasses.dataclass()
+class GetLatestGeneratorsByPlantRow:
+    id: int
+    compound_id: str
+    plant_id: Optional[int]
+    generator_code: str
+    name: Optional[str]
+    technology_description: Optional[str]
+    energy_source_code: Optional[str]
+    energy_source_description: Optional[str]
+    prime_mover_code: Optional[str]
+    prime_mover_description: Optional[str]
+    operating_status: Optional[str]
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_summer_cap_mw: Optional[float]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime]
+    plant_name: str
+    state: Optional[str]
+    county: Optional[str]
 
 
 GET_METRIC = """-- name: get_metric \\:one
@@ -425,6 +492,100 @@ DO UPDATE SET
     updated_at = CURRENT_TIMESTAMP
 RETURNING id, api_entity_id, name, description, metadata, created_at, updated_at
 """
+
+
+UPSERT_EIA_GENERATOR = """-- name: upsert_eia_generator \\:one
+INSERT INTO eia_generators (
+    compound_id,
+    plant_id,
+    generator_code,
+    name,
+    technology_description,
+    energy_source_code,
+    energy_source_description,
+    prime_mover_code,
+    prime_mover_description,
+    operating_status,
+    nameplate_capacity_mw,
+    net_summer_capacity_mw,
+    net_winter_capacity_mw,
+    operating_year_month,
+    planned_derate_summer_cap_mw,
+    planned_derate_year_month,
+    planned_uprate_summer_cap_mw,
+    planned_uprate_year_month,
+    planned_retirement_year_month,
+    metadata
+) VALUES (
+    :p1,
+    :p2,
+    :p3,
+    :p4,
+    :p5,
+    :p6,
+    :p7,
+    :p8,
+    :p9,
+    :p10,
+    :p11,
+    :p12,
+    :p13,
+    :p14,
+    :p15,
+    :p16,
+    :p17,
+    :p18,
+    :p19,
+    :p20
+)
+ON CONFLICT (compound_id) 
+DO UPDATE SET
+    plant_id = EXCLUDED.plant_id,
+    generator_code = EXCLUDED.generator_code,
+    name = EXCLUDED.name,
+    technology_description = EXCLUDED.technology_description,
+    energy_source_code = EXCLUDED.energy_source_code,
+    energy_source_description = EXCLUDED.energy_source_description,
+    prime_mover_code = EXCLUDED.prime_mover_code,
+    prime_mover_description = EXCLUDED.prime_mover_description,
+    operating_status = EXCLUDED.operating_status,
+    nameplate_capacity_mw = EXCLUDED.nameplate_capacity_mw,
+    net_summer_capacity_mw = EXCLUDED.net_summer_capacity_mw,
+    net_winter_capacity_mw = EXCLUDED.net_winter_capacity_mw,
+    operating_year_month = EXCLUDED.operating_year_month,
+    planned_derate_summer_cap_mw = EXCLUDED.planned_derate_summer_cap_mw,
+    planned_derate_year_month = EXCLUDED.planned_derate_year_month,
+    planned_uprate_summer_cap_mw = EXCLUDED.planned_uprate_summer_cap_mw,
+    planned_uprate_year_month = EXCLUDED.planned_uprate_year_month,
+    planned_retirement_year_month = EXCLUDED.planned_retirement_year_month,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING id, compound_id, plant_id, generator_code, name, technology_description, energy_source_code, energy_source_description, prime_mover_code, prime_mover_description, operating_status, nameplate_capacity_mw, net_summer_capacity_mw, net_winter_capacity_mw, operating_year_month, planned_derate_summer_cap_mw, planned_derate_year_month, planned_uprate_summer_cap_mw, planned_uprate_year_month, planned_retirement_year_month, metadata, created_at, updated_at
+"""
+
+
+@dataclasses.dataclass()
+class UpsertEIAGeneratorParams:
+    compound_id: str
+    plant_id: Optional[int]
+    generator_code: str
+    name: Optional[str]
+    technology_description: Optional[str]
+    energy_source_code: Optional[str]
+    energy_source_description: Optional[str]
+    prime_mover_code: Optional[str]
+    prime_mover_description: Optional[str]
+    operating_status: Optional[str]
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_summer_cap_mw: Optional[float]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    metadata: Optional[Any]
 
 
 UPSERT_EIA_POWER_PLANT = """-- name: upsert_eia_power_plant \\:one
@@ -514,49 +675,51 @@ class Querier:
     def create_eia_plant_generation(self, arg: CreateEIAPlantGenerationParams) -> Optional[models.EiaPlantGeneration]:
         row = self._conn.execute(sqlalchemy.text(CREATE_EIA_PLANT_GENERATION), {
             "p1": arg.plant_id,
-            "p2": arg.timestamp,
-            "p3": arg.period,
-            "p4": arg.generation,
-            "p5": arg.generation_units,
-            "p6": arg.gross_generation,
-            "p7": arg.gross_generation_units,
-            "p8": arg.consumption_for_eg,
-            "p9": arg.consumption_for_eg_units,
-            "p10": arg.consumption_for_eg_btu,
-            "p11": arg.consumption_for_eg_btu_units,
-            "p12": arg.total_consumption,
-            "p13": arg.total_consumption_units,
-            "p14": arg.total_consumption_btu,
-            "p15": arg.total_consumption_btu_units,
-            "p16": arg.average_heat_content,
-            "p17": arg.average_heat_content_units,
-            "p18": arg.source_timestamp,
-            "p19": arg.metadata,
+            "p2": arg.generator_id,
+            "p3": arg.timestamp,
+            "p4": arg.period,
+            "p5": arg.generation,
+            "p6": arg.generation_units,
+            "p7": arg.gross_generation,
+            "p8": arg.gross_generation_units,
+            "p9": arg.consumption_for_eg,
+            "p10": arg.consumption_for_eg_units,
+            "p11": arg.consumption_for_eg_btu,
+            "p12": arg.consumption_for_eg_btu_units,
+            "p13": arg.total_consumption,
+            "p14": arg.total_consumption_units,
+            "p15": arg.total_consumption_btu,
+            "p16": arg.total_consumption_btu_units,
+            "p17": arg.average_heat_content,
+            "p18": arg.average_heat_content_units,
+            "p19": arg.source_timestamp,
+            "p20": arg.metadata,
         }).first()
         if row is None:
             return None
         return models.EiaPlantGeneration(
             id=row[0],
             plant_id=row[1],
-            timestamp=row[2],
-            period=row[3],
-            generation=row[4],
-            generation_units=row[5],
-            gross_generation=row[6],
-            gross_generation_units=row[7],
-            consumption_for_eg=row[8],
-            consumption_for_eg_units=row[9],
-            consumption_for_eg_btu=row[10],
-            consumption_for_eg_btu_units=row[11],
-            total_consumption=row[12],
-            total_consumption_units=row[13],
-            total_consumption_btu=row[14],
-            total_consumption_btu_units=row[15],
-            average_heat_content=row[16],
-            average_heat_content_units=row[17],
-            source_timestamp=row[18],
-            metadata=row[19],
-            created_at=row[20],
+            generator_id=row[2],
+            timestamp=row[3],
+            period=row[4],
+            generation=row[5],
+            generation_units=row[6],
+            gross_generation=row[7],
+            gross_generation_units=row[8],
+            consumption_for_eg=row[9],
+            consumption_for_eg_units=row[10],
+            consumption_for_eg_btu=row[11],
+            consumption_for_eg_btu_units=row[12],
+            total_consumption=row[13],
+            total_consumption_units=row[14],
+            total_consumption_btu=row[15],
+            total_consumption_btu_units=row[16],
+            average_heat_content=row[17],
+            average_heat_content_units=row[18],
+            source_timestamp=row[19],
+            metadata=row[20],
+            created_at=row[21],
         )
 
     def create_eia_plant_stat(self, arg: CreateEIAPlantStatParams) -> Optional[models.EiaPlantCapacity]:
@@ -636,10 +799,10 @@ class Querier:
                 plant_metadata=row[12],
                 plant_created_at=row[13],
                 plant_updated_at=row[14],
-                stat_id=row[15],
-                nameplate_capacity_mw=row[16],
-                net_summer_capacity_mw=row[17],
-                net_winter_capacity_mw=row[18],
+                nameplate_capacity_mw=row[15],
+                net_summer_capacity_mw=row[16],
+                net_winter_capacity_mw=row[17],
+                stat_id=row[18],
                 planned_derate_summer_cap_mw=row[19],
                 planned_uprate_summer_cap_mw=row[20],
                 operating_year_month=row[21],
@@ -666,31 +829,91 @@ class Querier:
             updated_at=row[6],
         )
 
+    def get_eia_generator_by_compound_id(self, *, compound_id: str) -> Optional[models.EiaGenerator]:
+        row = self._conn.execute(sqlalchemy.text(GET_EIA_GENERATOR_BY_COMPOUND_ID), {"p1": compound_id}).first()
+        if row is None:
+            return None
+        return models.EiaGenerator(
+            id=row[0],
+            compound_id=row[1],
+            plant_id=row[2],
+            generator_code=row[3],
+            name=row[4],
+            technology_description=row[5],
+            energy_source_code=row[6],
+            energy_source_description=row[7],
+            prime_mover_code=row[8],
+            prime_mover_description=row[9],
+            operating_status=row[10],
+            nameplate_capacity_mw=row[11],
+            net_summer_capacity_mw=row[12],
+            net_winter_capacity_mw=row[13],
+            operating_year_month=row[14],
+            planned_derate_summer_cap_mw=row[15],
+            planned_derate_year_month=row[16],
+            planned_uprate_summer_cap_mw=row[17],
+            planned_uprate_year_month=row[18],
+            planned_retirement_year_month=row[19],
+            metadata=row[20],
+            created_at=row[21],
+            updated_at=row[22],
+        )
+
+    def get_eia_generators_by_plant_id(self, *, plant_id: Optional[int]) -> Iterator[models.EiaGenerator]:
+        result = self._conn.execute(sqlalchemy.text(GET_EIA_GENERATORS_BY_PLANT_ID), {"p1": plant_id})
+        for row in result:
+            yield models.EiaGenerator(
+                id=row[0],
+                compound_id=row[1],
+                plant_id=row[2],
+                generator_code=row[3],
+                name=row[4],
+                technology_description=row[5],
+                energy_source_code=row[6],
+                energy_source_description=row[7],
+                prime_mover_code=row[8],
+                prime_mover_description=row[9],
+                operating_status=row[10],
+                nameplate_capacity_mw=row[11],
+                net_summer_capacity_mw=row[12],
+                net_winter_capacity_mw=row[13],
+                operating_year_month=row[14],
+                planned_derate_summer_cap_mw=row[15],
+                planned_derate_year_month=row[16],
+                planned_uprate_summer_cap_mw=row[17],
+                planned_uprate_year_month=row[18],
+                planned_retirement_year_month=row[19],
+                metadata=row[20],
+                created_at=row[21],
+                updated_at=row[22],
+            )
+
     def get_eia_plant_generation_by_plant_id(self, *, plant_id: Optional[int]) -> Iterator[models.EiaPlantGeneration]:
         result = self._conn.execute(sqlalchemy.text(GET_EIA_PLANT_GENERATION_BY_PLANT_ID), {"p1": plant_id})
         for row in result:
             yield models.EiaPlantGeneration(
                 id=row[0],
                 plant_id=row[1],
-                timestamp=row[2],
-                period=row[3],
-                generation=row[4],
-                generation_units=row[5],
-                gross_generation=row[6],
-                gross_generation_units=row[7],
-                consumption_for_eg=row[8],
-                consumption_for_eg_units=row[9],
-                consumption_for_eg_btu=row[10],
-                consumption_for_eg_btu_units=row[11],
-                total_consumption=row[12],
-                total_consumption_units=row[13],
-                total_consumption_btu=row[14],
-                total_consumption_btu_units=row[15],
-                average_heat_content=row[16],
-                average_heat_content_units=row[17],
-                source_timestamp=row[18],
-                metadata=row[19],
-                created_at=row[20],
+                generator_id=row[2],
+                timestamp=row[3],
+                period=row[4],
+                generation=row[5],
+                generation_units=row[6],
+                gross_generation=row[7],
+                gross_generation_units=row[8],
+                consumption_for_eg=row[9],
+                consumption_for_eg_units=row[10],
+                consumption_for_eg_btu=row[11],
+                consumption_for_eg_btu_units=row[12],
+                total_consumption=row[13],
+                total_consumption_units=row[14],
+                total_consumption_btu=row[15],
+                total_consumption_btu_units=row[16],
+                average_heat_content=row[17],
+                average_heat_content_units=row[18],
+                source_timestamp=row[19],
+                metadata=row[20],
+                created_at=row[21],
             )
 
     def get_eia_plant_generation_in_time_range(self, *, plant_id: Optional[int], start_timestamp: datetime.datetime, end_timestamp: datetime.datetime) -> Iterator[models.EiaPlantGeneration]:
@@ -699,25 +922,26 @@ class Querier:
             yield models.EiaPlantGeneration(
                 id=row[0],
                 plant_id=row[1],
-                timestamp=row[2],
-                period=row[3],
-                generation=row[4],
-                generation_units=row[5],
-                gross_generation=row[6],
-                gross_generation_units=row[7],
-                consumption_for_eg=row[8],
-                consumption_for_eg_units=row[9],
-                consumption_for_eg_btu=row[10],
-                consumption_for_eg_btu_units=row[11],
-                total_consumption=row[12],
-                total_consumption_units=row[13],
-                total_consumption_btu=row[14],
-                total_consumption_btu_units=row[15],
-                average_heat_content=row[16],
-                average_heat_content_units=row[17],
-                source_timestamp=row[18],
-                metadata=row[19],
-                created_at=row[20],
+                generator_id=row[2],
+                timestamp=row[3],
+                period=row[4],
+                generation=row[5],
+                generation_units=row[6],
+                gross_generation=row[7],
+                gross_generation_units=row[8],
+                consumption_for_eg=row[9],
+                consumption_for_eg_units=row[10],
+                consumption_for_eg_btu=row[11],
+                consumption_for_eg_btu_units=row[12],
+                total_consumption=row[13],
+                total_consumption_units=row[14],
+                total_consumption_btu=row[15],
+                total_consumption_btu_units=row[16],
+                average_heat_content=row[17],
+                average_heat_content_units=row[18],
+                source_timestamp=row[19],
+                metadata=row[20],
+                created_at=row[21],
             )
 
     def get_eia_plant_stats_by_plant_id(self, *, plant_id: Optional[int]) -> Iterator[models.EiaPlantCapacity]:
@@ -812,25 +1036,26 @@ class Querier:
         return models.EiaPlantGeneration(
             id=row[0],
             plant_id=row[1],
-            timestamp=row[2],
-            period=row[3],
-            generation=row[4],
-            generation_units=row[5],
-            gross_generation=row[6],
-            gross_generation_units=row[7],
-            consumption_for_eg=row[8],
-            consumption_for_eg_units=row[9],
-            consumption_for_eg_btu=row[10],
-            consumption_for_eg_btu_units=row[11],
-            total_consumption=row[12],
-            total_consumption_units=row[13],
-            total_consumption_btu=row[14],
-            total_consumption_btu_units=row[15],
-            average_heat_content=row[16],
-            average_heat_content_units=row[17],
-            source_timestamp=row[18],
-            metadata=row[19],
-            created_at=row[20],
+            generator_id=row[2],
+            timestamp=row[3],
+            period=row[4],
+            generation=row[5],
+            generation_units=row[6],
+            gross_generation=row[7],
+            gross_generation_units=row[8],
+            consumption_for_eg=row[9],
+            consumption_for_eg_units=row[10],
+            consumption_for_eg_btu=row[11],
+            consumption_for_eg_btu_units=row[12],
+            total_consumption=row[13],
+            total_consumption_units=row[14],
+            total_consumption_btu=row[15],
+            total_consumption_btu_units=row[16],
+            average_heat_content=row[17],
+            average_heat_content_units=row[18],
+            source_timestamp=row[19],
+            metadata=row[20],
+            created_at=row[21],
         )
 
     def get_latest_eia_plant_stat(self, *, plant_id: Optional[int]) -> Optional[models.EiaPlantCapacity]:
@@ -855,6 +1080,38 @@ class Querier:
             metadata=row[14],
             created_at=row[15],
         )
+
+    def get_latest_generators_by_plant(self, *, plant_id: int) -> Iterator[GetLatestGeneratorsByPlantRow]:
+        result = self._conn.execute(sqlalchemy.text(GET_LATEST_GENERATORS_BY_PLANT), {"p1": plant_id})
+        for row in result:
+            yield GetLatestGeneratorsByPlantRow(
+                id=row[0],
+                compound_id=row[1],
+                plant_id=row[2],
+                generator_code=row[3],
+                name=row[4],
+                technology_description=row[5],
+                energy_source_code=row[6],
+                energy_source_description=row[7],
+                prime_mover_code=row[8],
+                prime_mover_description=row[9],
+                operating_status=row[10],
+                nameplate_capacity_mw=row[11],
+                net_summer_capacity_mw=row[12],
+                net_winter_capacity_mw=row[13],
+                operating_year_month=row[14],
+                planned_derate_summer_cap_mw=row[15],
+                planned_derate_year_month=row[16],
+                planned_uprate_summer_cap_mw=row[17],
+                planned_uprate_year_month=row[18],
+                planned_retirement_year_month=row[19],
+                metadata=row[20],
+                created_at=row[21],
+                updated_at=row[22],
+                plant_name=row[23],
+                state=row[24],
+                county=row[25],
+            )
 
     def get_metric(self, *, id: int) -> Optional[models.Metric]:
         row = self._conn.execute(sqlalchemy.text(GET_METRIC), {"p1": id}).first()
@@ -932,6 +1189,57 @@ class Querier:
             updated_at=row[6],
         )
 
+    def upsert_eia_generator(self, arg: UpsertEIAGeneratorParams) -> Optional[models.EiaGenerator]:
+        row = self._conn.execute(sqlalchemy.text(UPSERT_EIA_GENERATOR), {
+            "p1": arg.compound_id,
+            "p2": arg.plant_id,
+            "p3": arg.generator_code,
+            "p4": arg.name,
+            "p5": arg.technology_description,
+            "p6": arg.energy_source_code,
+            "p7": arg.energy_source_description,
+            "p8": arg.prime_mover_code,
+            "p9": arg.prime_mover_description,
+            "p10": arg.operating_status,
+            "p11": arg.nameplate_capacity_mw,
+            "p12": arg.net_summer_capacity_mw,
+            "p13": arg.net_winter_capacity_mw,
+            "p14": arg.operating_year_month,
+            "p15": arg.planned_derate_summer_cap_mw,
+            "p16": arg.planned_derate_year_month,
+            "p17": arg.planned_uprate_summer_cap_mw,
+            "p18": arg.planned_uprate_year_month,
+            "p19": arg.planned_retirement_year_month,
+            "p20": arg.metadata,
+        }).first()
+        if row is None:
+            return None
+        return models.EiaGenerator(
+            id=row[0],
+            compound_id=row[1],
+            plant_id=row[2],
+            generator_code=row[3],
+            name=row[4],
+            technology_description=row[5],
+            energy_source_code=row[6],
+            energy_source_description=row[7],
+            prime_mover_code=row[8],
+            prime_mover_description=row[9],
+            operating_status=row[10],
+            nameplate_capacity_mw=row[11],
+            net_summer_capacity_mw=row[12],
+            net_winter_capacity_mw=row[13],
+            operating_year_month=row[14],
+            planned_derate_summer_cap_mw=row[15],
+            planned_derate_year_month=row[16],
+            planned_uprate_summer_cap_mw=row[17],
+            planned_uprate_year_month=row[18],
+            planned_retirement_year_month=row[19],
+            metadata=row[20],
+            created_at=row[21],
+            updated_at=row[22],
+        )
+
     def upsert_eia_power_plant(self, arg: UpsertEIAPowerPlantParams) -> Optional[models.EiaPowerPlant]:
         row = self._conn.execute(sqlalchemy.text(UPSERT_EIA_POWER_PLANT), {
             "p1": arg.api_plant_id,
@@ -992,49 +1300,51 @@ class AsyncQuerier:
     async def create_eia_plant_generation(self, arg: CreateEIAPlantGenerationParams) -> Optional[models.EiaPlantGeneration]:
         row = (await self._conn.execute(sqlalchemy.text(CREATE_EIA_PLANT_GENERATION), {
             "p1": arg.plant_id,
-            "p2": arg.timestamp,
-            "p3": arg.period,
-            "p4": arg.generation,
-            "p5": arg.generation_units,
-            "p6": arg.gross_generation,
-            "p7": arg.gross_generation_units,
-            "p8": arg.consumption_for_eg,
-            "p9": arg.consumption_for_eg_units,
-            "p10": arg.consumption_for_eg_btu,
-            "p11": arg.consumption_for_eg_btu_units,
-            "p12": arg.total_consumption,
-            "p13": arg.total_consumption_units,
-            "p14": arg.total_consumption_btu,
-            "p15": arg.total_consumption_btu_units,
-            "p16": arg.average_heat_content,
-            "p17": arg.average_heat_content_units,
-            "p18": arg.source_timestamp,
-            "p19": arg.metadata,
+            "p2": arg.generator_id,
+            "p3": arg.timestamp,
+            "p4": arg.period,
+            "p5": arg.generation,
+            "p6": arg.generation_units,
+            "p7": arg.gross_generation,
+            "p8": arg.gross_generation_units,
+            "p9": arg.consumption_for_eg,
+            "p10": arg.consumption_for_eg_units,
+            "p11": arg.consumption_for_eg_btu,
+            "p12": arg.consumption_for_eg_btu_units,
+            "p13": arg.total_consumption,
+            "p14": arg.total_consumption_units,
+            "p15": arg.total_consumption_btu,
+            "p16": arg.total_consumption_btu_units,
+            "p17": arg.average_heat_content,
+            "p18": arg.average_heat_content_units,
+            "p19": arg.source_timestamp,
+            "p20": arg.metadata,
         })).first()
         if row is None:
             return None
         return models.EiaPlantGeneration(
             id=row[0],
             plant_id=row[1],
-            timestamp=row[2],
-            period=row[3],
-            generation=row[4],
-            generation_units=row[5],
-            gross_generation=row[6],
-            gross_generation_units=row[7],
-            consumption_for_eg=row[8],
-            consumption_for_eg_units=row[9],
-            consumption_for_eg_btu=row[10],
-            consumption_for_eg_btu_units=row[11],
-            total_consumption=row[12],
-            total_consumption_units=row[13],
-            total_consumption_btu=row[14],
-            total_consumption_btu_units=row[15],
-            average_heat_content=row[16],
-            average_heat_content_units=row[17],
-            source_timestamp=row[18],
-            metadata=row[19],
-            created_at=row[20],
+            generator_id=row[2],
+            timestamp=row[3],
+            period=row[4],
+            generation=row[5],
+            generation_units=row[6],
+            gross_generation=row[7],
+            gross_generation_units=row[8],
+            consumption_for_eg=row[9],
+            consumption_for_eg_units=row[10],
+            consumption_for_eg_btu=row[11],
+            consumption_for_eg_btu_units=row[12],
+            total_consumption=row[13],
+            total_consumption_units=row[14],
+            total_consumption_btu=row[15],
+            total_consumption_btu_units=row[16],
+            average_heat_content=row[17],
+            average_heat_content_units=row[18],
+            source_timestamp=row[19],
+            metadata=row[20],
+            created_at=row[21],
         )
 
     async def create_eia_plant_stat(self, arg: CreateEIAPlantStatParams) -> Optional[models.EiaPlantCapacity]:
@@ -1114,10 +1424,10 @@ class AsyncQuerier:
                 plant_metadata=row[12],
                 plant_created_at=row[13],
                 plant_updated_at=row[14],
-                stat_id=row[15],
-                nameplate_capacity_mw=row[16],
-                net_summer_capacity_mw=row[17],
-                net_winter_capacity_mw=row[18],
+                nameplate_capacity_mw=row[15],
+                net_summer_capacity_mw=row[16],
+                net_winter_capacity_mw=row[17],
+                stat_id=row[18],
                 planned_derate_summer_cap_mw=row[19],
                 planned_uprate_summer_cap_mw=row[20],
                 operating_year_month=row[21],
@@ -1144,31 +1454,91 @@ class AsyncQuerier:
             updated_at=row[6],
         )
 
+    async def get_eia_generator_by_compound_id(self, *, compound_id: str) -> Optional[models.EiaGenerator]:
+        row = (await self._conn.execute(sqlalchemy.text(GET_EIA_GENERATOR_BY_COMPOUND_ID), {"p1": compound_id})).first()
+        if row is None:
+            return None
+        return models.EiaGenerator(
+            id=row[0],
+            compound_id=row[1],
+            plant_id=row[2],
+            generator_code=row[3],
+            name=row[4],
+            technology_description=row[5],
+            energy_source_code=row[6],
+            energy_source_description=row[7],
+            prime_mover_code=row[8],
+            prime_mover_description=row[9],
+            operating_status=row[10],
+            nameplate_capacity_mw=row[11],
+            net_summer_capacity_mw=row[12],
+            net_winter_capacity_mw=row[13],
+            operating_year_month=row[14],
+            planned_derate_summer_cap_mw=row[15],
+            planned_derate_year_month=row[16],
+            planned_uprate_summer_cap_mw=row[17],
+            planned_uprate_year_month=row[18],
+            planned_retirement_year_month=row[19],
+            metadata=row[20],
+            created_at=row[21],
+            updated_at=row[22],
+        )
+
+    async def get_eia_generators_by_plant_id(self, *, plant_id: Optional[int]) -> AsyncIterator[models.EiaGenerator]:
+        result = await self._conn.stream(sqlalchemy.text(GET_EIA_GENERATORS_BY_PLANT_ID), {"p1": plant_id})
+        async for row in result:
+            yield models.EiaGenerator(
+                id=row[0],
+                compound_id=row[1],
+                plant_id=row[2],
+                generator_code=row[3],
+                name=row[4],
+                technology_description=row[5],
+                energy_source_code=row[6],
+                energy_source_description=row[7],
+                prime_mover_code=row[8],
+                prime_mover_description=row[9],
+                operating_status=row[10],
+                nameplate_capacity_mw=row[11],
+                net_summer_capacity_mw=row[12],
+                net_winter_capacity_mw=row[13],
+                operating_year_month=row[14],
+                planned_derate_summer_cap_mw=row[15],
+                planned_derate_year_month=row[16],
+                planned_uprate_summer_cap_mw=row[17],
+                planned_uprate_year_month=row[18],
+                planned_retirement_year_month=row[19],
+                metadata=row[20],
+                created_at=row[21],
+                updated_at=row[22],
+            )
+
     async def get_eia_plant_generation_by_plant_id(self, *, plant_id: Optional[int]) -> AsyncIterator[models.EiaPlantGeneration]:
         result = await self._conn.stream(sqlalchemy.text(GET_EIA_PLANT_GENERATION_BY_PLANT_ID), {"p1": plant_id})
         async for row in result:
             yield models.EiaPlantGeneration(
                 id=row[0],
                 plant_id=row[1],
-                timestamp=row[2],
-                period=row[3],
-                generation=row[4],
-                generation_units=row[5],
-                gross_generation=row[6],
-                gross_generation_units=row[7],
-                consumption_for_eg=row[8],
-                consumption_for_eg_units=row[9],
-                consumption_for_eg_btu=row[10],
-                consumption_for_eg_btu_units=row[11],
-                total_consumption=row[12],
-                total_consumption_units=row[13],
-                total_consumption_btu=row[14],
-                total_consumption_btu_units=row[15],
-                average_heat_content=row[16],
-                average_heat_content_units=row[17],
-                source_timestamp=row[18],
-                metadata=row[19],
-                created_at=row[20],
+                generator_id=row[2],
+                timestamp=row[3],
+                period=row[4],
+                generation=row[5],
+                generation_units=row[6],
+                gross_generation=row[7],
+                gross_generation_units=row[8],
+                consumption_for_eg=row[9],
+                consumption_for_eg_units=row[10],
+                consumption_for_eg_btu=row[11],
+                consumption_for_eg_btu_units=row[12],
+                total_consumption=row[13],
+                total_consumption_units=row[14],
+                total_consumption_btu=row[15],
+                total_consumption_btu_units=row[16],
+                average_heat_content=row[17],
+                average_heat_content_units=row[18],
+                source_timestamp=row[19],
+                metadata=row[20],
+                created_at=row[21],
             )
 
     async def get_eia_plant_generation_in_time_range(self, *, plant_id: Optional[int], start_timestamp: datetime.datetime, end_timestamp: datetime.datetime) -> AsyncIterator[models.EiaPlantGeneration]:
@@ -1177,25 +1547,26 @@ class AsyncQuerier:
             yield models.EiaPlantGeneration(
                 id=row[0],
                 plant_id=row[1],
-                timestamp=row[2],
-                period=row[3],
-                generation=row[4],
-                generation_units=row[5],
-                gross_generation=row[6],
-                gross_generation_units=row[7],
-                consumption_for_eg=row[8],
-                consumption_for_eg_units=row[9],
-                consumption_for_eg_btu=row[10],
-                consumption_for_eg_btu_units=row[11],
-                total_consumption=row[12],
-                total_consumption_units=row[13],
-                total_consumption_btu=row[14],
-                total_consumption_btu_units=row[15],
-                average_heat_content=row[16],
-                average_heat_content_units=row[17],
-                source_timestamp=row[18],
-                metadata=row[19],
-                created_at=row[20],
+                generator_id=row[2],
+                timestamp=row[3],
+                period=row[4],
+                generation=row[5],
+                generation_units=row[6],
+                gross_generation=row[7],
+                gross_generation_units=row[8],
+                consumption_for_eg=row[9],
+                consumption_for_eg_units=row[10],
+                consumption_for_eg_btu=row[11],
+                consumption_for_eg_btu_units=row[12],
+                total_consumption=row[13],
+                total_consumption_units=row[14],
+                total_consumption_btu=row[15],
+                total_consumption_btu_units=row[16],
+                average_heat_content=row[17],
+                average_heat_content_units=row[18],
+                source_timestamp=row[19],
+                metadata=row[20],
+                created_at=row[21],
             )
 
     async def get_eia_plant_stats_by_plant_id(self, *, plant_id: Optional[int]) -> AsyncIterator[models.EiaPlantCapacity]:
@@ -1290,25 +1661,26 @@ class AsyncQuerier:
         return models.EiaPlantGeneration(
             id=row[0],
             plant_id=row[1],
-            timestamp=row[2],
-            period=row[3],
-            generation=row[4],
-            generation_units=row[5],
-            gross_generation=row[6],
-            gross_generation_units=row[7],
-            consumption_for_eg=row[8],
-            consumption_for_eg_units=row[9],
-            consumption_for_eg_btu=row[10],
-            consumption_for_eg_btu_units=row[11],
-            total_consumption=row[12],
-            total_consumption_units=row[13],
-            total_consumption_btu=row[14],
-            total_consumption_btu_units=row[15],
-            average_heat_content=row[16],
-            average_heat_content_units=row[17],
-            source_timestamp=row[18],
-            metadata=row[19],
-            created_at=row[20],
+            generator_id=row[2],
+            timestamp=row[3],
+            period=row[4],
+            generation=row[5],
+            generation_units=row[6],
+            gross_generation=row[7],
+            gross_generation_units=row[8],
+            consumption_for_eg=row[9],
+            consumption_for_eg_units=row[10],
+            consumption_for_eg_btu=row[11],
+            consumption_for_eg_btu_units=row[12],
+            total_consumption=row[13],
+            total_consumption_units=row[14],
+            total_consumption_btu=row[15],
+            total_consumption_btu_units=row[16],
+            average_heat_content=row[17],
+            average_heat_content_units=row[18],
+            source_timestamp=row[19],
+            metadata=row[20],
+            created_at=row[21],
         )
 
     async def get_latest_eia_plant_stat(self, *, plant_id: Optional[int]) -> Optional[models.EiaPlantCapacity]:
@@ -1333,6 +1705,38 @@ class AsyncQuerier:
             metadata=row[14],
             created_at=row[15],
         )
+
+    async def get_latest_generators_by_plant(self, *, plant_id: int) -> AsyncIterator[GetLatestGeneratorsByPlantRow]:
+        result = await self._conn.stream(sqlalchemy.text(GET_LATEST_GENERATORS_BY_PLANT), {"p1": plant_id})
+        async for row in result:
+            yield GetLatestGeneratorsByPlantRow(
+                id=row[0],
+                compound_id=row[1],
+                plant_id=row[2],
+                generator_code=row[3],
+                name=row[4],
+                technology_description=row[5],
+                energy_source_code=row[6],
+                energy_source_description=row[7],
+                prime_mover_code=row[8],
+                prime_mover_description=row[9],
+                operating_status=row[10],
+                nameplate_capacity_mw=row[11],
+                net_summer_capacity_mw=row[12],
+                net_winter_capacity_mw=row[13],
+                operating_year_month=row[14],
+                planned_derate_summer_cap_mw=row[15],
+                planned_derate_year_month=row[16],
+                planned_uprate_summer_cap_mw=row[17],
+                planned_uprate_year_month=row[18],
+                planned_retirement_year_month=row[19],
+                metadata=row[20],
+                created_at=row[21],
+                updated_at=row[22],
+                plant_name=row[23],
+                state=row[24],
+                county=row[25],
+            )
 
     async def get_metric(self, *, id: int) -> Optional[models.Metric]:
         row = (await self._conn.execute(sqlalchemy.text(GET_METRIC), {"p1": id})).first()
@@ -1408,6 +1812,57 @@ class AsyncQuerier:
             metadata=row[4],
             created_at=row[5],
             updated_at=row[6],
+        )
+
+    async def upsert_eia_generator(self, arg: UpsertEIAGeneratorParams) -> Optional[models.EiaGenerator]:
+        row = (await self._conn.execute(sqlalchemy.text(UPSERT_EIA_GENERATOR), {
+            "p1": arg.compound_id,
+            "p2": arg.plant_id,
+            "p3": arg.generator_code,
+            "p4": arg.name,
+            "p5": arg.technology_description,
+            "p6": arg.energy_source_code,
+            "p7": arg.energy_source_description,
+            "p8": arg.prime_mover_code,
+            "p9": arg.prime_mover_description,
+            "p10": arg.operating_status,
+            "p11": arg.nameplate_capacity_mw,
+            "p12": arg.net_summer_capacity_mw,
+            "p13": arg.net_winter_capacity_mw,
+            "p14": arg.operating_year_month,
+            "p15": arg.planned_derate_summer_cap_mw,
+            "p16": arg.planned_derate_year_month,
+            "p17": arg.planned_uprate_summer_cap_mw,
+            "p18": arg.planned_uprate_year_month,
+            "p19": arg.planned_retirement_year_month,
+            "p20": arg.metadata,
+        })).first()
+        if row is None:
+            return None
+        return models.EiaGenerator(
+            id=row[0],
+            compound_id=row[1],
+            plant_id=row[2],
+            generator_code=row[3],
+            name=row[4],
+            technology_description=row[5],
+            energy_source_code=row[6],
+            energy_source_description=row[7],
+            prime_mover_code=row[8],
+            prime_mover_description=row[9],
+            operating_status=row[10],
+            nameplate_capacity_mw=row[11],
+            net_summer_capacity_mw=row[12],
+            net_winter_capacity_mw=row[13],
+            operating_year_month=row[14],
+            planned_derate_summer_cap_mw=row[15],
+            planned_derate_year_month=row[16],
+            planned_uprate_summer_cap_mw=row[17],
+            planned_uprate_year_month=row[18],
+            planned_retirement_year_month=row[19],
+            metadata=row[20],
+            created_at=row[21],
+            updated_at=row[22],
         )
 
     async def upsert_eia_power_plant(self, arg: UpsertEIAPowerPlantParams) -> Optional[models.EiaPowerPlant]:

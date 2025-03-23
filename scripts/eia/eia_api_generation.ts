@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 
-const PAGE_SIZE = 2500
+const PAGE_SIZE = 5000
 ;
 
 // Initialize database connection
@@ -79,35 +79,50 @@ async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE) {
 	return data;
 }
 
-// Helper function to find a matching plant ID
-async function findMatchingPlantId(item: any): Promise<number | null> {
-	// Try to find by plant code first (this is the plant ID in facility-fuel API)
+// Helper function to find matching plant and generator IDs
+async function findMatchingPlantAndGenerator(item: any): Promise<{plantId: number | null, generatorId: number | null}> {
+	// Try to find the plant first
+	let plantId = null;
+	let generatorId = null;
+	
 	if (item.plantCode) {
 		const result = await sql`
 			SELECT id FROM eia_power_plants 
 			WHERE api_plant_id = ${item.plantCode}
 		`;
 		if (result.length > 0) {
-			return result[0].id;
+			plantId = result[0].id;
+			
+			// If we have a generator ID, try to find that specific generator
+			if (item.generatorid) {
+				const compoundId = `${item.plantCode}_${item.generatorid}`;
+				const genResult = await sql`
+					SELECT id FROM eia_generators 
+					WHERE compound_id = ${compoundId}
+				`;
+				if (genResult.length > 0) {
+					generatorId = genResult[0].id;
+				}
+			}
 		}
 	}
 	
-	// If no direct match, try to find by name and state if available
-	if (item.plantName && item.stateCode) {
+	// If no direct match, try to find by name and state
+	if (!plantId && item.plantName && item.stateCode) {
 		const result = await sql`
 			SELECT id FROM eia_power_plants 
 			WHERE name = ${item.plantName} AND state = ${item.stateCode}
 		`;
 		if (result.length > 0) {
-			return result[0].id;
+			plantId = result[0].id;
 		}
 	}
 	
-	return null;
+	return { plantId, generatorId };
 }
 
 // Function to insert plant generation data
-async function createPlantGeneration(plantId: number, genData: any): Promise<void> {
+async function createPlantGeneration(plantId: number, genData: any, generatorId: number | null = null): Promise<void> {
 	// Extract generation data from API response
 	const period = genData.period || null;
 	const generation = genData.generation ? parseFloat(genData.generation) : null;
@@ -140,10 +155,11 @@ async function createPlantGeneration(plantId: number, genData: any): Promise<voi
 		}
 	}
 	
-	// Insert new generation record
+	// Insert generation record with generator_id if available
 	await sql`
 		INSERT INTO eia_plant_generation (
 			plant_id,
+			generator_id,
 			timestamp,
 			period,
 			generation,
@@ -164,6 +180,7 @@ async function createPlantGeneration(plantId: number, genData: any): Promise<voi
 			metadata
 		) VALUES (
 			${plantId},
+			${generatorId},
 			CURRENT_TIMESTAMP,
 			${period},
 			${generation},
@@ -208,13 +225,12 @@ async function processGenerationDataBatch(data: any): Promise<number> {
 			// Save the raw API response to file
 			await appendApiResponse(item);
 			
-			// The item itself contains all the data we need
-			// First check if we have a plant that matches this data
-			const plantId = await findMatchingPlantId(item);
+			// Find matching plant and generator
+			const { plantId, generatorId } = await findMatchingPlantAndGenerator(item);
 			
 			if (plantId) {
-				// Create generation record
-				await createPlantGeneration(plantId, item);
+				// Create generation record with generator ID if available
+				await createPlantGeneration(plantId, item, generatorId);
 				processedCount++;
 				
 				if (processedCount % 100 === 0) {

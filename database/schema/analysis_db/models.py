@@ -37,6 +37,33 @@ class EiaEntity:
 
 
 @dataclasses.dataclass()
+class EiaGenerator:
+    id: int
+    compound_id: str
+    plant_id: Optional[int]
+    generator_code: str
+    name: Optional[str]
+    technology_description: Optional[str]
+    energy_source_code: Optional[str]
+    energy_source_description: Optional[str]
+    prime_mover_code: Optional[str]
+    prime_mover_description: Optional[str]
+    operating_status: Optional[str]
+    nameplate_capacity_mw: Optional[float]
+    net_summer_capacity_mw: Optional[float]
+    net_winter_capacity_mw: Optional[float]
+    operating_year_month: Optional[datetime.date]
+    planned_derate_summer_cap_mw: Optional[float]
+    planned_derate_year_month: Optional[datetime.date]
+    planned_uprate_summer_cap_mw: Optional[float]
+    planned_uprate_year_month: Optional[datetime.date]
+    planned_retirement_year_month: Optional[datetime.date]
+    metadata: Optional[Any]
+    created_at: Optional[datetime.datetime]
+    updated_at: Optional[datetime.datetime]
+
+
+@dataclasses.dataclass()
 class EiaPlantCapacity:
     id: int
     plant_id: Optional[int]
@@ -60,6 +87,7 @@ class EiaPlantCapacity:
 class EiaPlantGeneration:
     id: int
     plant_id: Optional[int]
+    generator_id: Optional[int]
     timestamp: datetime.datetime
     period: Optional[str]
     generation: Optional[float]

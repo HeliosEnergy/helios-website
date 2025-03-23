@@ -217,10 +217,10 @@ SELECT
     p.metadata AS plant_metadata,
     p.created_at AS plant_created_at,
     p.updated_at AS plant_updated_at,
+    g.nameplate_capacity_mw,
+    g.net_summer_capacity_mw,
+    g.net_winter_capacity_mw,
     s.id AS stat_id,
-    s.nameplate_capacity_mw,
-    s.net_summer_capacity_mw,
-    s.net_winter_capacity_mw,
     s.planned_derate_summer_cap_mw,
     s.planned_uprate_summer_cap_mw,
     s.operating_year_month,
@@ -232,6 +232,16 @@ SELECT
     s.metadata AS stat_metadata,
     s.timestamp AS stat_timestamp
 FROM eia_power_plants as p
+LEFT JOIN (
+    SELECT 
+        plant_id,
+        SUM(nameplate_capacity_mw) AS nameplate_capacity_mw,
+        SUM(net_summer_capacity_mw) AS net_summer_capacity_mw,
+        SUM(net_winter_capacity_mw) AS net_winter_capacity_mw,
+        MAX(updated_at) AS latest_update
+    FROM eia_generators
+    GROUP BY plant_id
+) AS g ON g.plant_id = p.id
 LEFT JOIN (
     SELECT DISTINCT ON (plant_id) *
     FROM eia_plant_capacity
@@ -247,16 +257,17 @@ WHERE
     AND (sqlc.narg(operating_status)::text IS NULL OR p.operating_status = sqlc.narg(operating_status))
     AND (
         sqlc.narg(min_capacity)::float IS NULL 
-        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw >= sqlc.narg(min_capacity))
+        OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw >= sqlc.narg(min_capacity))
     )
     AND (
         sqlc.narg(max_capacity)::float IS NULL 
-        OR (s.nameplate_capacity_mw IS NOT NULL AND s.nameplate_capacity_mw <= sqlc.narg(max_capacity))
+        OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw <= sqlc.narg(max_capacity))
     );
 
 -- name: CreateEIAPlantGeneration :one
 INSERT INTO eia_plant_generation (
     plant_id,
+    generator_id,
     timestamp,
     period,
     generation,
@@ -277,6 +288,7 @@ INSERT INTO eia_plant_generation (
     metadata
 ) VALUES (
     sqlc.arg(plant_id),
+    sqlc.arg(generator_id),
     COALESCE(sqlc.arg(timestamp), CURRENT_TIMESTAMP),
     sqlc.arg(period),
     sqlc.arg(generation),
@@ -314,3 +326,89 @@ SELECT * FROM eia_plant_generation
 WHERE plant_id = sqlc.arg(plant_id)
 ORDER BY timestamp DESC
 LIMIT 1;
+
+-- name: UpsertEIAGenerator :one
+INSERT INTO eia_generators (
+    compound_id,
+    plant_id,
+    generator_code,
+    name,
+    technology_description,
+    energy_source_code,
+    energy_source_description,
+    prime_mover_code,
+    prime_mover_description,
+    operating_status,
+    nameplate_capacity_mw,
+    net_summer_capacity_mw,
+    net_winter_capacity_mw,
+    operating_year_month,
+    planned_derate_summer_cap_mw,
+    planned_derate_year_month,
+    planned_uprate_summer_cap_mw,
+    planned_uprate_year_month,
+    planned_retirement_year_month,
+    metadata
+) VALUES (
+    sqlc.arg(compound_id),
+    sqlc.arg(plant_id),
+    sqlc.arg(generator_code),
+    sqlc.arg(name),
+    sqlc.arg(technology_description),
+    sqlc.arg(energy_source_code),
+    sqlc.arg(energy_source_description),
+    sqlc.arg(prime_mover_code),
+    sqlc.arg(prime_mover_description),
+    sqlc.arg(operating_status),
+    sqlc.arg(nameplate_capacity_mw),
+    sqlc.arg(net_summer_capacity_mw),
+    sqlc.arg(net_winter_capacity_mw),
+    sqlc.arg(operating_year_month),
+    sqlc.arg(planned_derate_summer_cap_mw),
+    sqlc.arg(planned_derate_year_month),
+    sqlc.arg(planned_uprate_summer_cap_mw),
+    sqlc.arg(planned_uprate_year_month),
+    sqlc.arg(planned_retirement_year_month),
+    sqlc.arg(metadata)
+)
+ON CONFLICT (compound_id) 
+DO UPDATE SET
+    plant_id = EXCLUDED.plant_id,
+    generator_code = EXCLUDED.generator_code,
+    name = EXCLUDED.name,
+    technology_description = EXCLUDED.technology_description,
+    energy_source_code = EXCLUDED.energy_source_code,
+    energy_source_description = EXCLUDED.energy_source_description,
+    prime_mover_code = EXCLUDED.prime_mover_code,
+    prime_mover_description = EXCLUDED.prime_mover_description,
+    operating_status = EXCLUDED.operating_status,
+    nameplate_capacity_mw = EXCLUDED.nameplate_capacity_mw,
+    net_summer_capacity_mw = EXCLUDED.net_summer_capacity_mw,
+    net_winter_capacity_mw = EXCLUDED.net_winter_capacity_mw,
+    operating_year_month = EXCLUDED.operating_year_month,
+    planned_derate_summer_cap_mw = EXCLUDED.planned_derate_summer_cap_mw,
+    planned_derate_year_month = EXCLUDED.planned_derate_year_month,
+    planned_uprate_summer_cap_mw = EXCLUDED.planned_uprate_summer_cap_mw,
+    planned_uprate_year_month = EXCLUDED.planned_uprate_year_month,
+    planned_retirement_year_month = EXCLUDED.planned_retirement_year_month,
+    metadata = EXCLUDED.metadata,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING *;
+
+-- name: GetEIAGeneratorsByPlantID :many
+SELECT * FROM eia_generators
+WHERE plant_id = sqlc.arg(plant_id);
+
+-- name: GetEIAGeneratorByCompoundID :one
+SELECT * FROM eia_generators
+WHERE compound_id = sqlc.arg(compound_id);
+
+-- name: GetLatestGeneratorsByPlant :many
+SELECT 
+    g.*,
+    p.name AS plant_name,
+    p.state,
+    p.county
+FROM eia_generators g
+JOIN eia_power_plants p ON g.plant_id = p.id
+WHERE p.id = sqlc.arg(plant_id);

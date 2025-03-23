@@ -72,9 +72,9 @@ const fuelTypeColors: {[key: string]: string} = {
 	'MSW': '#996836',   // Municipal Solid Waste - Forest Green
 	'MWH': '#996836',   // Municipal Waste Heat - Forest Green
 	'OBS': '#996836',   // Other Biomass - Forest Green
-	'OBG': '#33fc00',   // Other Gas - Forest Green
+	'OBG': '#90ad5e',   // Other Gas - Forest Green
 	'WH': '#fc7f00',   // Waste Heat - Forest Green
-	'OG': '#33fc00',   // Other Gas - Forest Green
+	'OG': '#90ad5e',   // Other Gas - Forest Green
 	'WDL': '#ead6b2',   // Waste to Liquids - Forest Green
 	'RC': '#c86e33',   // Refuse Combustion - Forest Green
 	'SGC': '#ffc000',   // Solar Thermal - Forest Green
