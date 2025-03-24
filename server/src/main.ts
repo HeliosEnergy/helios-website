@@ -18,6 +18,8 @@ import { httpGetPowerPlantData } from "./routes/map_data.js";
 // Load environment variables
 dotenv.config();
 
+console.log(process.env.DB_HOST);
+
 
 	// Database configuration
 	const sql = postgres({
@@ -33,6 +35,8 @@ dotenv.config();
 	app.use(express.json());
 	app.use(cors());
 
+
+	console.log("adding route");
 	app.get("/", (req: Request, res: Response) => {
 		res.send("Hello World");
 	});
@@ -105,6 +109,8 @@ dotenv.config();
 		await sql.end();
 		process.exit(0);
 	});
+
+	console.log("listening");
 
 	app.listen(PORT, () => {
 		console.log(`Server is running on port ${PORT}`);
