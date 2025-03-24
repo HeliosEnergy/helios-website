@@ -5,6 +5,9 @@ import cors from "cors";
 import { httpGetPowerPlantData } from "./routes/map_data.js";
 import { resolve, join } from 'path';
 import { existsSync } from 'fs';
+import https from 'https';
+import http from 'http';
+import { generateSelfSignedCert } from './utils/cert.js';
 
 // Import the query functions
 import { 
@@ -20,7 +23,7 @@ import {
 // Load environment variables with fallback and error handling
 const loadEnvConfig = () => {
 	// First try in current working directory
-	const cwdEnvPath = resolve(process.cwd(), '../.env');
+	const cwdEnvPath = resolve(process.cwd(), '.env');
 	
 	console.log("cwdEnvPath",cwdEnvPath);
 
@@ -78,7 +81,7 @@ try {
 	process.exit(1);
 }
 
-const PORT = 4777;
+const PORT = parseInt(process.env.PORT || "4777");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -161,10 +164,39 @@ console.log("listening");
 
 // Wrap the server startup in a try-catch
 try {
-	app.listen(PORT, () => {
-		console.log(`Server is running on port ${PORT}`);
-		console.log(`http://localhost:${PORT}`);
-	});
+	const useHttps = process.env.USE_HTTPS === 'true';
+	
+	if (useHttps) {
+		// Check for certificate files
+		const certPath = process.env.CERT_PATH || resolve(process.cwd(), 'cert');
+		const keyFile = resolve(certPath, 'key.pem');
+		const certFile = resolve(certPath, 'cert.pem');
+		
+		// Generate certificates if they don't exist
+		if (!existsSync(keyFile) || !existsSync(certFile)) {
+			console.log('SSL certificates not found, generating self-signed certificates...');
+			await generateSelfSignedCert(certPath);
+		}
+		
+		// Read certificate files
+		const { readFileSync } = await import('fs');
+		const key = readFileSync(keyFile, 'utf8');
+		const cert = readFileSync(certFile, 'utf8');
+		
+		// Create HTTPS server
+		const httpsServer = https.createServer({ key, cert }, app);
+		
+		httpsServer.listen(PORT, () => {
+			console.log(`HTTPS Server is running on port ${PORT}`);
+			console.log(`https://localhost:${PORT}`);
+		});
+	} else {
+		// Create HTTP server (existing functionality)
+		app.listen(PORT, () => {
+			console.log(`HTTP Server is running on port ${PORT}`);
+			console.log(`http://localhost:${PORT}`);
+		});
+	}
 } catch (error) {
 	console.error('Failed to start server:', error);
 	process.exit(1);
