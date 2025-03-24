@@ -20,10 +20,21 @@ dotenv.config();
 
 console.log(process.env.DB_HOST);
 
-// Add this right after the imports, before any other code
-process.on('unhandledRejection', (reason, promise) => {
-	console.error('Unhandled Rejection at:', promise);
+// Replace the existing unhandledRejection handler with this more detailed one
+process.on('unhandledRejection', (reason: any, promise) => {
+	console.error('=== Unhandled Promise Rejection ===');
+	console.error('Promise:', promise);
 	console.error('Reason:', reason);
+	if (reason instanceof Error) {
+		console.error('Stack:', reason.stack);
+	}
+	if (reason && reason.code) {
+		console.error('Error code:', reason.code);
+	}
+	if (reason && reason.message) {
+		console.error('Error message:', reason.message);
+	}
+	console.error('===============================');
 });
 
 // Database configuration
