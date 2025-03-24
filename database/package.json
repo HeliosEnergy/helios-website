@@ -1,8 +1,8 @@
 {
     "name": "@helios/analysis_db",
     "version": "1.0.0",
-    "main": "analysis_db/query_sql.ts",
-    "types": "analysis_db/query_sql.ts",
+    "main": "dist/schema/analysis_db/query_sql.js",
+    "types": "dist/schema/analysis_db/query_sql.d.ts",
     "private": true,
     "type": "module",
     "scripts": {
