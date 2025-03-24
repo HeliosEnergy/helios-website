@@ -8,7 +8,7 @@ import postgres from "postgres";
  * Get power plant data with latest statistics
  * Supports filtering by fuel_type, state, operating_status, min_capacity, and max_capacity
  */
-export async function httpGetPowerPlantData(sql: postgres.Sql<{}>): Promise<(request: Request, response: Response) => Promise<any>> {
+export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
 
 	return async function (request: Request, response: Response) {
 		try {

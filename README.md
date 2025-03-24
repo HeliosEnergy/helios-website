@@ -44,3 +44,9 @@ Scrapes various cloud platforms to obtain real-time pricing info.
 
 # Database
 
+
+
+# Misc things
+
+curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | sudo sh
+

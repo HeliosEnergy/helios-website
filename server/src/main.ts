@@ -94,7 +94,7 @@ async function main() {
 				res.send("Map data");
 			});
 
-			map_data.get("/power_plants", await httpGetPowerPlantData(sql));
+			map_data.get("/power_plants", httpGetPowerPlantData(sql));
 		}
 		api.use("/map_data", map_data);
 	}
