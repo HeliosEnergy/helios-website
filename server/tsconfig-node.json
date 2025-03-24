@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["../database/schema/**/*.ts"]
 } 
