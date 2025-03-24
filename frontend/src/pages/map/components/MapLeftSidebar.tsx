@@ -211,12 +211,12 @@ export function MapLeftSidebar({
 				</div>
 
 				<div style={{ marginBottom: '10px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>Capacity Weight: {capacityWeight.toFixed(1)}</label>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Capacity Weight: {capacityWeight.toFixed(2)}</label>
 					<input 
 						type="range" 
 						min="0" 
-						max="4" 
-						step="0.02"
+						max="3" 
+						step="0.01"
 						value={capacityWeight}
 						onChange={(e) => throttledSetCapacityWeight(parseFloat(e.target.value))}
 						style={{ width: '100%' }}

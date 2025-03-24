@@ -74,7 +74,7 @@ async function appendApiResponse(record: any): Promise<void> {
 // 		&length=5000
 const API_URL_GENERATION_CAPACITY = "https://api.eia.gov/v2/electricity/operating-generator-capacity/data/";
 
-async function getPageOfGenerationCapacity(page: number, pageSize: number = PAGE_SIZE) {
+async function getPageOfGenerationCapacity(page: number, pageSize: number = PAGE_SIZE, retryCount: number = 0, maxRetries: number = 3) {
 	const url = `${API_URL_GENERATION_CAPACITY}`
 		+ `?api_key=${process.env.EIA_API_KEY}`
 		+ `&offset=${page * pageSize}`
@@ -97,13 +97,29 @@ async function getPageOfGenerationCapacity(page: number, pageSize: number = PAGE
 		// Check if we got an error response
 		if (data.error) {
 			console.log(`API returned error: ${data.error} (code: ${data.code})`);
-			return { response: { data: [] } }; // Return empty data to signal end of pagination
+			
+			// Implement retry logic with 3-second delay
+			if (retryCount < maxRetries) {
+				console.log(`Waiting 3 seconds before retry ${retryCount + 1}/${maxRetries}...`);
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				return getPageOfGenerationCapacity(page, pageSize, retryCount + 1, maxRetries);
+			}
+			
+			return { response: { data: [] } }; // Return empty data after max retries
 		}
 		
 		return data;
 	} catch (error) {
 		console.error(`Error fetching data from API: ${error}`);
-		return { response: { data: [] } }; // Return empty data to signal end of pagination
+		
+		// Implement retry logic with 3-second delay for network errors too
+		if (retryCount < maxRetries) {
+			console.log(`Waiting 3 seconds before retry ${retryCount + 1}/${maxRetries}...`);
+			await new Promise(resolve => setTimeout(resolve, 3000));
+			return getPageOfGenerationCapacity(page, pageSize, retryCount + 1, maxRetries);
+		}
+		
+		return { response: { data: [] } }; // Return empty data after max retries
 	}
 }
 
@@ -539,24 +555,48 @@ async function main() {
 		// Reset the API responses file at the start
 		await resetApiResponsesFile();
 		
-		// First, get the data and log the structure
-		const sampleData = await getPageOfGenerationCapacity(0, 3);
+		// Parse command line arguments for starting point
+		const args = process.argv.slice(2);
+		let startingPoint = 0;
 		
-		console.log('API Response Structure:');
-		console.log('Response keys:', JSON.stringify(sampleData, null, 4));
+		if (args.length > 0) {
+			const parsedValue = parseInt(args[0], 10);
+			if (!isNaN(parsedValue) && parsedValue >= 0) {
+				startingPoint = parsedValue;
+				console.log(`Starting from point: ${startingPoint}`);
+			} else {
+				console.warn(`Invalid starting point provided: ${args[0]}. Starting from 0.`);
+			}
+		}
 		
-		if (sampleData.response && sampleData.response.data && sampleData.response.data.length > 0) {
-			console.log('First item keys:', Object.keys(sampleData.response.data[0]));
-			console.log('First item sample:', JSON.stringify(sampleData.response.data[0], null, 2));
+		// Calculate initial page number based on starting point
+		let page = Math.floor(startingPoint / PAGE_SIZE);
+		// Calculate the offset within the page
+		const offset = startingPoint % PAGE_SIZE;
+		
+		console.log(`Starting from page ${page} (offset ${offset})`);
+		
+		// First, get the data and log the structure - only if starting from beginning
+		if (page === 0) {
+			const sampleData = await getPageOfGenerationCapacity(0, 3);
+			
+			console.log('API Response Structure:');
+			console.log('Response keys:', JSON.stringify(sampleData, null, 4));
+			
+			if (sampleData.response && sampleData.response.data && sampleData.response.data.length > 0) {
+				console.log('First item keys:', Object.keys(sampleData.response.data[0]));
+				console.log('First item sample:', JSON.stringify(sampleData.response.data[0], null, 2));
+			}
 		}
 		
 		// Now continue with normal processing
-		let page = 0;
 		let totalProcessed = 0;
 		let hasMoreData = true;
 		let finalResponse = null;
+		let consecutiveEmptyResponses = 0;
+		const maxConsecutiveEmptyResponses = 3; // Allow up to 3 consecutive empty responses before giving up
 		
-		console.log("Starting EIA API capacity data import...");
+		console.log(`Starting EIA API capacity data import from page ${page}...`);
 		
 		while (hasMoreData) {
 			const data = await getPageOfGenerationCapacity(page);
@@ -566,10 +606,25 @@ async function main() {
 			
 			// Check if we got valid data
 			if (!data.response || !data.response.data || data.response.data.length === 0) {
-				console.log(`No more data to process at page ${page}`);
-				hasMoreData = false;
-				break;
+				console.log(`No data received for page ${page}`);
+				
+				// Count consecutive empty responses
+				consecutiveEmptyResponses++;
+				
+				if (consecutiveEmptyResponses >= maxConsecutiveEmptyResponses) {
+					console.log(`Received ${maxConsecutiveEmptyResponses} consecutive empty responses. Stopping.`);
+					hasMoreData = false;
+					break;
+				}
+				
+				console.log(`Waiting 3 seconds before trying next page...`);
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				page++; // Still move to next page
+				continue;
 			}
+			
+			// Reset counter when we get data
+			consecutiveEmptyResponses = 0;
 			
 			// Process this batch
 			const processedCount = await processDataBatch(data);

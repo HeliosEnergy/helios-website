@@ -69,6 +69,12 @@ const getRadiusByCapacity = (capacity: number, zoomLevel: number, sizeMultiplier
 	return ((baseRadius + capacityComponent) * sizeMultiplier) / 100;
 };
 
+// Function to calculate outline weight based on zoom level
+const getOutlineWeightByZoom = (zoomLevel: number) => {
+	// Min weight at zoom level 4, max weight at zoom level 18
+	return Math.max(0.5, Math.min(2, zoomLevel / 9));
+};
+
 export function MapLeafletPage() {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const mapInstanceRef = useRef<L.Map | null>(null);
@@ -141,6 +147,12 @@ export function MapLeafletPage() {
 				<h3>${plant.name}</h3>
 				<p><strong>ID:</strong> ${plant.id}</p>
 				<p><strong>Location:</strong> ${plant.county ? `${plant.county} County, ` : ''}${plant.state || ''}</p>
+				<p><strong>Coordinates:</strong>
+					<!--${plant.latitude.toFixed(6)}, ${plant.longitude.toFixed(6)}-->
+					<a href="https://www.google.com/maps?q=${plant.latitude},${plant.longitude}" target="_blank" rel="noopener noreferrer">
+						View on Google Maps
+					</a>
+				</p>
 				<p><strong>Fuel Type:</strong> ${plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type] || plant.fuel_type) : 'Unknown'}</p>
 				<p><strong>Capacity:</strong> ${
 					visualParams.showSummerCapacity && plant.net_summer_capacity_mw 
@@ -368,6 +380,7 @@ ${JSON.stringify({
 		
 		const handleZoom = () => {
 			const newZoomLevel = map.getZoom();
+			const outlineWeight = getOutlineWeightByZoom(newZoomLevel);
 			
 			markerRefs.current.forEach((marker, plantId) => {
 				const plant = powerPlants.find(p => p.id === plantId);
@@ -379,6 +392,9 @@ ${JSON.stringify({
 						visualParams.capacityWeight
 					);
 					marker.setRadius(newRadius);
+					marker.setStyle({
+						weight: outlineWeight
+					});
 				}
 			});
 		};

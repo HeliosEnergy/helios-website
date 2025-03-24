@@ -2,8 +2,8 @@
 
 const API_URL = "https://api.eia.gov/v2/electricity/operating-generator-capacity/data"
     + "?api_key=8EZBDmU1ZWDXD9aF3cVfT1zrn2YSx2A4xGmAw5aC"
-    + "&offset=12501"
-    + "&length=2500"
+    + "&offset=100000"
+    + "&length=5000"
     + "&data[0]=county"
     + "&data[1]=latitude"
     + "&data[2]=longitude"
