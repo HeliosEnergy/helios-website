@@ -5,7 +5,7 @@ set -e
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
     mkdir -p "$PGDATA"
     chown -R postgres:postgres "$PGDATA"
-    su postgres -c "/usr/lib/postgresql/17/bin/initdb -D $PGDATA"
+    su postgres -c "pg_ctl initdb -D $PGDATA"
 fi
 
 # Start PostgreSQL

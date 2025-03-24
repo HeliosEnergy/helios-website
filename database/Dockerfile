@@ -6,6 +6,7 @@ ARG POSTGRES_PASSWORD
 # Pre-configure timezone to avoid interactive prompt
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
+ENV PATH="/usr/lib/postgresql/17/bin:${PATH}"
 
 RUN apt-get update
 RUN apt-get install -y \
