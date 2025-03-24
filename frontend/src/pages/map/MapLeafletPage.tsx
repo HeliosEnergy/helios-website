@@ -205,7 +205,10 @@ ${JSON.stringify({
 				if (filters.max_capacity !== null) queryParams.append('max_capacity', filters.max_capacity.toString());
 				
 				// Get API URL from environment variable or use default
-				const API_SERVER_URL = import.meta.env.API_SERVER_URL || 'http://localhost:4777';
+				const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL;
+				if (!API_SERVER_URL) {
+					throw new Error('API_SERVER_URL is not defined');
+				}
 				const url = `${API_SERVER_URL}/api/map_data/power_plants?${queryParams.toString()}`;
 				
 				const response = await fetch(url);
