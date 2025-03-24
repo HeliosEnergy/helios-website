@@ -33,7 +33,7 @@ services:
     ports:
       - "6432:5432"
     volumes:
-      - ./data/timescaledb:/var/lib/postgresql/data
+      - timescaledb_data:/var/lib/postgresql/data
       - ./database/schema:/app/database/schema
     restart: unless-stopped
     networks:
