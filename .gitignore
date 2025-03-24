@@ -7,4 +7,4 @@ data/temp/*
 node_modules
 
 data/grafana
-./server/dist
+server/dist

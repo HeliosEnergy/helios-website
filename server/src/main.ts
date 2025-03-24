@@ -19,7 +19,6 @@ import { httpGetPowerPlantData } from "./routes/map_data.js";
 dotenv.config();
 
 
-async function main() {
 	// Database configuration
 	const sql = postgres({
 		host: process.env.DB_HOST,
@@ -111,6 +110,3 @@ async function main() {
 		console.log(`Server is running on port ${PORT}`);
 		console.log(`http://localhost:${PORT}`);
 	});
-}
-
-main();
