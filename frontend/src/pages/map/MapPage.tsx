@@ -1,27 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import React from 'react';
-import { Helmet } from 'react-helmet';
 
 const MapLeftSidebar = React.lazy(() => import('./components/MapLeftSidebar'));
 
 const leftSideBarClosedWidth = 32;
 const leftSideBarOpenWidth = 300;
 
-// Define the power plant data interface for TypeScript type checking
-interface PowerPlant {
-	id: number;
-	name: string;
-	latitude: number;
-	longitude: number;
-	fuel_type: string;
-	nameplate_capacity_mw: number;
-	net_summer_capacity_mw?: number;
-	net_winter_capacity_mw?: number;
-	operating_status: string;
-	county?: string;
-	state?: string;
-	last_updated?: string;
-}
 
 // Simple debounce function without dependencies
 function createDebounce(fn: Function, delay: number) {

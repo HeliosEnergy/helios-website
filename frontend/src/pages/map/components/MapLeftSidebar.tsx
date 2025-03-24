@@ -27,7 +27,6 @@ interface MapLeftSidebarProps {
 }
 
 export function MapLeftSidebar({ 
-	open, 
 	setOpen, 
 	showSummerCapacity, 
 	setShowSummerCapacity,
