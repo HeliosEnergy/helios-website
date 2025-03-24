@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Select from 'react-select';
 
 interface MapLeftSidebarProps {
@@ -146,6 +146,38 @@ export function MapLeftSidebar({
 		).filter(Boolean);
 	};
 
+	// Add this function at the component level
+	function createThrottle(func: Function, limit: number) {
+		let inThrottle = false;
+		let lastArgs: any[] | null = null;
+		
+		return function(...args: any[]) {
+			lastArgs = args;
+			
+			if (!inThrottle) {
+				func(...args);
+				inThrottle = true;
+				
+				setTimeout(() => {
+					inThrottle = false;
+					if (lastArgs) {
+						func(...lastArgs);
+						lastArgs = null;
+					}
+				}, limit);
+			}
+		};
+	}
+
+	// Create throttled updaters
+	const throttledSetSizeMultiplier = useRef(createThrottle((value: number) => {
+		setSizeMultiplier(value);
+	}, 100)).current;
+	
+	const throttledSetCapacityWeight = useRef(createThrottle((value: number) => {
+		setCapacityWeight(value);
+	}, 100)).current;
+
 	return (
 		<div style={{ width: '100%', height: '100%', overflow: 'auto', color: 'white', padding: '16px', boxSizing: 'border-box' }}>
 			<div style={{width:"100%", height: "30px"}}>
@@ -173,7 +205,7 @@ export function MapLeftSidebar({
 						min="1" 
 						max="50" 
 						value={sizeMultiplier}
-						onChange={(e) => setSizeMultiplier(parseInt(e.target.value))}
+						onChange={(e) => throttledSetSizeMultiplier(parseInt(e.target.value))}
 						style={{ width: '100%' }}
 					/>
 				</div>
@@ -186,7 +218,7 @@ export function MapLeftSidebar({
 						max="4" 
 						step="0.02"
 						value={capacityWeight}
-						onChange={(e) => setCapacityWeight(parseFloat(e.target.value))}
+						onChange={(e) => throttledSetCapacityWeight(parseFloat(e.target.value))}
 						style={{ width: '100%' }}
 					/>
 					<small style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: '#aaa' }}>

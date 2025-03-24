@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import MapPage from "./pages/map/MapPage";
 import App from "./App";
+import { MapLeafletPage } from "./pages/map/MapLeafletPage";
 export const router = createBrowserRouter([
 	{
 		path: "/",
@@ -13,6 +14,10 @@ export const router = createBrowserRouter([
 			{
 				path: "/map",
 				element: <MapPage />
+			},
+			{
+				path: "/map-leaflet",
+				element: <MapLeafletPage />
 			}
 		]
 	}
