@@ -20,8 +20,10 @@ import {
 // Load environment variables with fallback and error handling
 const loadEnvConfig = () => {
 	// First try in current working directory
-	const cwdEnvPath = resolve(process.cwd(), '.env');
+	const cwdEnvPath = resolve(process.cwd(), '../.env');
 	
+	console.log("cwdEnvPath",cwdEnvPath);
+
 	if (existsSync(cwdEnvPath)) {
 		console.log(`Loading .env from: ${cwdEnvPath}`);
 		return dotenv.config({ path: cwdEnvPath });
@@ -42,7 +44,7 @@ const loadEnvConfig = () => {
 
 loadEnvConfig();
 
-console.log(process.env.DB_HOST);
+console.log("DB HOST",process.env.DB_HOST);
 
 // Replace the existing unhandledRejection handler with this more detailed one
 process.on('unhandledRejection', (reason: any, promise) => {
