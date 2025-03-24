@@ -2,6 +2,9 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import postgres from "postgres";
 import cors from "cors";
+import { httpGetPowerPlantData } from "./routes/map_data.js";
+import { resolve, join } from 'path';
+import { existsSync } from 'fs';
 
 // Import the query functions
 import { 
@@ -13,10 +16,31 @@ import {
 	deleteMetric,
 	getMetricsByName
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
-import { httpGetPowerPlantData } from "./routes/map_data.js";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables with fallback and error handling
+const loadEnvConfig = () => {
+	// First try in current working directory
+	const cwdEnvPath = resolve(process.cwd(), '.env');
+	
+	if (existsSync(cwdEnvPath)) {
+		console.log(`Loading .env from: ${cwdEnvPath}`);
+		return dotenv.config({ path: cwdEnvPath });
+	}
+	
+	// Then try one directory up
+	const parentEnvPath = resolve(process.cwd(), '..', '.env');
+	
+	if (existsSync(parentEnvPath)) {
+		console.log(`Loading .env from: ${parentEnvPath}`);
+		return dotenv.config({ path: parentEnvPath });
+	}
+	
+	// If neither location has a .env file, error out
+	console.error('ERROR: No .env file found in current directory or parent directory');
+	process.exit(1);
+};
+
+loadEnvConfig();
 
 console.log(process.env.DB_HOST);
 
