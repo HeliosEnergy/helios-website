@@ -313,23 +313,23 @@ export function MapLeftSidebar({
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
 								<div style={{ width: '12px', height: '12px', backgroundColor: '#00ff00', marginRight: '5px' }}></div>
-								&lt;20%
+								&lt;{Math.round((filters.max_capacity_factor || 100) * 0.2)}%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
 								<div style={{ width: '12px', height: '12px', backgroundColor: '#88ff00', marginRight: '5px' }}></div>
-								20-40%
+								{Math.round((filters.max_capacity_factor || 100) * 0.2)}-{Math.round((filters.max_capacity_factor || 100) * 0.4)}%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
 								<div style={{ width: '12px', height: '12px', backgroundColor: '#ffff00', marginRight: '5px' }}></div>
-								40-60%
+								{Math.round((filters.max_capacity_factor || 100) * 0.4)}-{Math.round((filters.max_capacity_factor || 100) * 0.6)}%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
 								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff8800', marginRight: '5px' }}></div>
-								60-80%
+								{Math.round((filters.max_capacity_factor || 100) * 0.6)}-{Math.round((filters.max_capacity_factor || 100) * 0.8)}%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center' }}>
 								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff0000', marginRight: '5px' }}></div>
-								&gt;80%
+								&gt;{Math.round((filters.max_capacity_factor || 100) * 0.8)}%
 							</div>
 						</div>
 					)}

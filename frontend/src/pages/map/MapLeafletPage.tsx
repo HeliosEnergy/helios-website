@@ -133,14 +133,23 @@ const getOutlineWeightByZoom = (zoomLevel: number) => {
 	return Math.max(0.5, Math.min(2, zoomLevel / 9));
 };
 
-// Add capacity factor color mapping - memoize this for performance
-const getCapacityFactorColor = (capacityFactor: number | undefined | null): string => {
+// Define a non-hook version of the capacity factor color function
+const calculateCapacityFactorColor = (capacityFactor: number | undefined | null, maxCapacityFactor: number | null = 100): string => {
 	if (capacityFactor === undefined || capacityFactor === null) return '#444444'; // Dark gray for unknown/N/A
 	
-	if (capacityFactor < 20) return '#00ff00'; // Bright green for very low
-	if (capacityFactor < 40) return '#88ff00'; // Light green for low
-	if (capacityFactor < 60) return '#ffff00'; // Yellow for medium
-	if (capacityFactor < 80) return '#ff8800'; // Orange for good
+	// Use either the filter's max capacity factor or default to 100%
+	const actualMaxCapacity = maxCapacityFactor || 100;
+	
+	// Scale thresholds based on max capacity factor
+	const threshold1 = actualMaxCapacity * 0.2; // 20% of max
+	const threshold2 = actualMaxCapacity * 0.4; // 40% of max
+	const threshold3 = actualMaxCapacity * 0.6; // 60% of max
+	const threshold4 = actualMaxCapacity * 0.8; // 80% of max
+	
+	if (capacityFactor < threshold1) return '#00ff00'; // Bright green for very low
+	if (capacityFactor < threshold2) return '#88ff00'; // Light green for low
+	if (capacityFactor < threshold3) return '#ffff00'; // Yellow for medium
+	if (capacityFactor < threshold4) return '#ff8800'; // Orange for good
 	return '#ff0000'; // Red for excellent
 };
 
@@ -176,6 +185,13 @@ export function MapLeafletPage() {
 		}
 	});
 	
+	// Memoized capacity factor color calculation (inside component)
+	const getCapacityFactorColor = useCallback(
+		(capacityFactor: number | undefined | null, maxCapacityFactor: number | null = 100): string => {
+			return calculateCapacityFactorColor(capacityFactor, maxCapacityFactor);
+		}, 
+		[]
+	);
 
 	const defaultPosition: [number, number] = [39.8283, -98.5795];
 	
@@ -184,14 +200,15 @@ export function MapLeafletPage() {
 	
 	const capacityFactorColorMap = useMemo(() => {
 		const map = new Map<number, string>();
+		const maxCap = filterParams.filters.max_capacity_factor || 100;
 		
 		// Precompute colors for common capacity factor values
-		for (let i = 0; i <= 100; i += 5) {
-			map.set(i, getCapacityFactorColor(i));
+		for (let i = 0; i <= maxCap; i += 5) {
+			map.set(i, getCapacityFactorColor(i, maxCap));
 		}
 		
 		return map;
-	}, []);
+	}, [filterParams.filters.max_capacity_factor, getCapacityFactorColor]);
 	
 
 	const getPlantColor = useCallback((plant: PowerPlant, useCapacityFactor: boolean): string => {
@@ -203,13 +220,13 @@ export function MapLeafletPage() {
 			
 			// Round to nearest 5 to use from map or compute directly if needed
 			const roundedFactor = Math.round(plant.capacity_factor / 5) * 5;
-			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor);
+			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor);
 		}
 		
 		return plant.fuel_type && fuelTypeColors[plant.fuel_type] 
 			? fuelTypeColors[plant.fuel_type] 
 			: '#3388ff';
-	}, [capacityFactorColorMap]);
+	}, [capacityFactorColorMap, filterParams.filters.max_capacity_factor]);
 	
 	// Listen for messages from parent page
 	useEffect(() => {
@@ -277,7 +294,7 @@ export function MapLeafletPage() {
 				}</p>
 				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
 				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor ? 
-					`<span style="background-color: black; padding-left: 4px; padding-right: 4px; color: ${getCapacityFactorColor(plant.capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
+					`<span style="background-color: black; padding-left: 4px; padding-right: 4px; color: ${getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
 					: 'N/A'}</p>
 				
 				${plant.generation ? `
