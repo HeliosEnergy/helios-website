@@ -185,6 +185,14 @@ export function MapLeftSidebar({
 		setCapacityWeight(value);
 	}, 100)).current;
 
+	const throttledSetMinCapacityFactor = useRef(createThrottle((value: number) => {
+		handleFilterChange('min_capacity_factor', value);
+	}, 100)).current;
+
+	const throttledSetMaxCapacityFactor = useRef(createThrottle((value: number) => {
+		handleFilterChange('max_capacity_factor', value);
+	}, 100)).current;
+
 	return (
 		<div style={{ width: '100%', height: '100%', overflow: 'auto', color: 'white', padding: '16px', boxSizing: 'border-box' }}>
 			<div style={{width:"100%", height: "30px"}}>
@@ -362,10 +370,10 @@ export function MapLeftSidebar({
 							const newValue = parseInt(e.target.value);
 							// Ensure min doesn't exceed max
 							if (filters.max_capacity_factor === null || newValue <= filters.max_capacity_factor) {
-								handleFilterChange('min_capacity_factor', newValue);
+								throttledSetMinCapacityFactor(newValue);
 							} else {
 								// If min would exceed max, set min to max
-								handleFilterChange('min_capacity_factor', filters.max_capacity_factor);
+								throttledSetMinCapacityFactor(filters.max_capacity_factor);
 							}
 						}}
 						style={{ width: '100%' }}
@@ -384,10 +392,10 @@ export function MapLeftSidebar({
 							const newValue = parseInt(e.target.value);
 							// Ensure max is not less than min
 							if (filters.min_capacity_factor === null || newValue >= filters.min_capacity_factor) {
-								handleFilterChange('max_capacity_factor', newValue);
+								throttledSetMaxCapacityFactor(newValue);
 							} else {
 								// If max would be less than min, set max to min
-								handleFilterChange('max_capacity_factor', filters.min_capacity_factor);
+								throttledSetMaxCapacityFactor(filters.min_capacity_factor);
 							}
 						}}
 						style={{ width: '100%' }}

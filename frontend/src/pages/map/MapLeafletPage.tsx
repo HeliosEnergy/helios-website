@@ -1,6 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+
+// Add efficient debounce implementation
+function useDebounce<T>(value: T, delay: number): T {
+	const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+	useEffect(() => {
+		const handler = setTimeout(() => {
+			setDebouncedValue(value);
+		}, delay);
+
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [value, delay]);
+
+	return debouncedValue;
+}
 
 // Define the power plant data interface
 interface PowerPlant {
@@ -89,7 +106,7 @@ const getOutlineWeightByZoom = (zoomLevel: number) => {
 	return Math.max(0.5, Math.min(2, zoomLevel / 9));
 };
 
-// Add capacity factor color mapping
+// Add capacity factor color mapping - memoize this for performance
 const getCapacityFactorColor = (capacityFactor: number | undefined | null): string => {
 	if (capacityFactor === undefined || capacityFactor === null) return '#888888'; // Gray for unknown
 	
@@ -134,6 +151,34 @@ export function MapLeafletPage() {
 	
 	// Default map location (center of US)
 	const defaultPosition: [number, number] = [39.8283, -98.5795];
+	
+	// Debounce filter changes for better performance
+	const debouncedFilters = useDebounce(filterParams.filters, 300);
+	
+	// Memoize capacity factor colors
+	const capacityFactorColorMap = useMemo(() => {
+		const map = new Map<number, string>();
+		
+		// Precompute colors for common capacity factor values
+		for (let i = 0; i <= 100; i += 5) {
+			map.set(i, getCapacityFactorColor(i));
+		}
+		
+		return map;
+	}, []);
+	
+	// Optimize color lookup with memoization
+	const getPlantColor = useCallback((plant: PowerPlant, useCapacityFactor: boolean): string => {
+		if (useCapacityFactor && plant.capacity_factor !== null && plant.capacity_factor !== undefined) {
+			// Round to nearest 5 to use from map or compute directly if needed
+			const roundedFactor = Math.round(plant.capacity_factor / 5) * 5;
+			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor);
+		}
+		
+		return plant.fuel_type && fuelTypeColors[plant.fuel_type] 
+			? fuelTypeColors[plant.fuel_type] 
+			: '#3388ff';
+	}, [capacityFactorColorMap]);
 	
 	// Listen for messages from parent page
 	useEffect(() => {
@@ -240,7 +285,7 @@ ${JSON.stringify({
 		`;
 	}
 	
-	// Fetch power plant data from the API when filters change
+	// Fetch power plant data from the API when debounced filters change
 	useEffect(() => {
 		const fetchData = async () => {
 			setIsLoading(true);
@@ -249,7 +294,7 @@ ${JSON.stringify({
 			try {
 				// Build query string from filters
 				const queryParams = new URLSearchParams();
-				const filters = filterParams.filters;
+				const filters = debouncedFilters;
 				
 				if (filters.fuel_type) queryParams.append('fuel_type', filters.fuel_type);
 				
@@ -297,7 +342,7 @@ ${JSON.stringify({
 		};
 		
 		fetchData();
-	}, [filterParams.filters]);
+	}, [debouncedFilters]);
 	
 	// Initialize map
 	useEffect(() => {
@@ -327,7 +372,7 @@ ${JSON.stringify({
 		};
 	}, []); // Empty dependency array ensures this runs only once on mount
 	
-	// Update markers when power plants data changes
+	// Update markers when power plants data changes - use the optimized color function
 	useEffect(() => {
 		if (!mapInstanceRef.current || !markersLayerRef.current || isLoading) return;
 		
@@ -350,68 +395,84 @@ ${JSON.stringify({
 			}
 		}
 		
-		// Add or update markers
-		powerPlants.forEach(plant => {
-			// Skip plants without valid coordinates
-			if (!plant.latitude || !plant.longitude) return;
+		// Add or update markers - with batch updates for better performance
+		const batchSize = 100;
+		const batches = Math.ceil(powerPlants.length / batchSize);
+		
+		const processBatch = (batchIndex: number) => {
+			if (batchIndex >= batches) return;
 			
-			// Get color based on fuel type or capacity factor
-			const color = visualParams.colorByCapacityFactor && plant.capacity_factor !== null && plant.capacity_factor !== undefined
-				? getCapacityFactorColor(plant.capacity_factor)
-				: (plant.fuel_type && fuelTypeColors[plant.fuel_type] 
-					? fuelTypeColors[plant.fuel_type] 
-					: '#3388ff');
+			const startIdx = batchIndex * batchSize;
+			const endIdx = Math.min(startIdx + batchSize, powerPlants.length);
 			
-			// Calculate radius based on capacity
-			const radius = plant.nameplate_capacity_mw 
-				? getRadiusByCapacity(
-						plant.nameplate_capacity_mw, 
-						zoomLevel, 
-						visualParams.sizeMultiplier, 
-						visualParams.capacityWeight
-					)
-				: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
-			
-			const existingMarker = markerRefs.current.get(plant.id);
-			
-			if (existingMarker) {
-				// Update existing marker
-				existingMarker.setRadius(radius);
-				existingMarker.setLatLng([plant.latitude, plant.longitude]);
-				existingMarker.setStyle({
-					fillColor: color,
-					color: '#000',
-					weight: 2,
-					opacity: 1,
-					fillOpacity: 0.8
-				});
+			for (let i = startIdx; i < endIdx; i++) {
+				const plant = powerPlants[i];
 				
-				// Update popup
-				existingMarker.unbindPopup();
-				existingMarker.bindPopup(createPopupContent(plant));
-			} else {
-				// Create new marker
-				const circleMarker = L.circleMarker([plant.latitude, plant.longitude], {
-					radius: radius,
-					fillColor: color,
-					color: '#000',
-					weight: 2,
-					opacity: 1,
-					fillOpacity: 0.8
-				});
+				// Skip plants without valid coordinates
+				if (!plant.latitude || !plant.longitude) continue;
 				
-				// Store plant ID on marker for future reference
-				(circleMarker as any)._plantId = plant.id;
+				// Get color using optimized function
+				const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
 				
-				// Bind popup
-				circleMarker.bindPopup(createPopupContent(plant));
+				// Calculate radius based on capacity
+				const radius = plant.nameplate_capacity_mw 
+					? getRadiusByCapacity(
+							plant.nameplate_capacity_mw, 
+							zoomLevel, 
+							visualParams.sizeMultiplier, 
+							visualParams.capacityWeight
+						)
+					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
 				
-				// Add to layer and reference map
-				markersLayer.addLayer(circleMarker);
-				markerRefs.current.set(plant.id, circleMarker);
+				const existingMarker = markerRefs.current.get(plant.id);
+				
+				if (existingMarker) {
+					// Update existing marker
+					existingMarker.setRadius(radius);
+					existingMarker.setLatLng([plant.latitude, plant.longitude]);
+					existingMarker.setStyle({
+						fillColor: color,
+						color: '#000',
+						weight: 2,
+						opacity: 1,
+						fillOpacity: 0.8
+					});
+					
+					// Update popup
+					existingMarker.unbindPopup();
+					existingMarker.bindPopup(createPopupContent(plant));
+				} else {
+					// Create new marker
+					const circleMarker = L.circleMarker([plant.latitude, plant.longitude], {
+						radius: radius,
+						fillColor: color,
+						color: '#000',
+						weight: 2,
+						opacity: 1,
+						fillOpacity: 0.8
+					});
+					
+					// Store plant ID on marker for future reference
+					(circleMarker as any)._plantId = plant.id;
+					
+					// Bind popup
+					circleMarker.bindPopup(createPopupContent(plant));
+					
+					// Add to layer and reference map
+					markersLayer.addLayer(circleMarker);
+					markerRefs.current.set(plant.id, circleMarker);
+				}
 			}
-		});
-	}, [powerPlants, isLoading]);
+			
+			// Process next batch on next animation frame for smooth UI
+			if (batchIndex + 1 < batches) {
+				requestAnimationFrame(() => processBatch(batchIndex + 1));
+			}
+		};
+		
+		// Start processing the first batch
+		processBatch(0);
+	}, [powerPlants, isLoading, visualParams, getPlantColor]);
 	
 	// Update marker sizes when visual parameters change
 	useEffect(() => {
