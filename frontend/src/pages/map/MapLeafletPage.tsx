@@ -176,13 +176,12 @@ export function MapLeafletPage() {
 		}
 	});
 	
-	// Default map location (center of US)
+
 	const defaultPosition: [number, number] = [39.8283, -98.5795];
 	
-	// Debounce filter changes for better performance
-	const debouncedFilters = useDebounce(filterParams.filters, 300);
+	// Debounce filter changes for better performance (using a moderate value)
+	const debouncedFilters = useDebounce(filterParams.filters, 150);
 	
-	// Memoize capacity factor colors
 	const capacityFactorColorMap = useMemo(() => {
 		const map = new Map<number, string>();
 		
@@ -194,7 +193,7 @@ export function MapLeafletPage() {
 		return map;
 	}, []);
 	
-	// Optimize color lookup with memoization
+
 	const getPlantColor = useCallback((plant: PowerPlant, useCapacityFactor: boolean): string => {
 		if (useCapacityFactor) {
 			if (plant.capacity_factor === null || plant.capacity_factor === undefined) {
@@ -435,53 +434,46 @@ ${JSON.stringify({
 			}
 		}
 		
-		// Add or update markers - with batch updates for better performance
-		const batchSize = 100;
-		const batches = Math.ceil(powerPlants.length / batchSize);
+		const batchSize = 2000;
 		
-		const processBatch = (batchIndex: number) => {
-			if (batchIndex >= batches) return;
+		// Plants to process
+		const plantsToProcess = [...powerPlants];
+		let processedCount = 0;
+		
+		// Process plants in chunks to avoid blocking the UI
+		const processNextBatch = () => {
+			// Calculate the end index for this batch
+			const endIdx = Math.min(processedCount + batchSize, plantsToProcess.length);
 			
-			const startIdx = batchIndex * batchSize;
-			const endIdx = Math.min(startIdx + batchSize, powerPlants.length);
+			// Temporary arrays for this batch
+			const newMarkersInBatch: L.CircleMarker[] = [];
+			const markersToUpdateInBatch: [L.CircleMarker, PowerPlant][] = [];
 			
-			for (let i = startIdx; i < endIdx; i++) {
-				const plant = powerPlants[i];
+			// Process a batch of plants
+			for (let i = processedCount; i < endIdx; i++) {
+				const plant = plantsToProcess[i];
 				
 				// Skip plants without valid coordinates
 				if (!plant.latitude || !plant.longitude) continue;
 				
-				// Get color using optimized function
-				const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
-				
-				// Calculate radius based on capacity
-				const radius = plant.nameplate_capacity_mw 
-					? getRadiusByCapacity(
-							plant.nameplate_capacity_mw, 
-							zoomLevel, 
-							visualParams.sizeMultiplier, 
-							visualParams.capacityWeight
-						)
-					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
-				
 				const existingMarker = markerRefs.current.get(plant.id);
 				
 				if (existingMarker) {
-					// Update existing marker
-					existingMarker.setRadius(radius);
-					existingMarker.setLatLng([plant.latitude, plant.longitude]);
-					existingMarker.setStyle({
-						fillColor: color,
-						color: '#000',
-						weight: outlineWeight,
-						opacity: 1,
-						fillOpacity: 0.8
-					});
-					
-					// Update popup
-					existingMarker.unbindPopup();
-					existingMarker.bindPopup(createPopupContent(plant));
+					markersToUpdateInBatch.push([existingMarker, plant]);
 				} else {
+					// Get color using optimized function
+					const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
+					
+					// Calculate radius based on capacity
+					const radius = plant.nameplate_capacity_mw 
+						? getRadiusByCapacity(
+								plant.nameplate_capacity_mw, 
+								zoomLevel, 
+								visualParams.sizeMultiplier, 
+								visualParams.capacityWeight
+							)
+						: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+					
 					// Create new marker
 					const circleMarker = L.circleMarker([plant.latitude, plant.longitude], {
 						radius: radius,
@@ -498,20 +490,61 @@ ${JSON.stringify({
 					// Bind popup
 					circleMarker.bindPopup(createPopupContent(plant));
 					
-					// Add to layer and reference map
-					markersLayer.addLayer(circleMarker);
+					newMarkersInBatch.push(circleMarker);
 					markerRefs.current.set(plant.id, circleMarker);
 				}
 			}
 			
-			// Process next batch on next animation frame for smooth UI
-			if (batchIndex + 1 < batches) {
-				requestAnimationFrame(() => processBatch(batchIndex + 1));
+			// Update markers in this batch
+			markersToUpdateInBatch.forEach(([marker, plant]) => {
+				// Get color using optimized function
+				const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
+				
+				// Calculate radius based on capacity
+				const radius = plant.nameplate_capacity_mw 
+					? getRadiusByCapacity(
+							plant.nameplate_capacity_mw, 
+							zoomLevel, 
+							visualParams.sizeMultiplier, 
+							visualParams.capacityWeight
+						)
+					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+				
+				// Update existing marker
+				marker.setRadius(radius);
+				marker.setLatLng([plant.latitude, plant.longitude]);
+				marker.setStyle({
+					fillColor: color,
+					color: '#000',
+					weight: outlineWeight,
+					opacity: 1,
+					fillOpacity: 0.8
+				});
+				
+				// Update popup
+				marker.unbindPopup();
+				marker.bindPopup(createPopupContent(plant));
+			});
+			
+			// Add new markers to the layer
+			newMarkersInBatch.forEach(marker => {
+				markersLayer.addLayer(marker);
+			});
+			
+			// Update processed count
+			processedCount = endIdx;
+			
+			// Continue processing if there are more plants
+			if (processedCount < plantsToProcess.length) {
+				// Use requestAnimationFrame to avoid blocking the UI
+				requestAnimationFrame(processNextBatch);
 			}
 		};
 		
-		// Start processing the first batch
-		processBatch(0);
+		// Start processing
+		if (plantsToProcess.length > 0) {
+			processNextBatch();
+		}
 	}, [powerPlants, isLoading, visualParams, getPlantColor]);
 	
 	// Update marker sizes when visual parameters change
