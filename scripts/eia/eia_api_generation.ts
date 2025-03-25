@@ -74,9 +74,29 @@ async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE) {
 		+ `&sort[0][column]=period`
 		+ `&sort[0][direction]=desc`;
 	console.log(url);
-	const response = await fetch(url);
-	const data = await response.json();
-	return data;
+	
+	try {
+		const response = await fetch(url);
+		
+		// First get the response as text
+		const textResponse = await response.text();
+		
+		// Check if it looks like HTML (contains DOCTYPE or html tags)
+		if (textResponse.includes('<!DOCTYPE') || textResponse.includes('<html')) {
+			console.error('API RETURNED HTML ERROR:');
+			console.error('-----------------------------------------------------');
+			console.error(textResponse);
+			console.error('-----------------------------------------------------');
+			throw new Error('API returned HTML instead of JSON');
+		}
+		
+		// If it's not HTML, parse it as JSON
+		const data = JSON.parse(textResponse);
+		return data;
+	} catch (error) {
+		console.error(`Error in getPageOfGeneration:`, error);
+		throw error;
+	}
 }
 
 // Helper function to find matching plant and generator IDs
