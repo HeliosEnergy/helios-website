@@ -13,18 +13,18 @@ interface MapLeftSidebarProps {
 	colorByCapacityFactor: boolean;
 	setColorByCapacityFactor: (show: boolean) => void;
 	filters: {
-		fuel_type: string | null;
+		fuel_type: string[] | null;
 		state: string[] | null;
-		operating_status: string | null;
+		operating_status: string[] | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
 		min_capacity_factor: number | null;
 		max_capacity_factor: number | null;
 	};
 	setFilters: React.Dispatch<React.SetStateAction<{
-		fuel_type: string | null;
+		fuel_type: string[] | null;
 		state: string[] | null;
-		operating_status: string | null;
+		operating_status: string[] | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
 		min_capacity_factor: number | null;
@@ -150,6 +150,48 @@ export function MapLeftSidebar({
 		
 		return filters.state.map(stateCode => 
 			states.find(state => state.value === stateCode)
+		).filter(Boolean);
+	};
+
+	// Convert fuel types array to react-select format
+	const handleFuelTypeChange = (selectedOptions: any) => {
+		if (!selectedOptions || selectedOptions.length === 0) {
+			handleFilterChange('fuel_type', null);
+		} else {
+			// Extract just the fuel type codes into an array
+			const fuelTypeValues = selectedOptions.map((option: any) => option.value);
+			handleFilterChange('fuel_type', fuelTypeValues);
+		}
+	};
+
+	// Convert operating status array to react-select format
+	const handleOperatingStatusChange = (selectedOptions: any) => {
+		if (!selectedOptions || selectedOptions.length === 0) {
+			handleFilterChange('operating_status', null);
+		} else {
+			// Extract just the status codes into an array
+			const statusValues = selectedOptions.map((option: any) => option.value);
+			handleFilterChange('operating_status', statusValues);
+		}
+	};
+
+	// Transform current fuel_type filter into the format react-select expects
+	const getSelectedFuelTypes = () => {
+		if (!filters.fuel_type) return [];
+		if (!Array.isArray(filters.fuel_type)) return [];
+		
+		return filters.fuel_type.map(fuelTypeCode => 
+			fuelTypes.find(fuelType => fuelType.value === fuelTypeCode)
+		).filter(Boolean);
+	};
+
+	// Transform current operating_status filter into the format react-select expects
+	const getSelectedOperatingStatuses = () => {
+		if (!filters.operating_status) return [];
+		if (!Array.isArray(filters.operating_status)) return [];
+		
+		return filters.operating_status.map(statusCode => 
+			operatingStatuses.find(status => status.value === statusCode)
 		).filter(Boolean);
 	};
 
@@ -297,17 +339,23 @@ export function MapLeftSidebar({
 			<div style={{ marginBottom: '20px' }}>
 				<h3>Filters</h3>
 				
-				<div style={{ marginBottom: '10px' }}>
+				<div style={{ marginBottom: '10px', color: "black" }}>
 					<label style={{ display: 'block', marginBottom: '5px' }}>Fuel Type:</label>
-					<select 
-						value={filters.fuel_type || ''} 
-						onChange={(e) => handleFilterChange('fuel_type', e.target.value || null)}
-						style={{ width: '100%', padding: '5px' }}
-					>
-						{fuelTypes.map(option => (
-							<option key={option.label} value={option.value || ''}>{option.label}</option>
-						))}
-					</select>
+					<Select
+						isMulti
+						options={fuelTypes.filter(fuelType => fuelType.value !== null)}
+						value={getSelectedFuelTypes()}
+						onChange={handleFuelTypeChange}
+						placeholder="Select fuel types..."
+						isClearable={true}
+						className="react-select-container"
+						classNamePrefix="react-select"
+					/>
+					{filters.fuel_type && filters.fuel_type.length > 0 && (
+						<small style={{ marginTop: '5px', display: 'block' }}>
+							{filters.fuel_type.length} fuel type(s) selected
+						</small>
+					)}
 				</div>
 
 				<div style={{ marginBottom: '10px', color: "black" }}>
@@ -329,17 +377,23 @@ export function MapLeftSidebar({
 					)}
 				</div>
 
-				<div style={{ marginBottom: '10px' }}>
+				<div style={{ marginBottom: '10px', color: "black" }}>
 					<label style={{ display: 'block', marginBottom: '5px' }}>Operating Status:</label>
-					<select 
-						value={filters.operating_status || ''} 
-						onChange={(e) => handleFilterChange('operating_status', e.target.value || null)}
-						style={{ width: '100%', padding: '5px' }}
-					>
-						{operatingStatuses.map(option => (
-							<option key={option.label} value={option.value || ''}>{option.label}</option>
-						))}
-					</select>
+					<Select
+						isMulti
+						options={operatingStatuses.filter(status => status.value !== null)}
+						value={getSelectedOperatingStatuses()}
+						onChange={handleOperatingStatusChange}
+						placeholder="Select statuses..."
+						isClearable={true}
+						className="react-select-container"
+						classNamePrefix="react-select"
+					/>
+					{filters.operating_status && filters.operating_status.length > 0 && (
+						<small style={{ marginTop: '5px', display: 'block' }}>
+							{filters.operating_status.length} status(es) selected
+						</small>
+					)}
 				</div>
 
 				<div style={{ marginBottom: '10px' }}>

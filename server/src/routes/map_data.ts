@@ -37,11 +37,43 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				}
 			}
 
+			// Handle fuel_type as either a single value, array, or comma-separated list
+			let fuelTypesArray: string[] | null = null;
+			if (fuel_type) {
+				const fuelTypeStr = String(fuel_type);
+				// Check if it's a comma-separated list
+				if (fuelTypeStr.includes(',')) {
+					fuelTypesArray = fuelTypeStr.split(',').filter(f => f.trim());
+				} else {
+					fuelTypesArray = [fuelTypeStr];
+				}
+				// If the array is empty, set to null
+				if (fuelTypesArray.length === 0) {
+					fuelTypesArray = null;
+				}
+			}
+
+			// Handle operating_status as either a single value, array, or comma-separated list
+			let operatingStatusArray: string[] | null = null;
+			if (operating_status) {
+				const statusStr = String(operating_status);
+				// Check if it's a comma-separated list
+				if (statusStr.includes(',')) {
+					operatingStatusArray = statusStr.split(',').filter(s => s.trim());
+				} else {
+					operatingStatusArray = [statusStr];
+				}
+				// If the array is empty, set to null
+				if (operatingStatusArray.length === 0) {
+					operatingStatusArray = null;
+				}
+			}
+
 			// Build parameters object for the SQL query
 			const params = {
-				fuelType: fuel_type ? String(fuel_type) : null,
+				fuelTypes: fuelTypesArray,
 				states: statesArray,
-				operatingStatus: operating_status ? String(operating_status) : null,
+				operatingStatuses: operatingStatusArray,
 				minCapacity: min_capacity ? parseFloat(String(min_capacity)) : null,
 				maxCapacity: max_capacity ? parseFloat(String(max_capacity)) : null,
 				minCapacityFactor: min_capacity_factor ? parseFloat(String(min_capacity_factor)) : null,
@@ -118,13 +150,13 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 			) as s ON s.plant_id = p.id
 			LEFT JOIN latest_gen AS gen ON gen.plant_id = p.id
 			WHERE 
-				($1::text IS NULL OR p.fuel_type = $1)
+				($1::text[] IS NULL OR p.fuel_type = ANY($1))
 				AND (
 					$2::text[] IS NULL 
 					OR $2::text[] = '{}'::text[] 
 					OR p.state = ANY($2::text[])
 				)
-				AND ($3::text IS NULL OR p.operating_status = $3)
+				AND ($3::text[] IS NULL OR p.operating_status = ANY($3))
 				AND (
 					$4::float IS NULL 
 					OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw >= $4)
@@ -166,9 +198,9 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 
 			// Execute the query with secure parameter binding
 			const powerPlantsResult = await sql.unsafe(queryString, [
-				params.fuelType, 
+				params.fuelTypes, 
 				params.states, 
-				params.operatingStatus, 
+				params.operatingStatuses, 
 				params.minCapacity, 
 				params.maxCapacity,
 				params.minCapacityFactor,

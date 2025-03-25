@@ -50,36 +50,62 @@ interface PowerPlant {
 }
 
 // Define colors for different fuel types based on energy source code
-const fuelTypeColors: {[key: string]: string} = {
-	'SUN': '#FFD700',   // Solar - Gold
-	'WND': '#87CEEB',   // Wind - Sky Blue
-	'BIT': '#A9A9A9',   // Bituminous Coal - Dark Gray
-	'SUB': '#A9A9A9',   // Subbituminous Coal - Dark Gray
-	'LIG': '#A9A9A9',   // Lignite Coal - Dark Gray
-	'NG': '#d9ff33',    // Natural Gas - Steel Blue
-	'DFO': '#000000',   // Distillate Fuel Oil - Black
-	'WAT': '#001fff',   // Water/Hydro - Dodger Blue
-	'GEO': '#8B4513',   // Geothermal - Saddle Brown
-	'LFG': '#228B22',   // Landfill Gas - Forest Green
-	'WDS': '#228B22',   // Wood Waste Solids - Forest Green
-	'NUC': '#4eff33',   // Nuclear - Lime Green
-	'OTHER': '#FFFFFF', // Other - Gray
-};
+ 
 
-// Map for fuel type display names
-const fuelTypeDisplayNames: {[key: string]: string} = {
-	'SUN': 'Solar',
-	'WND': 'Wind',
-	'BIT': 'Bituminous Coal',
-	'SUB': 'Subbituminous Coal',
-	'LIG': 'Lignite Coal',
-	'NG': 'Natural Gas',
-	'DFO': 'Fuel Oil',
-	'WAT': 'Hydro',
-	'GEO': 'Geothermal',
-	'LFG': 'Landfill Gas',
-	'WDS': 'Wood/Biomass',
-	'NUC': 'Nuclear',
+const fuelTypeColors: {[key: string]: string} = {
+ 	'SUN': '#FFD700',   // Solar - Gold
+ 	'WND': '#87CEEB',   // Wind - Sky Blue
+ 	'BIT': '#A9A9A9',   // Bituminous Coal - Dark Gray
+ 	'SUB': '#A9A9A9',   // Subbituminous Coal - Dark Gray
+ 	'LIG': '#A9A9A9',   // Lignite Coal - Dark Gray
+ 	'NG': '#d9ff33',    // Natural Gas - Steel Blue
+ 	'DFO': '#000000',   // Distillate Fuel Oil - Black
+ 	'WAT': '#001fff',   // Water/Hydro - Dodger Blue
+ 	'GEO': '#8B4513',   // Geothermal - Saddle Brown
+ 	'LFG': '#228B22',   // Landfill Gas - Forest Green
+ 	'WDS': '#228B22',   // Wood Waste Solids - Forest Green
+ 	'BLQ': '#228B22',   // Black Liquor - Forest Green
+ 	'NUC': '#4eff33',   // Nuclear - Lime Green
+ 	'MSW': '#996836',   // Municipal Solid Waste - Forest Green
+ 	'MWH': '#996836',   // Municipal Waste Heat - Forest Green
+ 	'OBS': '#996836',   // Other Biomass - Forest Green
+ 	'OBG': '#90ad5e',   // Other Gas - Forest Green
+ 	'WH': '#fc7f00',   // Waste Heat - Forest Green
+ 	'OG': '#90ad5e',   // Other Gas - Forest Green
+ 	'WDL': '#ead6b2',   // Waste to Liquids - Forest Green
+ 	'RC': '#c86e33',   // Refuse Combustion - Forest Green
+ 	'SGC': '#ffc000',   // Solar Thermal - Forest Green
+ 	'RFO': '#000000',   // Residual Fuel Oil - Forest Green
+ 	'PC': '#000000',   // Petroleum Coke - Forest Green
+ 	'OTHER': '#FFFFFF', // Other - Gray
+ };
+ 
+ // Map for fuel type display names
+ const fuelTypeDisplayNames = {
+ 	'SUN': 'Solar',
+ 	'WND': 'Wind',
+ 	'BIT': 'Bituminous Coal',
+ 	'SUB': 'Subbituminous Coal',
+ 	'LIG': 'Lignite Coal',
+ 	'NG': 'Natural Gas',
+ 	'DFO': 'Fuel Oil',
+ 	'WAT': 'Hydro',
+ 	'GEO': 'Geothermal',
+ 	'LFG': 'Landfill Gas',
+ 	'WDS': 'Wood/Biomass',
+ 	'BLQ': 'Black Liquor',
+ 	'NUC': 'Nuclear',
+ 	'MSW': 'Municipal Solid Waste',
+ 	'MWH': 'Municipal Waste Heat',
+ 	'OBS': 'Other Biomass',
+ 	'OBG': 'Other Gas',
+ 	'WH': 'Waste Heat',
+ 	'OG': 'Other Gas',
+ 	'WDL': 'Waste to Liquids',
+ 	'RC': 'Refuse Combustion',
+ 	'SGC': 'Solar Thermal',
+	'RFO': 'Residual Fuel Oil',
+	'OTHER': 'Other',
 };
 
 // Map for operating status display names
@@ -89,6 +115,7 @@ const operatingStatusDisplayNames: {[key: string]: string} = {
 	'OS': 'Out of Service',
 	'RE': 'Retired',
 };
+
 
 // Function to calculate radius based on capacity and zoom level
 const getRadiusByCapacity = (capacity: number, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
@@ -139,9 +166,9 @@ export function MapLeafletPage() {
 	// Configuration state for filter parameters
 	const [filterParams, setFilterParams] = useState({
 		filters: {
-			fuel_type: null as string | null,
+			fuel_type: null as string[] | null,
 			state: null as string[] | null,
-			operating_status: null as string | null,
+			operating_status: null as string[] | null,
 			min_capacity: null as number | null,
 			max_capacity: null as number | null,
 			min_capacity_factor: null as number | null,
@@ -241,7 +268,7 @@ export function MapLeafletPage() {
 						View on Google Maps
 					</a>
 				</p>
-				<p><strong>Fuel Type:</strong> ${plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type] || plant.fuel_type) : 'Unknown'}</p>
+				<p><strong>Fuel Type:</strong> ${plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type as keyof typeof fuelTypeDisplayNames] || plant.fuel_type) : 'Unknown'}</p>
 				<p><strong>Capacity:</strong> ${
 					visualParams.showSummerCapacity && plant.net_summer_capacity_mw 
 						? `${plant.net_summer_capacity_mw} MW (Summer)` 
@@ -251,7 +278,7 @@ export function MapLeafletPage() {
 				}</p>
 				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
 				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor ? 
-					`<span style="color: ${getCapacityFactorColor(plant.capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
+					`<span style="background-color: black; padding-left: 4px; padding-right: 4px; color: ${getCapacityFactorColor(plant.capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
 					: 'N/A'}</p>
 				
 				${plant.generation ? `
@@ -301,7 +328,10 @@ ${JSON.stringify({
 				const queryParams = new URLSearchParams();
 				const filters = debouncedFilters;
 				
-				if (filters.fuel_type) queryParams.append('fuel_type', filters.fuel_type);
+				// Handle fuel_type array - join with commas for the API
+				if (filters.fuel_type && Array.isArray(filters.fuel_type) && filters.fuel_type.length > 0) {
+					queryParams.append('fuel_type', filters.fuel_type.join(','));
+				}
 				
 				// Handle state array
 				if (filters.state && Array.isArray(filters.state)) {
@@ -310,7 +340,11 @@ ${JSON.stringify({
 					});
 				}
 				
-				if (filters.operating_status) queryParams.append('operating_status', filters.operating_status);
+				// Handle operating_status array - join with commas for the API
+				if (filters.operating_status && Array.isArray(filters.operating_status) && filters.operating_status.length > 0) {
+					queryParams.append('operating_status', filters.operating_status.join(','));
+				}
+				
 				if (filters.min_capacity !== null) queryParams.append('min_capacity', filters.min_capacity.toString());
 				if (filters.max_capacity !== null) queryParams.append('max_capacity', filters.max_capacity.toString());
 				if (filters.min_capacity_factor !== null) queryParams.append('min_capacity_factor', filters.min_capacity_factor.toString());
