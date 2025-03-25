@@ -775,6 +775,11 @@ export async function getEIAPowerPlantsForEntity(sql: Sql, args: GetEIAPowerPlan
 }
 
 export const getAllPowerPlantsWithLatestStatsQuery = `-- name: GetAllPowerPlantsWithLatestStats :many
+WITH latest_gen AS (
+    SELECT DISTINCT ON (plant_id) id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
+    FROM eia_plant_generation
+    ORDER BY plant_id, timestamp DESC
+)
 SELECT 
     p.id, 
     p.api_plant_id, 
@@ -804,7 +809,17 @@ SELECT
     s.source_timestamp,
     s.data_period,
     s.metadata AS stat_metadata,
-    s.timestamp AS stat_timestamp
+    s.timestamp AS stat_timestamp,
+    gen.id AS gen_id,
+    gen.period AS gen_period,
+    gen.generation AS gen_generation,
+    gen.generation_units AS gen_generation_units,
+    gen.consumption_for_eg AS gen_consumption_for_eg,
+    gen.consumption_for_eg_units AS gen_consumption_for_eg_units,
+    gen.total_consumption AS gen_total_consumption,
+    gen.total_consumption_units AS gen_total_consumption_units,
+    gen.metadata AS gen_metadata,
+    gen.timestamp AS gen_timestamp
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT 
@@ -821,6 +836,7 @@ LEFT JOIN (
     FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
+LEFT JOIN latest_gen AS gen ON gen.plant_id = p.id
 WHERE 
     ($1::text IS NULL OR p.fuel_type = $1)
     AND (
@@ -876,6 +892,16 @@ export interface GetAllPowerPlantsWithLatestStatsRow {
     dataPeriod: string | null;
     statMetadata: any | null;
     statTimestamp: Date;
+    genId: number | null;
+    genPeriod: string | null;
+    genGeneration: number | null;
+    genGenerationUnits: string | null;
+    genConsumptionForEg: number | null;
+    genConsumptionForEgUnits: string | null;
+    genTotalConsumption: number | null;
+    genTotalConsumptionUnits: string | null;
+    genMetadata: any | null;
+    genTimestamp: Date | null;
 }
 
 export async function getAllPowerPlantsWithLatestStats(sql: Sql, args: GetAllPowerPlantsWithLatestStatsArgs): Promise<GetAllPowerPlantsWithLatestStatsRow[]> {
@@ -908,7 +934,17 @@ export async function getAllPowerPlantsWithLatestStats(sql: Sql, args: GetAllPow
         sourceTimestamp: row[25],
         dataPeriod: row[26],
         statMetadata: row[27],
-        statTimestamp: row[28]
+        statTimestamp: row[28],
+        genId: row[29],
+        genPeriod: row[30],
+        genGeneration: row[31],
+        genGenerationUnits: row[32],
+        genConsumptionForEg: row[33],
+        genConsumptionForEgUnits: row[34],
+        genTotalConsumption: row[35],
+        genTotalConsumptionUnits: row[36],
+        genMetadata: row[37],
+        genTimestamp: row[38]
     }));
 }
 

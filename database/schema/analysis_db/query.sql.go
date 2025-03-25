@@ -334,6 +334,11 @@ func (q *Queries) DeleteMetric(ctx context.Context, id int32) error {
 }
 
 const getAllPowerPlantsWithLatestStats = `-- name: GetAllPowerPlantsWithLatestStats :many
+WITH latest_gen AS (
+    SELECT DISTINCT ON (plant_id) id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
+    FROM eia_plant_generation
+    ORDER BY plant_id, timestamp DESC
+)
 SELECT 
     p.id, 
     p.api_plant_id, 
@@ -363,7 +368,17 @@ SELECT
     s.source_timestamp,
     s.data_period,
     s.metadata AS stat_metadata,
-    s.timestamp AS stat_timestamp
+    s.timestamp AS stat_timestamp,
+    gen.id AS gen_id,
+    gen.period AS gen_period,
+    gen.generation AS gen_generation,
+    gen.generation_units AS gen_generation_units,
+    gen.consumption_for_eg AS gen_consumption_for_eg,
+    gen.consumption_for_eg_units AS gen_consumption_for_eg_units,
+    gen.total_consumption AS gen_total_consumption,
+    gen.total_consumption_units AS gen_total_consumption_units,
+    gen.metadata AS gen_metadata,
+    gen.timestamp AS gen_timestamp
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT 
@@ -380,6 +395,7 @@ LEFT JOIN (
     FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
+LEFT JOIN latest_gen AS gen ON gen.plant_id = p.id
 WHERE 
     ($1::text IS NULL OR p.fuel_type = $1)
     AND (
@@ -436,6 +452,16 @@ type GetAllPowerPlantsWithLatestStatsRow struct {
 	DataPeriod                 pgtype.Text
 	StatMetadata               []byte
 	StatTimestamp              pgtype.Timestamptz
+	GenID                      pgtype.Int4
+	GenPeriod                  pgtype.Text
+	GenGeneration              pgtype.Float8
+	GenGenerationUnits         pgtype.Text
+	GenConsumptionForEg        pgtype.Float8
+	GenConsumptionForEgUnits   pgtype.Text
+	GenTotalConsumption        pgtype.Float8
+	GenTotalConsumptionUnits   pgtype.Text
+	GenMetadata                []byte
+	GenTimestamp               pgtype.Timestamptz
 }
 
 func (q *Queries) GetAllPowerPlantsWithLatestStats(ctx context.Context, arg GetAllPowerPlantsWithLatestStatsParams) ([]GetAllPowerPlantsWithLatestStatsRow, error) {
@@ -483,6 +509,16 @@ func (q *Queries) GetAllPowerPlantsWithLatestStats(ctx context.Context, arg GetA
 			&i.DataPeriod,
 			&i.StatMetadata,
 			&i.StatTimestamp,
+			&i.GenID,
+			&i.GenPeriod,
+			&i.GenGeneration,
+			&i.GenGenerationUnits,
+			&i.GenConsumptionForEg,
+			&i.GenConsumptionForEgUnits,
+			&i.GenTotalConsumption,
+			&i.GenTotalConsumptionUnits,
+			&i.GenMetadata,
+			&i.GenTimestamp,
 		); err != nil {
 			return nil, err
 		}

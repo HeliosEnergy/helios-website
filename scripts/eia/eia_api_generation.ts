@@ -28,6 +28,10 @@ const sql = postgres({
 const TEMP_DIR_PATH = resolve(__dirname, '../../data/temp');
 const API_RESPONSES_FILE = resolve(TEMP_DIR_PATH, '__eia_api_generation_responses.json');
 
+function sleep(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Clear/create the API responses file at startup
 async function resetApiResponsesFile() {
 	try {
@@ -58,7 +62,7 @@ async function appendApiResponse(record: any): Promise<void> {
 // Define API endpoint for facility-fuel data
 const API_URL_GENERATION = "https://api.eia.gov/v2/electricity/facility-fuel/data";
 
-async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE) {
+async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE, retryCount: number = 0, maxRetries: number = 3) {
 	const url = `${API_URL_GENERATION}`
 		+ `?api_key=${process.env.EIA_API_KEY}`
 		+ `&offset=${page * pageSize}`
@@ -87,15 +91,47 @@ async function getPageOfGeneration(page: number, pageSize: number = PAGE_SIZE) {
 			console.error('-----------------------------------------------------');
 			console.error(textResponse);
 			console.error('-----------------------------------------------------');
-			throw new Error('API returned HTML instead of JSON');
+			
+			// Implement retry logic with 3-second delay
+			if (retryCount < maxRetries) {
+				console.log(`Waiting 3 seconds before retry ${retryCount + 1}/${maxRetries}...`);
+				await sleep(3000);
+				return getPageOfGeneration(page, pageSize, retryCount + 1, maxRetries);
+			}
+			
+			throw new Error('API returned HTML instead of JSON after max retries');
 		}
 		
 		// If it's not HTML, parse it as JSON
 		const data = JSON.parse(textResponse);
+		
+		// Check if we got an error response
+		if (data.error) {
+			console.log(`API returned error: ${data.error} (code: ${data.code})`);
+			
+			// Implement retry logic with 3-second delay
+			if (retryCount < maxRetries) {
+				console.log(`Waiting 3 seconds before retry ${retryCount + 1}/${maxRetries}...`);
+				await sleep(3000);
+				return getPageOfGeneration(page, pageSize, retryCount + 1, maxRetries);
+			}
+			
+			return { response: { data: [] } }; // Return empty data after max retries
+		}
+		
 		return data;
 	} catch (error) {
 		console.error(`Error in getPageOfGeneration:`, error);
-		throw error;
+		
+		// Implement retry logic with 3-second delay for network errors too
+		if (retryCount < maxRetries) {
+			console.log(`Waiting 3 seconds before retry ${retryCount + 1}/${maxRetries}...`);
+			await sleep(3000);
+			return getPageOfGeneration(page, pageSize, retryCount + 1, maxRetries);
+		}
+		
+		// Return empty data structure after max retries
+		return { response: { data: [] } };
 	}
 }
 
@@ -106,6 +142,7 @@ async function findMatchingPlantAndGenerator(item: any): Promise<{plantId: numbe
 	let generatorId = null;
 	
 	if (item.plantCode) {
+		console.log(`Finding matching plant for ${item.plantCode}`);
 		const result = await sql`
 			SELECT id FROM eia_power_plants 
 			WHERE api_plant_id = ${item.plantCode}
@@ -291,10 +328,13 @@ async function main() {
 		let totalProcessed = 0;
 		let hasMoreData = true;
 		let finalResponse = null;
+		let consecutiveEmptyResponses = 0;
+		const maxConsecutiveEmptyResponses = 3; // Allow up to 3 consecutive empty responses before giving up
 		
 		console.log("Starting EIA API generation data import...");
 		
 		while (hasMoreData) {
+			await sleep(1000);
 			const data = await getPageOfGeneration(page);
 			
 			// Store this response
@@ -302,10 +342,25 @@ async function main() {
 			
 			// Check if we got valid data
 			if (!data.response || !data.response.data || data.response.data.length === 0) {
-				console.log(`No more generation data to process at page ${page}`);
-				hasMoreData = false;
-				break;
+				console.log(`No data received for page ${page}`);
+				
+				// Count consecutive empty responses
+				consecutiveEmptyResponses++;
+				
+				if (consecutiveEmptyResponses >= maxConsecutiveEmptyResponses) {
+					console.log(`Received ${maxConsecutiveEmptyResponses} consecutive empty responses. Stopping.`);
+					hasMoreData = false;
+					break;
+				}
+				
+				console.log(`Waiting 3 seconds before trying next page...`);
+				await sleep(3000);
+				page++; // Still move to next page
+				continue;
 			}
+			
+			// Reset counter when we get data
+			consecutiveEmptyResponses = 0;
 			
 			// Process this batch
 			const processedCount = await processGenerationDataBatch(data);
@@ -324,7 +379,7 @@ async function main() {
 			page++;
 			
 			// Add a small delay between requests
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await sleep(1000);
 		}
 		
 		// Log the final generation response

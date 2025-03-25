@@ -16,6 +16,19 @@ interface PowerPlant {
 	county?: string;
 	state?: string;
 	last_updated?: string;
+	// Add generation data
+	generation?: {
+		id: number;
+		period: string;
+		generation: number;
+		generation_units: string;
+		consumption_for_eg: number;
+		consumption_for_eg_units: string;
+		total_consumption: number;
+		total_consumption_units: string;
+		timestamp: string;
+		metadata: any;
+	};
 }
 
 // Define colors for different fuel types based on energy source code
@@ -142,6 +155,15 @@ export function MapLeafletPage() {
 	
 	// Function to create popup content
 	function createPopupContent(plant: PowerPlant) {
+		// Format generation date if available
+		const generationDate = plant.generation?.timestamp 
+			? new Date(plant.generation.timestamp).toLocaleDateString('en-US', {
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric'
+			})
+			: null;
+		
 		return `
 			<div>
 				<h3>${plant.name}</h3>
@@ -162,6 +184,19 @@ export function MapLeafletPage() {
 							: 'Unknown'
 				}</p>
 				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
+				
+				${plant.generation ? `
+				<hr />
+				<h4>Latest Generation Data (${generationDate || 'Unknown Date'})</h4>
+				<p><strong>Generation:</strong> ${plant.generation.generation ? `${plant.generation.generation.toLocaleString()} ${plant.generation.generation_units || ''}` : 'N/A'}</p>
+				<p><strong>Capacity Factor:</strong> ${plant.generation.generation ? `${(plant.generation.generation / (plant.nameplate_capacity_mw * 720) * 100).toFixed(1)}%` : 'N/A'}</p>
+				${plant.generation.consumption_for_eg ? `
+				<p><strong>Consumption:</strong> ${plant.generation.consumption_for_eg.toLocaleString()} ${plant.generation.consumption_for_eg_units || ''}</p>
+				` : ''}${plant.generation.total_consumption ? `
+				<p><strong>Total Consumption:</strong> ${plant.generation.total_consumption.toLocaleString()} ${plant.generation.total_consumption_units || ''}</p>
+				` : ''}
+				` : ''}
+				
 				<hr />
 				<details>
 					<summary>Debug Info</summary>
@@ -173,6 +208,12 @@ ${JSON.stringify({
 	fuel_type: plant.fuel_type,
 	capacity: plant.nameplate_capacity_mw,
 	status: plant.operating_status,
+	generation: plant.generation ? {
+		period: plant.generation.period,
+		amount: plant.generation.generation,
+		units: plant.generation.generation_units,
+		timestamp: plant.generation.timestamp
+	} : null
 }, null, 2)}
 					</pre>
 				</details>

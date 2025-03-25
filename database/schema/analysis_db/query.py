@@ -210,6 +210,11 @@ WHERE id = :p1
 
 
 GET_ALL_POWER_PLANTS_WITH_LATEST_STATS = """-- name: get_all_power_plants_with_latest_stats \\:many
+WITH latest_gen AS (
+    SELECT DISTINCT ON (plant_id) id, plant_id, generator_id, timestamp, period, generation, generation_units, gross_generation, gross_generation_units, consumption_for_eg, consumption_for_eg_units, consumption_for_eg_btu, consumption_for_eg_btu_units, total_consumption, total_consumption_units, total_consumption_btu, total_consumption_btu_units, average_heat_content, average_heat_content_units, source_timestamp, metadata, created_at
+    FROM eia_plant_generation
+    ORDER BY plant_id, timestamp DESC
+)
 SELECT 
     p.id, 
     p.api_plant_id, 
@@ -239,7 +244,17 @@ SELECT
     s.source_timestamp,
     s.data_period,
     s.metadata AS stat_metadata,
-    s.timestamp AS stat_timestamp
+    s.timestamp AS stat_timestamp,
+    gen.id AS gen_id,
+    gen.period AS gen_period,
+    gen.generation AS gen_generation,
+    gen.generation_units AS gen_generation_units,
+    gen.consumption_for_eg AS gen_consumption_for_eg,
+    gen.consumption_for_eg_units AS gen_consumption_for_eg_units,
+    gen.total_consumption AS gen_total_consumption,
+    gen.total_consumption_units AS gen_total_consumption_units,
+    gen.metadata AS gen_metadata,
+    gen.timestamp AS gen_timestamp
 FROM eia_power_plants as p
 LEFT JOIN (
     SELECT 
@@ -256,6 +271,7 @@ LEFT JOIN (
     FROM eia_plant_capacity
     ORDER BY plant_id, timestamp DESC
 ) as s ON s.plant_id = p.id
+LEFT JOIN latest_gen AS gen ON gen.plant_id = p.id
 WHERE 
     (:p1\\:\\:text IS NULL OR p.fuel_type = :p1)
     AND (
@@ -315,6 +331,16 @@ class GetAllPowerPlantsWithLatestStatsRow:
     data_period: Optional[str]
     stat_metadata: Optional[Any]
     stat_timestamp: datetime.datetime
+    gen_id: Optional[int]
+    gen_period: Optional[str]
+    gen_generation: Optional[float]
+    gen_generation_units: Optional[str]
+    gen_consumption_for_eg: Optional[float]
+    gen_consumption_for_eg_units: Optional[str]
+    gen_total_consumption: Optional[float]
+    gen_total_consumption_units: Optional[str]
+    gen_metadata: Optional[Any]
+    gen_timestamp: Optional[datetime.datetime]
 
 
 GET_EIA_ENTITY_BY_API_ID = """-- name: get_eia_entity_by_api_id \\:one
@@ -813,6 +839,16 @@ class Querier:
                 data_period=row[26],
                 stat_metadata=row[27],
                 stat_timestamp=row[28],
+                gen_id=row[29],
+                gen_period=row[30],
+                gen_generation=row[31],
+                gen_generation_units=row[32],
+                gen_consumption_for_eg=row[33],
+                gen_consumption_for_eg_units=row[34],
+                gen_total_consumption=row[35],
+                gen_total_consumption_units=row[36],
+                gen_metadata=row[37],
+                gen_timestamp=row[38],
             )
 
     def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:
@@ -1438,6 +1474,16 @@ class AsyncQuerier:
                 data_period=row[26],
                 stat_metadata=row[27],
                 stat_timestamp=row[28],
+                gen_id=row[29],
+                gen_period=row[30],
+                gen_generation=row[31],
+                gen_generation_units=row[32],
+                gen_consumption_for_eg=row[33],
+                gen_consumption_for_eg_units=row[34],
+                gen_total_consumption=row[35],
+                gen_total_consumption_units=row[36],
+                gen_metadata=row[37],
+                gen_timestamp=row[38],
             )
 
     async def get_eia_entity_by_api_id(self, *, api_entity_id: str) -> Optional[models.EiaEntity]:

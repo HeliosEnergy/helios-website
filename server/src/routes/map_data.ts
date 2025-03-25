@@ -1,7 +1,4 @@
 import { Request, RequestHandler, Response } from "express";
-import {
-	getAllPowerPlantsWithLatestStats
-} from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 import postgres from "postgres";
 
 /**
@@ -39,24 +36,106 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 
 			// Build parameters object for the SQL query
 			const params = {
-				fuel_type: fuel_type ? String(fuel_type) : null,
+				fuelType: fuel_type ? String(fuel_type) : null,
 				states: statesArray,
-				operating_status: operating_status ? String(operating_status) : null,
-				min_capacity: min_capacity ? parseFloat(String(min_capacity)) : null,
-				max_capacity: max_capacity ? parseFloat(String(max_capacity)) : null
+				operatingStatus: operating_status ? String(operating_status) : null,
+				minCapacity: min_capacity ? parseFloat(String(min_capacity)) : null,
+				maxCapacity: max_capacity ? parseFloat(String(max_capacity)) : null
 			};
 
-			// Execute the query
-			const powerPlants = await getAllPowerPlantsWithLatestStats(sql, {
-				fuelType: params.fuel_type,
-				states: params.states,
-				operatingStatus: params.operating_status,
-				minCapacity: params.min_capacity,
-				maxCapacity: params.max_capacity
-			});
+			// Direct SQL query instead of using the generated function
+			const queryString = `
+			WITH latest_gen AS (
+				SELECT DISTINCT ON (plant_id) *
+				FROM eia_plant_generation
+				ORDER BY plant_id, timestamp DESC
+			)
+			SELECT 
+				p.id, 
+				p.api_plant_id, 
+				p.entity_id, 
+				p.name, 
+				p.county, 
+				p.state,
+				ST_X(p.location::geometry) AS longitude,
+				ST_Y(p.location::geometry) AS latitude,
+				p.plant_code,
+				p.fuel_type,
+				p.prime_mover,
+				p.operating_status,
+				p.metadata AS plant_metadata,
+				p.created_at AS plant_created_at,
+				p.updated_at AS plant_updated_at,
+				g.nameplate_capacity_mw,
+				g.net_summer_capacity_mw,
+				g.net_winter_capacity_mw,
+				s.id AS stat_id,
+				s.planned_derate_summer_cap_mw,
+				s.planned_uprate_summer_cap_mw,
+				s.operating_year_month,
+				s.planned_derate_year_month,
+				s.planned_uprate_year_month,
+				s.planned_retirement_year_month,
+				s.source_timestamp,
+				s.data_period,
+				s.metadata AS stat_metadata,
+				s.timestamp AS stat_timestamp,
+				gen.id AS gen_id,
+				gen.period AS gen_period,
+				gen.generation AS gen_generation,
+				gen.generation_units AS gen_generation_units,
+				gen.consumption_for_eg AS gen_consumption_for_eg,
+				gen.consumption_for_eg_units AS gen_consumption_for_eg_units,
+				gen.total_consumption AS gen_total_consumption,
+				gen.total_consumption_units AS gen_total_consumption_units,
+				gen.metadata AS gen_metadata,
+				gen.timestamp AS gen_timestamp
+			FROM eia_power_plants as p
+			LEFT JOIN (
+				SELECT 
+					plant_id,
+					SUM(nameplate_capacity_mw) AS nameplate_capacity_mw,
+					SUM(net_summer_capacity_mw) AS net_summer_capacity_mw,
+					SUM(net_winter_capacity_mw) AS net_winter_capacity_mw,
+					MAX(updated_at) AS latest_update
+				FROM eia_generators
+				GROUP BY plant_id
+			) AS g ON g.plant_id = p.id
+			LEFT JOIN (
+				SELECT DISTINCT ON (plant_id) *
+				FROM eia_plant_capacity
+				ORDER BY plant_id, timestamp DESC
+			) as s ON s.plant_id = p.id
+			LEFT JOIN latest_gen AS gen ON gen.plant_id = p.id
+			WHERE 
+				($1::text IS NULL OR p.fuel_type = $1)
+				AND (
+					$2::text[] IS NULL 
+					OR $2::text[] = '{}'::text[] 
+					OR p.state = ANY($2::text[])
+				)
+				AND ($3::text IS NULL OR p.operating_status = $3)
+				AND (
+					$4::float IS NULL 
+					OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw >= $4)
+				)
+				AND (
+					$5::float IS NULL 
+					OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw <= $5)
+				)`;
 
+			// Execute the query with secure parameter binding
+			const powerPlantsResult = await sql.unsafe(queryString, [
+				params.fuelType, 
+				params.states, 
+				params.operatingStatus, 
+				params.minCapacity, 
+				params.maxCapacity
+			]);
+
+	
 			// Transform the data to include geographical coordinates
-			const formattedPowerPlants = powerPlants.map((plant: any) => {
+			const formattedPowerPlants = powerPlantsResult.map((plant: any) => {
 				// Extract metadata from JSON strings if they exist
 				let plantMetadata = plant.plant_metadata ? 
 					(typeof plant.plant_metadata === 'string' ? 
@@ -65,35 +144,59 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				let statMetadata = plant.stat_metadata ? 
 					(typeof plant.stat_metadata === 'string' ? 
 						JSON.parse(plant.stat_metadata) : plant.stat_metadata) : {};
-/* 
+                
+                let genMetadata = plant.gen_metadata ? 
+					(typeof plant.gen_metadata === 'string' ? 
+						JSON.parse(plant.gen_metadata) : plant.gen_metadata) : {};
 
-				console.log("CAPACITY:", JSON.stringify(plant, null, 2)); */
+				if (plant.genGeneration) {
+					console.log("GENERATION GENERATION: ", plant.genGeneration);
+				}
+				if (plant.genConsumptionForEg) {
+					console.log("GENERATION CONSUMPTION FOR EG: ", plant.genConsumptionForEg);
+				}
+				if (plant.genTotalConsumption) {
+					console.log("GENERATION TOTAL CONSUMPTION: ", plant.genTotalConsumption);
+				}
 					
 				return {
 					id: plant.id,
-					api_plant_id: plant.apiPlantId,
-					entity_id: plant.entityId,
+					api_plant_id: plant.api_plant_id,
+					entity_id: plant.entity_id,
 					name: plant.name,
 					county: plant.county,
 					state: plant.state,
 					latitude: parseFloat(plant.latitude),
 					longitude: parseFloat(plant.longitude),
-					plant_code: plant.plantCode,
-					fuel_type: plant.fuelType,
-					prime_mover: plant.primeMover,
-					operating_status: plant.operatingStatus,
-					nameplate_capacity_mw: plant.nameplateCapacityMw ? parseFloat(String(plant.nameplateCapacityMw)) : null,
-					net_summer_capacity_mw: plant.netSummerCapacityMw ? parseFloat(String(plant.netSummerCapacityMw)) : null,
-					net_winter_capacity_mw: plant.netWinterCapacityMw ? parseFloat(String(plant.netWinterCapacityMw)) : null,
-					planned_derate_summer_cap_mw: plant.plannedDerateSummerCapMw,
-					planned_uprate_summer_cap_mw: plant.plannedUprateSummerCapMw,
-					operating_year_month: plant.operatingYearMonth,
-					planned_derate_year_month: plant.plannedDerateYearMonth,
-					planned_uprate_year_month: plant.plannedUprateYearMonth,
-					planned_retirement_year_month: plant.plannedRetirementYearMonth,
-					last_updated: plant.statTimestamp || plant.plantUpdatedAt,
+					plant_code: plant.plant_code,
+					fuel_type: plant.fuel_type,
+					prime_mover: plant.prime_mover,
+					operating_status: plant.operating_status,
+					nameplate_capacity_mw: plant.nameplate_capacity_mw ? parseFloat(String(plant.nameplate_capacity_mw)) : null,
+					net_summer_capacity_mw: plant.net_summer_capacity_mw ? parseFloat(String(plant.net_summer_capacity_mw)) : null,
+					net_winter_capacity_mw: plant.net_winter_capacity_mw ? parseFloat(String(plant.net_winter_capacity_mw)) : null,
+					planned_derate_summer_cap_mw: plant.planned_derate_summer_cap_mw,
+					planned_uprate_summer_cap_mw: plant.planned_uprate_summer_cap_mw,
+					operating_year_month: plant.operating_year_month,
+					planned_derate_year_month: plant.planned_derate_year_month,
+					planned_uprate_year_month: plant.planned_uprate_year_month,
+					planned_retirement_year_month: plant.planned_retirement_year_month,
+					last_updated: plant.stat_timestamp || plant.plant_updated_at,
 					plant_metadata: plantMetadata,
-					stat_metadata: statMetadata
+					stat_metadata: statMetadata,
+                    // Add generation data
+                    generation: plant.gen_id ? {
+                        id: plant.gen_id,
+                        period: plant.gen_period,
+                        generation: plant.gen_generation ? parseFloat(String(plant.gen_generation)) : null,
+                        generation_units: plant.gen_generation_units,
+                        consumption_for_eg: plant.gen_consumption_for_eg ? parseFloat(String(plant.gen_consumption_for_eg)) : null,
+                        consumption_for_eg_units: plant.gen_consumption_for_eg_units,
+                        total_consumption: plant.gen_total_consumption ? parseFloat(String(plant.gen_total_consumption)) : null,
+                        total_consumption_units: plant.gen_total_consumption_units,
+                        timestamp: plant.gen_timestamp,
+                        metadata: plant.gen_metadata
+                    } : null
 				};
 			});
 
