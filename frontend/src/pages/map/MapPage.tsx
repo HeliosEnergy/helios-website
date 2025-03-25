@@ -30,6 +30,9 @@ export default function MapPage() {
 	
 	// Add state for capacity weight factor (default to 1.0)
 	const [capacityWeight, setCapacityWeight] = useState(1.0);
+	
+	// Add state for coloring by capacity factor
+	const [colorByCapacityFactor, setColorByCapacityFactor] = useState(false);
 
 	// Add state for filters
 	const [filters, setFilters] = useState({
@@ -37,7 +40,9 @@ export default function MapPage() {
 		state: null as string[] | null,
 		operating_status: null as string | null,
 		min_capacity: null as number | null,
-		max_capacity: null as number | null
+		max_capacity: null as number | null,
+		min_capacity_factor: null as number | null,
+		max_capacity_factor: null as number | null
 	});
 	
 	// Create debounced function to send visual-only parameter changes
@@ -55,9 +60,10 @@ export default function MapPage() {
 		debouncedPostVisualParams({
 			showSummerCapacity,
 			sizeMultiplier,
-			capacityWeight
+			capacityWeight,
+			colorByCapacityFactor
 		});
-	}, [showSummerCapacity, sizeMultiplier, capacityWeight]);
+	}, [showSummerCapacity, sizeMultiplier, capacityWeight, colorByCapacityFactor]);
 	
 	// Send filter parameters (immediately, not debounced)
 	useEffect(() => {
@@ -111,6 +117,8 @@ export default function MapPage() {
 							setSizeMultiplier={setSizeMultiplier}
 							capacityWeight={capacityWeight}
 							setCapacityWeight={setCapacityWeight}
+							colorByCapacityFactor={colorByCapacityFactor}
+							setColorByCapacityFactor={setColorByCapacityFactor}
 							filters={filters}
 							setFilters={setFilters}
 						/>

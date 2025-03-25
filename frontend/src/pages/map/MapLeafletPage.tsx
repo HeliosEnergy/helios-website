@@ -16,6 +16,7 @@ interface PowerPlant {
 	county?: string;
 	state?: string;
 	last_updated?: string;
+	capacity_factor?: number;
 	// Add generation data
 	generation?: {
 		id: number;
@@ -88,6 +89,17 @@ const getOutlineWeightByZoom = (zoomLevel: number) => {
 	return Math.max(0.5, Math.min(2, zoomLevel / 9));
 };
 
+// Add capacity factor color mapping
+const getCapacityFactorColor = (capacityFactor: number | undefined | null): string => {
+	if (capacityFactor === undefined || capacityFactor === null) return '#888888'; // Gray for unknown
+	
+	if (capacityFactor < 20) return '#ff0000'; // Red for very low
+	if (capacityFactor < 40) return '#ff8800'; // Orange for low
+	if (capacityFactor < 60) return '#ffff00'; // Yellow for medium
+	if (capacityFactor < 80) return '#88ff00'; // Light green for good
+	return '#00ff00'; // Bright green for excellent
+};
+
 export function MapLeafletPage() {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const mapInstanceRef = useRef<L.Map | null>(null);
@@ -103,7 +115,8 @@ export function MapLeafletPage() {
 	const [visualParams, setVisualParams] = useState({
 		showSummerCapacity: true,
 		sizeMultiplier: 15,
-		capacityWeight: 1.0
+		capacityWeight: 1.0,
+		colorByCapacityFactor: false
 	});
 	
 	// Configuration state for filter parameters
@@ -113,7 +126,9 @@ export function MapLeafletPage() {
 			state: null as string[] | null,
 			operating_status: null as string | null,
 			min_capacity: null as number | null,
-			max_capacity: null as number | null
+			max_capacity: null as number | null,
+			min_capacity_factor: null as number | null,
+			max_capacity_factor: null as number | null
 		}
 	});
 	
@@ -134,7 +149,8 @@ export function MapLeafletPage() {
 					setVisualParams({
 						showSummerCapacity: event.data.showSummerCapacity,
 						sizeMultiplier: event.data.sizeMultiplier,
-						capacityWeight: event.data.capacityWeight
+						capacityWeight: event.data.capacityWeight,
+						colorByCapacityFactor: event.data.colorByCapacityFactor || false
 					});
 				} 
 				else if (event.data.type === 'filterParams') {
@@ -184,12 +200,14 @@ export function MapLeafletPage() {
 							: 'Unknown'
 				}</p>
 				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
+				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor ? 
+					`<span style="color: ${getCapacityFactorColor(plant.capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
+					: 'N/A'}</p>
 				
 				${plant.generation ? `
 				<hr />
 				<h4>Latest Generation Data (${generationDate || 'Unknown Date'})</h4>
 				<p><strong>Generation:</strong> ${plant.generation.generation ? `${plant.generation.generation.toLocaleString()} ${plant.generation.generation_units || ''}` : 'N/A'}</p>
-				<p><strong>Capacity Factor:</strong> ${plant.generation.generation ? `${(plant.generation.generation / (plant.nameplate_capacity_mw * 720) * 100).toFixed(1)}%` : 'N/A'}</p>
 				${plant.generation.consumption_for_eg ? `
 				<p><strong>Consumption:</strong> ${plant.generation.consumption_for_eg.toLocaleString()} ${plant.generation.consumption_for_eg_units || ''}</p>
 				` : ''}${plant.generation.total_consumption ? `
@@ -208,6 +226,7 @@ ${JSON.stringify({
 	fuel_type: plant.fuel_type,
 	capacity: plant.nameplate_capacity_mw,
 	status: plant.operating_status,
+	capacity_factor: plant.capacity_factor,
 	generation: plant.generation ? {
 		period: plant.generation.period,
 		amount: plant.generation.generation,
@@ -244,6 +263,8 @@ ${JSON.stringify({
 				if (filters.operating_status) queryParams.append('operating_status', filters.operating_status);
 				if (filters.min_capacity !== null) queryParams.append('min_capacity', filters.min_capacity.toString());
 				if (filters.max_capacity !== null) queryParams.append('max_capacity', filters.max_capacity.toString());
+				if (filters.min_capacity_factor !== null) queryParams.append('min_capacity_factor', filters.min_capacity_factor.toString());
+				if (filters.max_capacity_factor !== null) queryParams.append('max_capacity_factor', filters.max_capacity_factor.toString());
 				
 				// Get API URL from environment variable or use default
 				const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL;
@@ -334,10 +355,12 @@ ${JSON.stringify({
 			// Skip plants without valid coordinates
 			if (!plant.latitude || !plant.longitude) return;
 			
-			// Get color based on fuel type
-			const color = plant.fuel_type && fuelTypeColors[plant.fuel_type] 
-				? fuelTypeColors[plant.fuel_type] 
-				: '#3388ff';
+			// Get color based on fuel type or capacity factor
+			const color = visualParams.colorByCapacityFactor && plant.capacity_factor !== null && plant.capacity_factor !== undefined
+				? getCapacityFactorColor(plant.capacity_factor)
+				: (plant.fuel_type && fuelTypeColors[plant.fuel_type] 
+					? fuelTypeColors[plant.fuel_type] 
+					: '#3388ff');
 			
 			// Calculate radius based on capacity
 			const radius = plant.nameplate_capacity_mw 

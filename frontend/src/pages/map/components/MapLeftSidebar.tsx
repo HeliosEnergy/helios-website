@@ -10,12 +10,16 @@ interface MapLeftSidebarProps {
 	setSizeMultiplier: (multiplier: number) => void;
 	capacityWeight: number;
 	setCapacityWeight: (weight: number) => void;
+	colorByCapacityFactor: boolean;
+	setColorByCapacityFactor: (show: boolean) => void;
 	filters: {
 		fuel_type: string | null;
 		state: string[] | null;
 		operating_status: string | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
+		min_capacity_factor: number | null;
+		max_capacity_factor: number | null;
 	};
 	setFilters: React.Dispatch<React.SetStateAction<{
 		fuel_type: string | null;
@@ -23,6 +27,8 @@ interface MapLeftSidebarProps {
 		operating_status: string | null;
 		min_capacity: number | null;
 		max_capacity: number | null;
+		min_capacity_factor: number | null;
+		max_capacity_factor: number | null;
 	}>>;
 }
 
@@ -34,6 +40,8 @@ export function MapLeftSidebar({
 	setSizeMultiplier,
 	capacityWeight,
 	setCapacityWeight,
+	colorByCapacityFactor,
+	setColorByCapacityFactor,
 	filters,
 	setFilters
 }: MapLeftSidebarProps) {
@@ -236,6 +244,42 @@ export function MapLeftSidebar({
 						Show Summer Capacity (for Solar)
 					</label>
 				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label>
+						<input 
+							type="checkbox" 
+							checked={colorByCapacityFactor} 
+							onChange={() => setColorByCapacityFactor(!colorByCapacityFactor)}
+						/>
+						{' '}
+						Color by Capacity Factor
+					</label>
+					{colorByCapacityFactor && (
+						<div style={{ marginLeft: '20px', marginTop: '5px', fontSize: '12px' }}>
+							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff0000', marginRight: '5px' }}></div>
+								&lt;20%
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff8800', marginRight: '5px' }}></div>
+								20-40%
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#ffff00', marginRight: '5px' }}></div>
+								40-60%
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#88ff00', marginRight: '5px' }}></div>
+								60-80%
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#00ff00', marginRight: '5px' }}></div>
+								&gt;80%
+							</div>
+						</div>
+					)}
+				</div>
 			</div>
 
 			<div style={{ marginBottom: '20px' }}>
@@ -305,6 +349,50 @@ export function MapLeftSidebar({
 						style={{ width: '100%', padding: '5px' }}
 					/>
 				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Min Capacity Factor: {filters.min_capacity_factor !== null ? `${filters.min_capacity_factor}%` : '0%'}</label>
+					<input 
+						type="range" 
+						min="0"
+						max="100"
+						step="1"
+						value={filters.min_capacity_factor !== null ? filters.min_capacity_factor : 0} 
+						onChange={(e) => {
+							const newValue = parseInt(e.target.value);
+							// Ensure min doesn't exceed max
+							if (filters.max_capacity_factor === null || newValue <= filters.max_capacity_factor) {
+								handleFilterChange('min_capacity_factor', newValue);
+							} else {
+								// If min would exceed max, set min to max
+								handleFilterChange('min_capacity_factor', filters.max_capacity_factor);
+							}
+						}}
+						style={{ width: '100%' }}
+					/>
+				</div>
+
+				<div style={{ marginBottom: '10px' }}>
+					<label style={{ display: 'block', marginBottom: '5px' }}>Max Capacity Factor: {filters.max_capacity_factor !== null ? `${filters.max_capacity_factor}%` : '100%'}</label>
+					<input 
+						type="range" 
+						min="0"
+						max="100"
+						step="1"
+						value={filters.max_capacity_factor !== null ? filters.max_capacity_factor : 100} 
+						onChange={(e) => {
+							const newValue = parseInt(e.target.value);
+							// Ensure max is not less than min
+							if (filters.min_capacity_factor === null || newValue >= filters.min_capacity_factor) {
+								handleFilterChange('max_capacity_factor', newValue);
+							} else {
+								// If max would be less than min, set max to min
+								handleFilterChange('max_capacity_factor', filters.min_capacity_factor);
+							}
+						}}
+						style={{ width: '100%' }}
+					/>
+				</div>
 				
 				<button 
 					onClick={() => setFilters({
@@ -312,7 +400,9 @@ export function MapLeftSidebar({
 						state: null,
 						operating_status: null,
 						min_capacity: null,
-						max_capacity: null
+						max_capacity: null,
+						min_capacity_factor: null,
+						max_capacity_factor: null
 					})}
 					style={{ 
 						width: '100%', 

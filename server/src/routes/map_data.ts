@@ -3,7 +3,8 @@ import postgres from "postgres";
 
 /**
  * Get power plant data with latest statistics
- * Supports filtering by fuel_type, state, operating_status, min_capacity, and max_capacity
+ * Supports filtering by fuel_type, state, operating_status, min_capacity, max_capacity,
+ * min_capacity_factor, and max_capacity_factor
  */
 export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
 
@@ -15,7 +16,9 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				state, 
 				operating_status, 
 				min_capacity, 
-				max_capacity 
+				max_capacity,
+				min_capacity_factor,
+				max_capacity_factor
 			} = request.query;
 
 			// Handle state as either a single value or an array
@@ -40,7 +43,9 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				states: statesArray,
 				operatingStatus: operating_status ? String(operating_status) : null,
 				minCapacity: min_capacity ? parseFloat(String(min_capacity)) : null,
-				maxCapacity: max_capacity ? parseFloat(String(max_capacity)) : null
+				maxCapacity: max_capacity ? parseFloat(String(max_capacity)) : null,
+				minCapacityFactor: min_capacity_factor ? parseFloat(String(min_capacity_factor)) : null,
+				maxCapacityFactor: max_capacity_factor ? parseFloat(String(max_capacity_factor)) : null
 			};
 
 			// Direct SQL query instead of using the generated function
@@ -89,7 +94,12 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				gen.total_consumption AS gen_total_consumption,
 				gen.total_consumption_units AS gen_total_consumption_units,
 				gen.metadata AS gen_metadata,
-				gen.timestamp AS gen_timestamp
+				gen.timestamp AS gen_timestamp,
+				CASE 
+					WHEN gen.generation IS NOT NULL AND g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw > 0 
+					THEN (gen.generation / (g.nameplate_capacity_mw * 720)) * 100 
+					ELSE NULL 
+				END AS capacity_factor
 			FROM eia_power_plants as p
 			LEFT JOIN (
 				SELECT 
@@ -122,6 +132,24 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				AND (
 					$5::float IS NULL 
 					OR (g.nameplate_capacity_mw IS NOT NULL AND g.nameplate_capacity_mw <= $5)
+				)
+				AND (
+					$6::float IS NULL
+					OR (
+						gen.generation IS NOT NULL 
+						AND g.nameplate_capacity_mw IS NOT NULL 
+						AND g.nameplate_capacity_mw > 0
+						AND ((gen.generation / (g.nameplate_capacity_mw * 720)) * 100) >= $6
+					)
+				)
+				AND (
+					$7::float IS NULL
+					OR (
+						gen.generation IS NOT NULL 
+						AND g.nameplate_capacity_mw IS NOT NULL 
+						AND g.nameplate_capacity_mw > 0
+						AND ((gen.generation / (g.nameplate_capacity_mw * 720)) * 100) <= $7
+					)
 				)`;
 
 			// Execute the query with secure parameter binding
@@ -130,12 +158,13 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				params.states, 
 				params.operatingStatus, 
 				params.minCapacity, 
-				params.maxCapacity
+				params.maxCapacity,
+				params.minCapacityFactor,
+				params.maxCapacityFactor
 			]);
-
 	
 			// Transform the data to include geographical coordinates
-			const formattedPowerPlants = powerPlantsResult.map((plant: any) => {
+			const formattedPowerPlants = [...powerPlantsResult].map((plant: any) => {
 				// Extract metadata from JSON strings if they exist
 				let plantMetadata = plant.plant_metadata ? 
 					(typeof plant.plant_metadata === 'string' ? 
@@ -149,16 +178,6 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 					(typeof plant.gen_metadata === 'string' ? 
 						JSON.parse(plant.gen_metadata) : plant.gen_metadata) : {};
 
-				if (plant.genGeneration) {
-					console.log("GENERATION GENERATION: ", plant.genGeneration);
-				}
-				if (plant.genConsumptionForEg) {
-					console.log("GENERATION CONSUMPTION FOR EG: ", plant.genConsumptionForEg);
-				}
-				if (plant.genTotalConsumption) {
-					console.log("GENERATION TOTAL CONSUMPTION: ", plant.genTotalConsumption);
-				}
-					
 				return {
 					id: plant.id,
 					api_plant_id: plant.api_plant_id,
@@ -184,6 +203,7 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 					last_updated: plant.stat_timestamp || plant.plant_updated_at,
 					plant_metadata: plantMetadata,
 					stat_metadata: statMetadata,
+					capacity_factor: plant.capacity_factor ? parseFloat(String(plant.capacity_factor)) : null,
                     // Add generation data
                     generation: plant.gen_id ? {
                         id: plant.gen_id,
