@@ -135,7 +135,9 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 				)
 				AND (
 					$6::float IS NULL
+					OR $6 = 0
 					OR (
+						-- If min_capacity_factor > 0, ensure capacity factor exists and is >= min
 						gen.generation IS NOT NULL 
 						AND g.nameplate_capacity_mw IS NOT NULL 
 						AND g.nameplate_capacity_mw > 0
@@ -149,6 +151,16 @@ export function httpGetPowerPlantData(sql: postgres.Sql<{}>): (request: Request,
 						AND g.nameplate_capacity_mw IS NOT NULL 
 						AND g.nameplate_capacity_mw > 0
 						AND ((gen.generation / (g.nameplate_capacity_mw * 720)) * 100) <= $7
+					)
+				)
+				-- Exclude NULL capacity factor records when min capacity factor is > 0
+				AND (
+					$6::float IS NULL 
+					OR $6 = 0
+					OR (
+						gen.generation IS NOT NULL 
+						AND g.nameplate_capacity_mw IS NOT NULL 
+						AND g.nameplate_capacity_mw > 0
 					)
 				)`;
 

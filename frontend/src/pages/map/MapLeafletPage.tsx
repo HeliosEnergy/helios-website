@@ -108,13 +108,13 @@ const getOutlineWeightByZoom = (zoomLevel: number) => {
 
 // Add capacity factor color mapping - memoize this for performance
 const getCapacityFactorColor = (capacityFactor: number | undefined | null): string => {
-	if (capacityFactor === undefined || capacityFactor === null) return '#888888'; // Gray for unknown
+	if (capacityFactor === undefined || capacityFactor === null) return '#444444'; // Dark gray for unknown/N/A
 	
-	if (capacityFactor < 20) return '#ff0000'; // Red for very low
-	if (capacityFactor < 40) return '#ff8800'; // Orange for low
+	if (capacityFactor < 20) return '#00ff00'; // Bright green for very low
+	if (capacityFactor < 40) return '#88ff00'; // Light green for low
 	if (capacityFactor < 60) return '#ffff00'; // Yellow for medium
-	if (capacityFactor < 80) return '#88ff00'; // Light green for good
-	return '#00ff00'; // Bright green for excellent
+	if (capacityFactor < 80) return '#ff8800'; // Orange for good
+	return '#ff0000'; // Red for excellent
 };
 
 export function MapLeafletPage() {
@@ -169,7 +169,12 @@ export function MapLeafletPage() {
 	
 	// Optimize color lookup with memoization
 	const getPlantColor = useCallback((plant: PowerPlant, useCapacityFactor: boolean): string => {
-		if (useCapacityFactor && plant.capacity_factor !== null && plant.capacity_factor !== undefined) {
+		if (useCapacityFactor) {
+			if (plant.capacity_factor === null || plant.capacity_factor === undefined) {
+				// Return dark gray for N/A capacity factors when coloring by capacity factor is enabled
+				return '#444444';
+			}
+			
 			// Round to nearest 5 to use from map or compute directly if needed
 			const roundedFactor = Math.round(plant.capacity_factor / 5) * 5;
 			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor);
@@ -379,6 +384,7 @@ ${JSON.stringify({
 		const map = mapInstanceRef.current;
 		const markersLayer = markersLayerRef.current;
 		const zoomLevel = map.getZoom();
+		const outlineWeight = getOutlineWeightByZoom(zoomLevel);
 		
 		// Track old marker IDs to remove ones that are no longer needed
 		const currentPlantIds = new Set(powerPlants.map(plant => plant.id));
@@ -433,7 +439,7 @@ ${JSON.stringify({
 					existingMarker.setStyle({
 						fillColor: color,
 						color: '#000',
-						weight: 2,
+						weight: outlineWeight,
 						opacity: 1,
 						fillOpacity: 0.8
 					});
@@ -447,7 +453,7 @@ ${JSON.stringify({
 						radius: radius,
 						fillColor: color,
 						color: '#000',
-						weight: 2,
+						weight: outlineWeight,
 						opacity: 1,
 						fillOpacity: 0.8
 					});

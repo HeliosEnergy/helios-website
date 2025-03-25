@@ -266,11 +266,15 @@ export function MapLeftSidebar({
 					{colorByCapacityFactor && (
 						<div style={{ marginLeft: '20px', marginTop: '5px', fontSize: '12px' }}>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
-								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff0000', marginRight: '5px' }}></div>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#444444', marginRight: '5px' }}></div>
+								N/A
+							</div>
+							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#00ff00', marginRight: '5px' }}></div>
 								&lt;20%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
-								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff8800', marginRight: '5px' }}></div>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#88ff00', marginRight: '5px' }}></div>
 								20-40%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
@@ -278,11 +282,11 @@ export function MapLeftSidebar({
 								40-60%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center', marginBottom: '2px' }}>
-								<div style={{ width: '12px', height: '12px', backgroundColor: '#88ff00', marginRight: '5px' }}></div>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff8800', marginRight: '5px' }}></div>
 								60-80%
 							</div>
 							<div style={{ display: 'flex', alignItems: 'center' }}>
-								<div style={{ width: '12px', height: '12px', backgroundColor: '#00ff00', marginRight: '5px' }}></div>
+								<div style={{ width: '12px', height: '12px', backgroundColor: '#ff0000', marginRight: '5px' }}></div>
 								&gt;80%
 							</div>
 						</div>
