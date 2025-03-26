@@ -53,7 +53,7 @@ interface PowerPlant {
 // Define colors for different fuel types based on energy source code
  
 
-export const getRadiusBase = (capacity: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number): [number, number] => {
+export const getRadiusBase = (capacity: number | null | undefined, zoomLevel: number, sizeMultiplier: number): [number, number] => {
 	// Return just base size if capacity is null or undefined
 	if (capacity === null || capacity === undefined) {
 		const baseSize = Math.max(1, zoomLevel - 3) * sizeMultiplier / 15;
@@ -69,16 +69,10 @@ export const getRadiusBase = (capacity: number | null | undefined, zoomLevel: nu
 
 // Function to calculate radius based on capacity and zoom level
 const getRadiusByCapacity = (capacity: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
-	const [baseSize, zoomCapacityFactor] = getRadiusBase(capacity, zoomLevel, sizeMultiplier, capacityWeight);
+	const [baseSize, zoomCapacityFactor] = getRadiusBase(capacity, zoomLevel, sizeMultiplier);
 	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.75) * zoomCapacityFactor * capacityWeight; 
 	return ((baseSize + capacityComponent) * sizeMultiplier) / 100;
 };
-
-const getRadiusByCapcaityFactor = (capacityFactorPercentage: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
-	const [baseSize, zoomCapacityFactor] = getRadiusBase(capacityFactorPercentage, zoomLevel, sizeMultiplier, capacityWeight);
-	const capacityComponent = Math.pow((capacityFactorPercentage || 0.1), 1.75) * zoomCapacityFactor * capacityWeight; 
-	return ((baseSize + capacityComponent) * sizeMultiplier) / 100;
-}
 
 // Function to calculate outline weight based on zoom level
 const getOutlineWeightByZoom = (zoomLevel: number) => {
