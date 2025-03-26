@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { fuelTypeColors, fuelTypeDisplayNames, operatingStatusDisplayNames, MapColorings, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, operatingStatusColors } from './MapValueMappings';
+import { fuelTypeColors, fuelTypeDisplayNames, operatingStatusDisplayNames, MapColorings, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, operatingStatusColors, DEFAULT_SIZE_BY_OPTION } from './MapValueMappings';
 
 // Add efficient debounce implementation
 function useDebounce<T>(value: T, delay: number): T {
@@ -105,7 +105,8 @@ export function MapLeafletPage() {
 		showSummerCapacity: DEFAULT_SHOW_SUMMER_CAPACITY,
 		sizeMultiplier: DEFAULT_SIZE_MULTIPLIER,
 		capacityWeight: DEFAULT_CAPACITY_WEIGHT,
-		coloringMode: DEFAULT_COLORING_MODE
+		coloringMode: DEFAULT_COLORING_MODE,
+		sizeByOption: DEFAULT_SIZE_BY_OPTION
 	});
 	
 	// Configuration state for filter parameters
@@ -185,7 +186,8 @@ export function MapLeafletPage() {
 						showSummerCapacity: event.data.showSummerCapacity,
 						sizeMultiplier: event.data.sizeMultiplier,
 						capacityWeight: event.data.capacityWeight,
-						coloringMode: event.data.coloringMode || "fuelType"
+						coloringMode: event.data.coloringMode || "fuelType",
+						sizeByOption: event.data.sizeByOption || "nameplate_capacity"
 					});
 				} 
 				else if (event.data.type === 'filterParams') {
@@ -228,14 +230,12 @@ export function MapLeafletPage() {
 				</p>
 				<p><strong>Fuel Type:</strong> ${plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type as keyof typeof fuelTypeDisplayNames] || plant.fuel_type) : 'Unknown'}</p>
 				<p><strong>Capacity:</strong> ${
-					visualParams.showSummerCapacity && plant.net_summer_capacity_mw 
-						? `${plant.net_summer_capacity_mw} MW (Summer)` 
-						: plant.nameplate_capacity_mw 
-							? `${plant.nameplate_capacity_mw} MW` 
-							: 'Unknown'
+					plant.nameplate_capacity_mw 
+						? `${Math.ceil(plant.nameplate_capacity_mw)} MW` 
+						: 'Unknown'
 				}</p>
 				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
-				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor ? 
+				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor !== undefined && plant.capacity_factor !== null ? 
 					`<span style="background-color: black; padding-left: 4px; padding-right: 4px; color: ${getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
 					: 'N/A'}</p>
 				
@@ -424,14 +424,29 @@ ${JSON.stringify({
 					const color = getPlantColor(plant, visualParams.coloringMode);
 					
 					// Calculate radius based on capacity
-					const radius = plant.nameplate_capacity_mw 
-						? getRadiusByCapacity(
-								plant.nameplate_capacity_mw, 
-								zoomLevel, 
-								visualParams.sizeMultiplier, 
-								visualParams.capacityWeight
-							)
-						: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+					const radius = 
+						visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
+							? getRadiusByCapacity(
+									plant.capacity_factor, 
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+							: visualParams.sizeByOption === "generation" && plant.generation?.generation
+								? getRadiusByCapacity(
+									plant.generation.generation / 1000, // Convert to thousands for better scaling
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+								: plant.nameplate_capacity_mw 
+									? getRadiusByCapacity(
+										plant.nameplate_capacity_mw, 
+										zoomLevel, 
+										visualParams.sizeMultiplier, 
+										visualParams.capacityWeight
+									)
+									: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
 					
 					// Create new marker
 					const circleMarker = L.circleMarker([plant.latitude, plant.longitude], {
@@ -460,14 +475,29 @@ ${JSON.stringify({
 				const color = getPlantColor(plant, visualParams.coloringMode);
 				
 				// Calculate radius based on capacity
-				const radius = plant.nameplate_capacity_mw 
-					? getRadiusByCapacity(
-							plant.nameplate_capacity_mw, 
-							zoomLevel, 
-							visualParams.sizeMultiplier, 
-							visualParams.capacityWeight
-						)
-					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+				const radius = 
+					visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
+						? getRadiusByCapacity(
+								plant.capacity_factor, 
+								zoomLevel, 
+								visualParams.sizeMultiplier, 
+								visualParams.capacityWeight
+							)
+						: visualParams.sizeByOption === "generation" && plant.generation?.generation
+							? getRadiusByCapacity(
+								plant.generation.generation / 1000, // Convert to thousands for better scaling
+								zoomLevel, 
+								visualParams.sizeMultiplier, 
+								visualParams.capacityWeight
+							)
+							: plant.nameplate_capacity_mw 
+								? getRadiusByCapacity(
+									plant.nameplate_capacity_mw, 
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
 				
 				// Update existing marker
 				marker.setRadius(radius);
@@ -517,12 +547,29 @@ ${JSON.stringify({
 		markerRefs.current.forEach((marker, plantId) => {
 			const plant = powerPlants.find(p => p.id === plantId);
 			if (plant && plant.nameplate_capacity_mw) {
-				const newRadius = getRadiusByCapacity(
-					plant.nameplate_capacity_mw,
-					zoomLevel,
-					visualParams.sizeMultiplier,
-					visualParams.capacityWeight
-				);
+				const newRadius = 
+					visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
+						? getRadiusByCapacity(
+								plant.capacity_factor, 
+								zoomLevel, 
+								visualParams.sizeMultiplier, 
+								visualParams.capacityWeight
+							)
+						: visualParams.sizeByOption === "generation" && plant.generation?.generation
+							? getRadiusByCapacity(
+									plant.generation.generation / 1000, // Convert to thousands for better scaling
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+							: plant.nameplate_capacity_mw 
+								? getRadiusByCapacity(
+									plant.nameplate_capacity_mw, 
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
 				marker.setRadius(newRadius);
 				
 				// Update popup content for summer capacity changes
@@ -545,12 +592,29 @@ ${JSON.stringify({
 			markerRefs.current.forEach((marker, plantId) => {
 				const plant = powerPlants.find(p => p.id === plantId);
 				if (plant && plant.nameplate_capacity_mw) {
-					const newRadius = getRadiusByCapacity(
-						plant.nameplate_capacity_mw,
-						newZoomLevel,
-						visualParams.sizeMultiplier,
-						visualParams.capacityWeight
-					);
+					const newRadius = 
+						visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
+							? getRadiusByCapacity(
+									plant.capacity_factor, 
+									newZoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+							: visualParams.sizeByOption === "generation" && plant.generation?.generation
+								? getRadiusByCapacity(
+									plant.generation.generation / 1000, // Convert to thousands for better scaling
+									newZoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+								: plant.nameplate_capacity_mw 
+									? getRadiusByCapacity(
+										plant.nameplate_capacity_mw, 
+										newZoomLevel, 
+										visualParams.sizeMultiplier, 
+										visualParams.capacityWeight
+									)
+									: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15;
 					marker.setRadius(newRadius);
 					marker.setStyle({
 						weight: outlineWeight
@@ -577,13 +641,13 @@ ${JSON.stringify({
 			backgroundColor: '#f0f0f0',
 			position: 'relative'
 		}}>
-			{isLoading && !powerPlants.length && (
+			{isLoading && (
 				<div style={{
 					position: 'absolute',
 					top: '50%',
 					left: '50%',
 					transform: 'translate(-50%, -50%)',
-					backgroundColor: 'rgba(0, 0, 0, 0.7)',
+					backgroundColor: 'rgba(0, 0, 0, ' + (powerPlants.length ? '0.5' : '0.7') + ')',
 					color: 'white',
 					padding: '20px',
 					borderRadius: '5px',

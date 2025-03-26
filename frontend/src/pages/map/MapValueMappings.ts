@@ -1,8 +1,7 @@
-
-
 export type MapColorings = "capacityFactor" | "fuelType" | "operatingStatus";
 
-
+// Add this new type definition
+export type SizeByOption = "nameplate_capacity" | "capacity_factor" | "generation";
 
 export const fuelTypeColors: {[key: string]: string} = {
 	'SUN': '#FFD700',   // Solar - Gold
@@ -135,3 +134,4 @@ export const DEFAULT_CAPACITY_WEIGHT = 0.2;
 export const DEFAULT_SIZE_MULTIPLIER = 15;
 export const DEFAULT_COLORING_MODE: MapColorings = "fuelType";
 export const DEFAULT_SHOW_SUMMER_CAPACITY = false;
+export const DEFAULT_SIZE_BY_OPTION: SizeByOption = "nameplate_capacity";

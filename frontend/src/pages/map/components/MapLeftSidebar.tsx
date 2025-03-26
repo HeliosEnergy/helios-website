@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { MdArrowBack, MdArrowBackIos, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import Select from 'react-select';
-import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, fuelTypeColors, fuelTypeDisplayNames, MapColorings, operatingStatusDisplayNames, states } from '../MapValueMappings';
+import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, fuelTypeColors, fuelTypeDisplayNames, MapColorings, operatingStatusDisplayNames, states, SizeByOption, DEFAULT_SIZE_BY_OPTION } from '../MapValueMappings';
 import { OptionsOrGroups, GroupBase } from 'react-select';
 
 interface MapLeftSidebarProps {
@@ -33,6 +33,8 @@ interface MapLeftSidebarProps {
 		min_capacity_factor: number | null;
 		max_capacity_factor: number | null;
 	}>>;
+	sizeByOption: SizeByOption;
+	setSizeByOption: (option: SizeByOption) => void;
 }
 
 interface DropdownProps {
@@ -85,7 +87,9 @@ export function MapLeftSidebar({
 	coloringMode,
 	setColoringMode,
 	filters,
-	setFilters
+	setFilters,
+	sizeByOption,
+	setSizeByOption
 }: MapLeftSidebarProps) {
 	// Track which dropdown is currently open
 	const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -235,7 +239,7 @@ export function MapLeftSidebar({
 			<div style={{
 				width: "100%",
 			}}>
-				<div style={{ width: "100%", height: "32px" }}>
+				<div style={{ width: "100%", height: "64px" }}>
 					<div style={{
 						height: "400px",
 						marginTop: "16px"
@@ -257,7 +261,11 @@ export function MapLeftSidebar({
 					/>
 				</div>
 
-				<h4>MOAT: Monopolizing Optimal<br />AI Territory</h4>
+				<h4 style={{
+					marginBottom: "16px"
+				}}>
+					MOAT: Monopolizing Optimal<br />AI Territory
+				</h4>
 
 				<Dropdown
 					title="Plant Sizing"
@@ -277,7 +285,7 @@ export function MapLeftSidebar({
 					</div>
 
 					<div style={{ marginBottom: '10px' }}>
-						<label style={{ display: 'block', marginBottom: '5px' }}>Capacity Scaling: {capacityWeight.toFixed(2)}</label>
+						<label style={{ display: 'block', marginBottom: '5px' }}>Data Emphasis: {capacityWeight.toFixed(2)}</label>
 						<input
 							type="range"
 							min="0"
@@ -287,9 +295,29 @@ export function MapLeftSidebar({
 							onChange={(e) => throttledSetCapacityWeight(parseFloat(e.target.value))}
 							style={{ width: '100%' }}
 						/>
-						<small style={{ display: 'block', marginTop: '2px', fontSize: '12px', color: '#aaa' }}>
-							Controls how much a plant's capacity affects its size (0 = uniform size, 1 = normal, 3 = capacity emphasized)
+						<small style={{ display: 'block', marginTop: '2px', fontSize: '10px', color: '#aaa' }}>
+							Raises plant's capacity effect on size<br/>(0 = uniform, 1 = normal, 3 = emphasized)
 						</small>
+					</div>
+
+					<div style={{ marginBottom: '10px' }}>
+						<label style={{ display: 'block', marginBottom: '5px' }}>Size Circles By:</label>
+						<select 
+							value={sizeByOption}
+							onChange={(e) => setSizeByOption(e.target.value as SizeByOption)}
+							style={{ 
+								width: '100%', 
+								padding: '5px',
+								backgroundColor: '#333',
+								color: 'white',
+								border: '1px solid #555',
+								borderRadius: '4px' 
+							}}
+						>
+							<option value="nameplate_capacity">Nameplate Capacity</option>
+							<option value="capacity_factor">Capacity Factor</option>
+							<option value="generation">Generation</option>
+						</select>
 					</div>
 
 					<div style={{ marginBottom: '10px' }}>
@@ -300,7 +328,7 @@ export function MapLeftSidebar({
 								onChange={() => setShowSummerCapacity(!showSummerCapacity)}
 							/>
 							{' '}
-							Show Summer Capacity (for Solar)
+							Show Summer Capacity
 						</label>
 					</div>
 
@@ -508,10 +536,12 @@ export function MapLeftSidebar({
 						setShowSummerCapacity(DEFAULT_SHOW_SUMMER_CAPACITY)
 						setSizeMultiplier(DEFAULT_SIZE_MULTIPLIER)
 						setCapacityWeight(DEFAULT_CAPACITY_WEIGHT)
+						setSizeByOption(DEFAULT_SIZE_BY_OPTION)
 					}}
 					style={{
 						width: '100%',
 						padding: '8px',
+						marginBottom: '32px',
 						backgroundColor: '#444',
 						color: 'white',
 						border: 'none',

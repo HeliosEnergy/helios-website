@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import React from 'react';
 import './Map.scss';
 import { MdArrowForwardIos } from "react-icons/md";
-import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, MapColorings, operatingStatusColors, operatingStatusDisplayNames } from "./MapValueMappings";
+import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, MapColorings, operatingStatusColors, operatingStatusDisplayNames, DEFAULT_SIZE_BY_OPTION, SizeByOption } from "./MapValueMappings";
 import { fuelTypeColors, fuelTypeDisplayNames } from "./MapValueMappings";
 
 const MapLeftSidebar = React.lazy(() => import('./components/MapLeftSidebar'));
@@ -51,6 +51,9 @@ export default function MapPage() {
 		max_capacity_factor: null as number | null
 	});
 
+	// Add state for sizing by capacity factor
+	const [sizeByOption, setSizeByOption] = useState<SizeByOption>(DEFAULT_SIZE_BY_OPTION);
+
 	// Create debounced function to send visual-only parameter changes
 	const debouncedPostVisualParams = useRef(createDebounce((params: any) => {
 		if (iframeRef.current?.contentWindow) {
@@ -67,9 +70,10 @@ export default function MapPage() {
 			showSummerCapacity,
 			sizeMultiplier,
 			capacityWeight,
-			coloringMode
+			coloringMode,
+			sizeByOption
 		});
-	}, [showSummerCapacity, sizeMultiplier, capacityWeight, coloringMode]);
+	}, [showSummerCapacity, sizeMultiplier, capacityWeight, coloringMode, sizeByOption]);
 
 	// Send filter parameters (immediately, not debounced)
 	useEffect(() => {
@@ -81,7 +85,7 @@ export default function MapPage() {
 		}
 	}, [filters]);
 
-	
+
 	return (
 		<div style={{
 			height: "100vh",
@@ -128,6 +132,8 @@ export default function MapPage() {
 							setColoringMode={setColoringMode}
 							filters={filters}
 							setFilters={setFilters}
+							sizeByOption={sizeByOption}
+							setSizeByOption={setSizeByOption}
 						/>
 					) : (
 						<MdArrowForwardIos color="white" />
@@ -161,9 +167,9 @@ export default function MapPage() {
 				right: 16,
 				maxWidth: "150px",
 				maxHeight: "75%",
-				border: "2px solid rgb(0, 0, 0)",
-				borderRadius: "10px",
-				backgroundColor: "rgba(0, 0, 0, 0.75)",
+				border: "3px solid rgba(33, 33, 33, 1)",
+				borderRadius: "6px",
+				backgroundColor: "rgba(33, 33, 33, 0.85)",
 				zIndex: 1000,
 				padding: "16px",
 				paddingTop: "8px",
@@ -172,10 +178,23 @@ export default function MapPage() {
 				display: "flex",
 				flexDirection: "column"
 			}}>
-				<h5 style={{ margin: "0 0 10px 0", textAlign: "center" }}>{coloringMode === "fuelType" ? "Fuel Type" : "Capacity Factor"}</h5>
+
+				<h5 style={{ textAlign: "center" }}> {sizeByOption === "nameplate_capacity" ? "Nameplate Capacity" : sizeByOption === "capacity_factor" ? "Capacity Factor" : "Generation"}</h5>
+				<div
+					style={{
+						marginTop: "6px",
+						marginBottom: "4px",
+						border: "1px solid white",
+						borderRadius: "10px",
+						textAlign: "center"
+					}}>
+
+				</div>
+				<h5 style={{ margin: "0 0 6px 0", textAlign: "center" }}>{coloringMode === "fuelType" ? "Fuel Type" : "Capacity Factor"}</h5>
 
 				<div style={{
 					overflowY: "auto",
+					marginTop: "0px",
 					maxHeight: "calc(75vh - 50px)",
 					scrollbarWidth: "thin",
 					scrollbarColor: "rgba(255, 255, 255, 0.5) transparent"
@@ -210,14 +229,14 @@ export default function MapPage() {
 					)}
 
 					{coloringMode === "fuelType" && Object.entries(fuelTypeColors).map(([fuelType, color]) => (
-						<div key={fuelType} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px', fontSize: '12px' }}>
+						<div key={fuelType} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px', fontSize: '16px' }}>
 							<div style={{ width: '12px', height: '12px', backgroundColor: color, border: "1px solid white", marginRight: '5px' }}></div>
 							<span>{fuelTypeDisplayNames[fuelType as keyof typeof fuelTypeDisplayNames]}</span>
 						</div>
 					))}
 
 					{coloringMode === "operatingStatus" && Object.entries(operatingStatusColors).map(([operatingStatus, color]) => (
-						<div key={operatingStatus} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px', fontSize: '12px' }}>
+						<div key={operatingStatus} style={{ display: 'flex', alignItems: 'center', marginBottom: '4px', fontSize: '16px' }}>
 							<div style={{ width: '12px', height: '12px', backgroundColor: color, border: "1px solid white", marginRight: '5px' }}></div>
 							<span>{operatingStatusDisplayNames[operatingStatus as keyof typeof operatingStatusDisplayNames]}</span>
 						</div>
