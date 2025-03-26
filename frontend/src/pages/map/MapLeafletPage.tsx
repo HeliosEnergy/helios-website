@@ -53,15 +53,32 @@ interface PowerPlant {
 // Define colors for different fuel types based on energy source code
  
 
-// Function to calculate radius based on capacity and zoom level
-const getRadiusByCapacity = (capacity: number, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
+export const getRadiusBase = (capacity: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number): [number, number] => {
+	// Return just base size if capacity is null or undefined
+	if (capacity === null || capacity === undefined) {
+		const baseSize = Math.max(1, zoomLevel - 3) * sizeMultiplier / 15;
+		return [baseSize, 0];
+	}
+	
 	const zoomBaseFactor = Math.pow(1.5, zoomLevel);
 	const zoomCapacityFactor = Math.pow(1.75, zoomLevel);
+	const baseSize = Math.pow(2, 0.5) * zoomBaseFactor;
 
-	const baseRadius = Math.pow(2, 0.5) * zoomBaseFactor;
-	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.75) * zoomCapacityFactor * capacityWeight; 
-	return ((baseRadius + capacityComponent) * sizeMultiplier) / 100;
+	return [baseSize, zoomCapacityFactor];
 };
+
+// Function to calculate radius based on capacity and zoom level
+const getRadiusByCapacity = (capacity: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
+	const [baseSize, zoomCapacityFactor] = getRadiusBase(capacity, zoomLevel, sizeMultiplier, capacityWeight);
+	const capacityComponent = Math.pow((capacity || 0.2) / 100, 0.75) * zoomCapacityFactor * capacityWeight; 
+	return ((baseSize + capacityComponent) * sizeMultiplier) / 100;
+};
+
+const getRadiusByCapcaityFactor = (capacityFactorPercentage: number | null | undefined, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
+	const [baseSize, zoomCapacityFactor] = getRadiusBase(capacityFactorPercentage, zoomLevel, sizeMultiplier, capacityWeight);
+	const capacityComponent = Math.pow((capacityFactorPercentage || 0.1), 1.75) * zoomCapacityFactor * capacityWeight; 
+	return ((baseSize + capacityComponent) * sizeMultiplier) / 100;
+}
 
 // Function to calculate outline weight based on zoom level
 const getOutlineWeightByZoom = (zoomLevel: number) => {
@@ -87,6 +104,27 @@ const calculateCapacityFactorColor = (capacityFactor: number | undefined | null,
 	if (capacityFactor < threshold3) return '#ffff00'; // Yellow for medium
 	if (capacityFactor < threshold4) return '#ff8800'; // Orange for good
 	return '#ff0000'; // Red for excellent
+};
+
+const clampValue = (value: number, min: number, max: number): number => {
+	return Math.max(min, Math.min(max, value));
+};
+
+// Replace the getScaledCapacityFactorForRadius function with this direct fix:
+const getScaledCapacityFactorForRadius = (capacityFactor: number, maxCapacityFactor: number | null = 100): number => {
+	// All values are percentages (0-100)
+	const actualCapacityFactor = clampValue(capacityFactor, 0, 100);
+	const actualMaxCapacityFactor = clampValue(maxCapacityFactor || 100, 1, 100);
+	
+	// Invert the values - higher capacity factors will be smaller
+	const invertedValue = actualMaxCapacityFactor - actualCapacityFactor;
+	
+	// Create a scaling factor that increases dramatically as max decreases
+	// When maxCapacityFactor is small, this will greatly exaggerate differences
+	const scalingFactor = 100 / actualMaxCapacityFactor;
+	
+	// Return the inverted, scaled value - this is still a percentage
+	return invertedValue * scalingFactor;
 };
 
 export function MapLeafletPage() {
@@ -425,20 +463,25 @@ ${JSON.stringify({
 					
 					// Calculate radius based on capacity
 					const radius = 
-						visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
-							? getRadiusByCapacity(
-									plant.capacity_factor, 
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-							: visualParams.sizeByOption === "generation" && plant.generation?.generation
+						visualParams.sizeByOption === "capacity_factor" 
+							? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
 								? getRadiusByCapacity(
-									plant.generation.generation / 1000, // Convert to thousands for better scaling
+									// Scale capacity factor based on max allowed value
+									getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
 									zoomLevel, 
 									visualParams.sizeMultiplier, 
 									visualParams.capacityWeight
 								)
+								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
+							: visualParams.sizeByOption === "generation" 
+								? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
+									? getRadiusByCapacity(
+										plant.generation.generation / 1000,
+										zoomLevel, 
+										visualParams.sizeMultiplier, 
+										visualParams.capacityWeight
+									)
+									: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
 								: plant.nameplate_capacity_mw 
 									? getRadiusByCapacity(
 										plant.nameplate_capacity_mw, 
@@ -476,20 +519,25 @@ ${JSON.stringify({
 				
 				// Calculate radius based on capacity
 				const radius = 
-					visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
-						? getRadiusByCapacity(
-								plant.capacity_factor, 
-								zoomLevel, 
-								visualParams.sizeMultiplier, 
-								visualParams.capacityWeight
-							)
-						: visualParams.sizeByOption === "generation" && plant.generation?.generation
+					visualParams.sizeByOption === "capacity_factor" 
+						? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
 							? getRadiusByCapacity(
-								plant.generation.generation / 1000, // Convert to thousands for better scaling
+								// Scale capacity factor based on max allowed value
+								getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
 								zoomLevel, 
 								visualParams.sizeMultiplier, 
 								visualParams.capacityWeight
 							)
+							: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
+						: visualParams.sizeByOption === "generation" 
+							? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
+								? getRadiusByCapacity(
+									plant.generation.generation / 1000,
+									zoomLevel, 
+									visualParams.sizeMultiplier, 
+									visualParams.capacityWeight
+								)
+								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
 							: plant.nameplate_capacity_mw 
 								? getRadiusByCapacity(
 									plant.nameplate_capacity_mw, 
@@ -548,20 +596,25 @@ ${JSON.stringify({
 			const plant = powerPlants.find(p => p.id === plantId);
 			if (plant && plant.nameplate_capacity_mw) {
 				const newRadius = 
-					visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
-						? getRadiusByCapacity(
-								plant.capacity_factor, 
+					visualParams.sizeByOption === "capacity_factor" 
+						? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
+							? getRadiusByCapacity(
+								// Scale capacity factor based on max allowed value
+								getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
 								zoomLevel, 
 								visualParams.sizeMultiplier, 
 								visualParams.capacityWeight
 							)
-						: visualParams.sizeByOption === "generation" && plant.generation?.generation
-							? getRadiusByCapacity(
-									plant.generation.generation / 1000, // Convert to thousands for better scaling
+							: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
+						: visualParams.sizeByOption === "generation" 
+							? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
+								? getRadiusByCapacity(
+									plant.generation.generation / 1000,
 									zoomLevel, 
 									visualParams.sizeMultiplier, 
 									visualParams.capacityWeight
 								)
+								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
 							: plant.nameplate_capacity_mw 
 								? getRadiusByCapacity(
 									plant.nameplate_capacity_mw, 
@@ -591,22 +644,27 @@ ${JSON.stringify({
 			
 			markerRefs.current.forEach((marker, plantId) => {
 				const plant = powerPlants.find(p => p.id === plantId);
-				if (plant && plant.nameplate_capacity_mw) {
+				if (plant) {
 					const newRadius = 
-						visualParams.sizeByOption === "capacity_factor" && plant.capacity_factor
-							? getRadiusByCapacity(
-									plant.capacity_factor, 
-									newZoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-							: visualParams.sizeByOption === "generation" && plant.generation?.generation
+						visualParams.sizeByOption === "capacity_factor" 
+							? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
 								? getRadiusByCapacity(
-									plant.generation.generation / 1000, // Convert to thousands for better scaling
+									// Scale capacity factor based on max allowed value
+									getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
 									newZoomLevel, 
 									visualParams.sizeMultiplier, 
 									visualParams.capacityWeight
 								)
+								: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
+							: visualParams.sizeByOption === "generation" 
+								? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
+									? getRadiusByCapacity(
+										plant.generation.generation / 1000,
+										newZoomLevel, 
+										visualParams.sizeMultiplier, 
+										visualParams.capacityWeight
+									)
+									: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
 								: plant.nameplate_capacity_mw 
 									? getRadiusByCapacity(
 										plant.nameplate_capacity_mw, 
@@ -615,6 +673,7 @@ ${JSON.stringify({
 										visualParams.capacityWeight
 									)
 									: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15;
+					
 					marker.setRadius(newRadius);
 					marker.setStyle({
 						weight: outlineWeight
