@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { fuelTypeColors, fuelTypeDisplayNames, operatingStatusDisplayNames, MapColorings, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, operatingStatusColors } from './MapValueMappings';
 
 // Add efficient debounce implementation
 function useDebounce<T>(value: T, delay: number): T {
@@ -25,11 +26,11 @@ interface PowerPlant {
 	name: string;
 	latitude: number;
 	longitude: number;
-	fuel_type: string;
+	fuel_type: keyof typeof fuelTypeDisplayNames;
 	nameplate_capacity_mw: number;
 	net_summer_capacity_mw?: number;
 	net_winter_capacity_mw?: number;
-	operating_status: string;
+	operating_status: keyof typeof operatingStatusDisplayNames;
 	county?: string;
 	state?: string;
 	last_updated?: string;
@@ -51,71 +52,6 @@ interface PowerPlant {
 
 // Define colors for different fuel types based on energy source code
  
-
-const fuelTypeColors: {[key: string]: string} = {
- 	'SUN': '#FFD700',   // Solar - Gold
- 	'WND': '#87CEEB',   // Wind - Sky Blue
- 	'BIT': '#A9A9A9',   // Bituminous Coal - Dark Gray
- 	'SUB': '#A9A9A9',   // Subbituminous Coal - Dark Gray
- 	'LIG': '#A9A9A9',   // Lignite Coal - Dark Gray
- 	'NG': '#d9ff33',    // Natural Gas - Steel Blue
- 	'DFO': '#000000',   // Distillate Fuel Oil - Black
- 	'WAT': '#001fff',   // Water/Hydro - Dodger Blue
- 	'GEO': '#8B4513',   // Geothermal - Saddle Brown
- 	'LFG': '#228B22',   // Landfill Gas - Forest Green
- 	'WDS': '#228B22',   // Wood Waste Solids - Forest Green
- 	'BLQ': '#228B22',   // Black Liquor - Forest Green
- 	'NUC': '#4eff33',   // Nuclear - Lime Green
- 	'MSW': '#996836',   // Municipal Solid Waste - Forest Green
- 	'MWH': '#996836',   // Municipal Waste Heat - Forest Green
- 	'OBS': '#996836',   // Other Biomass - Forest Green
- 	'OBG': '#90ad5e',   // Other Gas - Forest Green
- 	'WH': '#fc7f00',   // Waste Heat - Forest Green
- 	'OG': '#90ad5e',   // Other Gas - Forest Green
- 	'WDL': '#ead6b2',   // Waste to Liquids - Forest Green
- 	'RC': '#c86e33',   // Refuse Combustion - Forest Green
- 	'SGC': '#ffc000',   // Solar Thermal - Forest Green
- 	'RFO': '#000000',   // Residual Fuel Oil - Forest Green
- 	'PC': '#000000',   // Petroleum Coke - Forest Green
- 	'OTHER': '#FFFFFF', // Other - Gray
- };
- 
- // Map for fuel type display names
- const fuelTypeDisplayNames = {
- 	'SUN': 'Solar',
- 	'WND': 'Wind',
- 	'BIT': 'Bituminous Coal',
- 	'SUB': 'Subbituminous Coal',
- 	'LIG': 'Lignite Coal',
- 	'NG': 'Natural Gas',
- 	'DFO': 'Fuel Oil',
- 	'WAT': 'Hydro',
- 	'GEO': 'Geothermal',
- 	'LFG': 'Landfill Gas',
- 	'WDS': 'Wood/Biomass',
- 	'BLQ': 'Black Liquor',
- 	'NUC': 'Nuclear',
- 	'MSW': 'Municipal Solid Waste',
- 	'MWH': 'Municipal Waste Heat',
- 	'OBS': 'Other Biomass',
- 	'OBG': 'Other Gas',
- 	'WH': 'Waste Heat',
- 	'OG': 'Other Gas',
- 	'WDL': 'Waste to Liquids',
- 	'RC': 'Refuse Combustion',
- 	'SGC': 'Solar Thermal',
-	'RFO': 'Residual Fuel Oil',
-	'OTHER': 'Other',
-};
-
-// Map for operating status display names
-const operatingStatusDisplayNames: {[key: string]: string} = {
-	'OP': 'Operating',
-	'SB': 'Standby/Backup',
-	'OS': 'Out of Service',
-	'RE': 'Retired',
-};
-
 
 // Function to calculate radius based on capacity and zoom level
 const getRadiusByCapacity = (capacity: number, zoomLevel: number, sizeMultiplier: number, capacityWeight: number) => {
@@ -166,10 +102,10 @@ export function MapLeafletPage() {
 	
 	// Configuration state for visual parameters
 	const [visualParams, setVisualParams] = useState({
-		showSummerCapacity: true,
-		sizeMultiplier: 15,
-		capacityWeight: 1.0,
-		colorByCapacityFactor: false
+		showSummerCapacity: DEFAULT_SHOW_SUMMER_CAPACITY,
+		sizeMultiplier: DEFAULT_SIZE_MULTIPLIER,
+		capacityWeight: DEFAULT_CAPACITY_WEIGHT,
+		coloringMode: DEFAULT_COLORING_MODE
 	});
 	
 	// Configuration state for filter parameters
@@ -211,21 +147,27 @@ export function MapLeafletPage() {
 	}, [filterParams.filters.max_capacity_factor, getCapacityFactorColor]);
 	
 
-	const getPlantColor = useCallback((plant: PowerPlant, useCapacityFactor: boolean): string => {
-		if (useCapacityFactor) {
+	const getPlantColor = useCallback((plant: PowerPlant, coloringMode: MapColorings): string => {
+		if (coloringMode === "capacityFactor") {
 			if (plant.capacity_factor === null || plant.capacity_factor === undefined) {
 				// Return dark gray for N/A capacity factors when coloring by capacity factor is enabled
-				return '#444444';
+				return 'darkgrey';
 			}
 			
 			// Round to nearest 5 to use from map or compute directly if needed
 			const roundedFactor = Math.round(plant.capacity_factor / 5) * 5;
 			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor);
 		}
+
+		if (coloringMode === "operatingStatus") {
+			return plant.operating_status && operatingStatusColors[plant.operating_status] 
+				? operatingStatusColors[plant.operating_status] 
+				: 'darkgrey';
+		}
 		
 		return plant.fuel_type && fuelTypeColors[plant.fuel_type] 
 			? fuelTypeColors[plant.fuel_type] 
-			: '#3388ff';
+			: 'darkgrey';
 	}, [capacityFactorColorMap, filterParams.filters.max_capacity_factor]);
 	
 	// Listen for messages from parent page
@@ -243,7 +185,7 @@ export function MapLeafletPage() {
 						showSummerCapacity: event.data.showSummerCapacity,
 						sizeMultiplier: event.data.sizeMultiplier,
 						capacityWeight: event.data.capacityWeight,
-						colorByCapacityFactor: event.data.colorByCapacityFactor || false
+						coloringMode: event.data.coloringMode || "fuelType"
 					});
 				} 
 				else if (event.data.type === 'filterParams') {
@@ -274,7 +216,7 @@ export function MapLeafletPage() {
 			: null;
 		
 		return `
-			<div>
+			<div style="color: black;">
 				<h3>${plant.name}</h3>
 				<p><strong>ID:</strong> ${plant.id}</p>
 				<p><strong>Location:</strong> ${plant.county ? `${plant.county} County, ` : ''}${plant.state || ''}</p>
@@ -479,7 +421,7 @@ ${JSON.stringify({
 					markersToUpdateInBatch.push([existingMarker, plant]);
 				} else {
 					// Get color using optimized function
-					const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
+					const color = getPlantColor(plant, visualParams.coloringMode);
 					
 					// Calculate radius based on capacity
 					const radius = plant.nameplate_capacity_mw 
@@ -515,7 +457,7 @@ ${JSON.stringify({
 			// Update markers in this batch
 			markersToUpdateInBatch.forEach(([marker, plant]) => {
 				// Get color using optimized function
-				const color = getPlantColor(plant, visualParams.colorByCapacityFactor);
+				const color = getPlantColor(plant, visualParams.coloringMode);
 				
 				// Calculate radius based on capacity
 				const radius = plant.nameplate_capacity_mw 
