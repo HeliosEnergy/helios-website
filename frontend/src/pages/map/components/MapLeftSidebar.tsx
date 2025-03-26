@@ -1,8 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { MdArrowBack, MdArrowBackIos, MdExpandMore, MdExpandLess } from 'react-icons/md';
+import { MdArrowBackIos, MdExpandMore, MdExpandLess } from 'react-icons/md';
 import Select from 'react-select';
-import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, fuelTypeColors, fuelTypeDisplayNames, MapColorings, operatingStatusDisplayNames, states, SizeByOption, DEFAULT_SIZE_BY_OPTION } from '../MapValueMappings';
-import { OptionsOrGroups, GroupBase } from 'react-select';
+import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, fuelTypeDisplayNames, MapColorings, operatingStatusDisplayNames, states, SizeByOption, DEFAULT_SIZE_BY_OPTION } from '../MapValueMappings';
 
 interface MapLeftSidebarProps {
 	open: boolean;
