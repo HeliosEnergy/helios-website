@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fuelTypeColors, fuelTypeDisplayNames, operatingStatusDisplayNames, MapColorings, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, operatingStatusColors, DEFAULT_SIZE_BY_OPTION } from './MapValueMappings';
+import { MapLeafletPopup } from './components/MapLeafletPopup';
+import ReactDOMServer from 'react-dom/server';
 
 // Add efficient debounce implementation
 function useDebounce<T>(value: T, delay: number): T {
@@ -21,33 +23,15 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 // Define the power plant data interface
-interface PowerPlant {
+export interface PowerPlant {
 	id: number;
-	name: string;
 	latitude: number;
 	longitude: number;
 	fuel_type: keyof typeof fuelTypeDisplayNames;
-	nameplate_capacity_mw: number;
-	net_summer_capacity_mw?: number;
-	net_winter_capacity_mw?: number;
 	operating_status: keyof typeof operatingStatusDisplayNames;
-	county?: string;
-	state?: string;
-	last_updated?: string;
-	capacity_factor?: number;
-	// Add generation data
-	generation?: {
-		id: number;
-		period: string;
-		generation: number;
-		generation_units: string;
-		consumption_for_eg: number;
-		consumption_for_eg_units: string;
-		total_consumption: number;
-		total_consumption_units: string;
-		timestamp: string;
-		metadata: any;
-	};
+	capacity: number;
+	generation: number | null;
+	capacity_factor: number | null;
 }
 
 // Define colors for different fuel types based on energy source code
@@ -121,6 +105,19 @@ const getScaledCapacityFactorForRadius = (capacityFactor: number, maxCapacityFac
 	return invertedValue * scalingFactor;
 };
 
+// Add a new function to fetch plant details
+async function fetchPlantDetails(plantId: number) {
+	const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL;
+	if (!API_SERVER_URL) {
+		throw new Error('API_SERVER_URL is not defined');
+	}
+
+	const response = await fetch(`${API_SERVER_URL}/api/map_data/power_plant/${plantId}`);
+	const data = await response.json();
+	console.log('Full plant data response:', data);
+	return data.data;
+}
+
 export function MapLeafletPage() {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const mapInstanceRef = useRef<L.Map | null>(null);
@@ -183,11 +180,9 @@ export function MapLeafletPage() {
 	const getPlantColor = useCallback((plant: PowerPlant, coloringMode: MapColorings): string => {
 		if (coloringMode === "capacityFactor") {
 			if (plant.capacity_factor === null || plant.capacity_factor === undefined) {
-				// Return dark gray for N/A capacity factors when coloring by capacity factor is enabled
 				return 'darkgrey';
 			}
 			
-			// Round to nearest 5 to use from map or compute directly if needed
 			const roundedFactor = Math.round(plant.capacity_factor / 5) * 5;
 			return capacityFactorColorMap.get(roundedFactor) || getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor);
 		}
@@ -202,6 +197,9 @@ export function MapLeafletPage() {
 			? fuelTypeColors[plant.fuel_type] 
 			: 'darkgrey';
 	}, [capacityFactorColorMap, filterParams.filters.max_capacity_factor]);
+	
+	// Add state for the currently selected plant's full data
+	const [selectedPlantData, setSelectedPlantData] = useState<any>(null);
 	
 	// Listen for messages from parent page
 	useEffect(() => {
@@ -238,75 +236,6 @@ export function MapLeafletPage() {
 		};
 	}, []);
 	
-	// Function to create popup content
-	function createPopupContent(plant: PowerPlant) {
-		// Format generation date if available
-		const generationDate = plant.generation?.timestamp 
-			? new Date(plant.generation.timestamp).toLocaleDateString('en-US', {
-				year: 'numeric',
-				month: 'short',
-				day: 'numeric'
-			})
-			: null;
-		
-		return `
-			<div style="color: black;">
-				<h3>${plant.name}</h3>
-				<p><strong>ID:</strong> ${plant.id}</p>
-				<p><strong>Location:</strong> ${plant.county ? `${plant.county} County, ` : ''}${plant.state || ''}</p>
-				<p><strong>Coordinates:</strong>
-					<!--${plant.latitude.toFixed(6)}, ${plant.longitude.toFixed(6)}-->
-					<a href="https://www.google.com/maps?q=${plant.latitude},${plant.longitude}" target="_blank" rel="noopener noreferrer">
-						View on Google Maps
-					</a>
-				</p>
-				<p><strong>Fuel Type:</strong> ${plant.fuel_type ? (fuelTypeDisplayNames[plant.fuel_type as keyof typeof fuelTypeDisplayNames] || plant.fuel_type) : 'Unknown'}</p>
-				<p><strong>Capacity:</strong> ${
-					plant.nameplate_capacity_mw 
-						? `${Math.ceil(plant.nameplate_capacity_mw)} MW` 
-						: 'Unknown'
-				}</p>
-				<p><strong>Status:</strong> ${plant.operating_status ? (operatingStatusDisplayNames[plant.operating_status] || plant.operating_status) : 'Unknown'}</p>
-				<p><strong>Capacity Factor:</strong> ${plant.capacity_factor !== undefined && plant.capacity_factor !== null ? 
-					`<span style="background-color: black; padding-left: 4px; padding-right: 4px; color: ${getCapacityFactorColor(plant.capacity_factor, filterParams.filters.max_capacity_factor)}; font-weight: bold;">${plant.capacity_factor.toFixed(1)}%</span>` 
-					: 'N/A'}</p>
-				
-				${plant.generation ? `
-				<hr />
-				<h4>Latest Generation Data (${generationDate || 'Unknown Date'})</h4>
-				<p><strong>Generation:</strong> ${plant.generation.generation ? `${plant.generation.generation.toLocaleString()} ${plant.generation.generation_units || ''}` : 'N/A'}</p>
-				${plant.generation.consumption_for_eg ? `
-				<p><strong>Consumption:</strong> ${plant.generation.consumption_for_eg.toLocaleString()} ${plant.generation.consumption_for_eg_units || ''}</p>
-				` : ''}${plant.generation.total_consumption ? `
-				<p><strong>Total Consumption:</strong> ${plant.generation.total_consumption.toLocaleString()} ${plant.generation.total_consumption_units || ''}</p>
-				` : ''}
-				` : ''}
-				
-				<hr />
-				<details>
-					<summary>Debug Info</summary>
-					<pre style="max-height: 150px; overflow: auto;">
-${JSON.stringify({
-	id: plant.id,
-	name: plant.name,
-	coordinates: [plant.latitude, plant.longitude],
-	fuel_type: plant.fuel_type,
-	capacity: plant.nameplate_capacity_mw,
-	status: plant.operating_status,
-	capacity_factor: plant.capacity_factor,
-	generation: plant.generation ? {
-		period: plant.generation.period,
-		amount: plant.generation.generation,
-		units: plant.generation.generation_units,
-		timestamp: plant.generation.timestamp
-	} : null
-}, null, 2)}
-					</pre>
-				</details>
-			</div>
-		`;
-	}
-	
 	// Fetch power plant data from the API when debounced filters change
 	useEffect(() => {
 		const fetchData = async () => {
@@ -318,19 +247,16 @@ ${JSON.stringify({
 				const queryParams = new URLSearchParams();
 				const filters = debouncedFilters;
 				
-				// Handle fuel_type array - join with commas for the API
 				if (filters.fuel_type && Array.isArray(filters.fuel_type) && filters.fuel_type.length > 0) {
 					queryParams.append('fuel_type', filters.fuel_type.join(','));
 				}
 				
-				// Handle state array
 				if (filters.state && Array.isArray(filters.state)) {
 					filters.state.forEach(stateCode => {
 						queryParams.append('state', stateCode);
 					});
 				}
 				
-				// Handle operating_status array - join with commas for the API
 				if (filters.operating_status && Array.isArray(filters.operating_status) && filters.operating_status.length > 0) {
 					queryParams.append('operating_status', filters.operating_status.join(','));
 				}
@@ -340,12 +266,12 @@ ${JSON.stringify({
 				if (filters.min_capacity_factor !== null) queryParams.append('min_capacity_factor', filters.min_capacity_factor.toString());
 				if (filters.max_capacity_factor !== null) queryParams.append('max_capacity_factor', filters.max_capacity_factor.toString());
 				
-				// Get API URL from environment variable or use default
 				const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL;
 				if (!API_SERVER_URL) {
 					throw new Error('API_SERVER_URL is not defined');
 				}
-				const url = `${API_SERVER_URL}/api/map_data/power_plants?${queryParams.toString()}`;
+				// Update URL to use minimal endpoint
+				const url = `${API_SERVER_URL}/api/map_data/power_plants_minimal?${queryParams.toString()}`;
 				
 				const response = await fetch(url);
 				
@@ -432,7 +358,7 @@ ${JSON.stringify({
 		let processedCount = 0;
 		
 		// Process plants in chunks to avoid blocking the UI
-		const processNextBatch = () => {
+		const processNextBatch = async () => {
 			// Calculate the end index for this batch
 			const endIdx = Math.min(processedCount + batchSize, plantsToProcess.length);
 			
@@ -456,34 +382,7 @@ ${JSON.stringify({
 					const color = getPlantColor(plant, visualParams.coloringMode);
 					
 					// Calculate radius based on capacity
-					const radius = 
-						visualParams.sizeByOption === "capacity_factor" 
-							? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
-								? getRadiusByCapacity(
-									// Scale capacity factor based on max allowed value
-									getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
-							: visualParams.sizeByOption === "generation" 
-								? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
-									? getRadiusByCapacity(
-										plant.generation.generation / 1000,
-										zoomLevel, 
-										visualParams.sizeMultiplier, 
-										visualParams.capacityWeight
-									)
-									: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
-								: plant.nameplate_capacity_mw 
-									? getRadiusByCapacity(
-										plant.nameplate_capacity_mw, 
-										zoomLevel, 
-										visualParams.sizeMultiplier, 
-										visualParams.capacityWeight
-									)
-									: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+					const radius = getPlantRadius(plant, zoomLevel);
 					
 					// Create new marker
 					const circleMarker = L.circleMarker([plant.latitude, plant.longitude], {
@@ -498,8 +397,23 @@ ${JSON.stringify({
 					// Store plant ID on marker for future reference
 					(circleMarker as any)._plantId = plant.id;
 					
-					// Bind popup
-					circleMarker.bindPopup(createPopupContent(plant));
+					// Instead of binding popup directly, handle popup opening:
+					circleMarker.on('click', async function(e) {
+						const popup = L.popup()
+							.setLatLng(e.latlng)
+							.setContent('Loading plant details...')
+							.openOn(mapInstanceRef.current!);
+
+						try {
+							const fullData = await fetchPlantDetails(plant.id);
+							popup.setContent(ReactDOMServer.renderToString(
+								<MapLeafletPopup plant={plant} fullPlantData={fullData} />
+							));
+						} catch (error) {
+							console.error('Error fetching plant details:', error);
+							popup.setContent('Error loading plant details');
+						}
+					});
 					
 					newMarkersInBatch.push(circleMarker);
 					markerRefs.current.set(plant.id, circleMarker);
@@ -512,34 +426,7 @@ ${JSON.stringify({
 				const color = getPlantColor(plant, visualParams.coloringMode);
 				
 				// Calculate radius based on capacity
-				const radius = 
-					visualParams.sizeByOption === "capacity_factor" 
-						? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
-							? getRadiusByCapacity(
-								// Scale capacity factor based on max allowed value
-								getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
-								zoomLevel, 
-								visualParams.sizeMultiplier, 
-								visualParams.capacityWeight
-							)
-							: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
-						: visualParams.sizeByOption === "generation" 
-							? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
-								? getRadiusByCapacity(
-									plant.generation.generation / 1000,
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
-							: plant.nameplate_capacity_mw 
-								? getRadiusByCapacity(
-									plant.nameplate_capacity_mw, 
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+				const radius = getPlantRadius(plant, zoomLevel);
 				
 				// Update existing marker
 				marker.setRadius(radius);
@@ -552,9 +439,24 @@ ${JSON.stringify({
 					fillOpacity: 0.8
 				});
 				
-				// Update popup
-				marker.unbindPopup();
-				marker.bindPopup(createPopupContent(plant));
+				// Update click handler instead of using bindPopup
+				marker.off('click'); // Remove old handler
+				marker.on('click', async function(e) {
+					const popup = L.popup()
+						.setLatLng(e.latlng)
+						.setContent('Loading plant details...')
+						.openOn(mapInstanceRef.current!);
+
+					try {
+						const fullData = await fetchPlantDetails(plant.id);
+						popup.setContent(ReactDOMServer.renderToString(
+							<MapLeafletPopup plant={plant} fullPlantData={fullData} />
+						));
+					} catch (error) {
+						console.error('Error fetching plant details:', error);
+						popup.setContent('Error loading plant details');
+					}
+				});
 			});
 			
 			// Add new markers to the layer
@@ -588,40 +490,28 @@ ${JSON.stringify({
 		// Update all existing markers
 		markerRefs.current.forEach((marker, plantId) => {
 			const plant = powerPlants.find(p => p.id === plantId);
-			if (plant && plant.nameplate_capacity_mw) {
-				const newRadius = 
-					visualParams.sizeByOption === "capacity_factor" 
-						? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
-							? getRadiusByCapacity(
-								// Scale capacity factor based on max allowed value
-								getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
-								zoomLevel, 
-								visualParams.sizeMultiplier, 
-								visualParams.capacityWeight
-							)
-							: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
-						: visualParams.sizeByOption === "generation" 
-							? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
-								? getRadiusByCapacity(
-									plant.generation.generation / 1000,
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
-							: plant.nameplate_capacity_mw 
-								? getRadiusByCapacity(
-									plant.nameplate_capacity_mw, 
-									zoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+			if (plant && plant.capacity) {
+				const newRadius = getPlantRadius(plant, zoomLevel);
 				marker.setRadius(newRadius);
 				
-				// Update popup content for summer capacity changes
-				marker.unbindPopup();
-				marker.bindPopup(createPopupContent(plant));
+				// Update click handler instead of using bindPopup
+				marker.off('click'); // Remove old handler
+				marker.on('click', async function(e) {
+					const popup = L.popup()
+						.setLatLng(e.latlng)
+						.setContent('Loading plant details...')
+						.openOn(mapInstanceRef.current!);
+
+					try {
+						const fullData = await fetchPlantDetails(plant.id);
+						popup.setContent(ReactDOMServer.renderToString(
+							<MapLeafletPopup plant={plant} fullPlantData={fullData} />
+						));
+					} catch (error) {
+						console.error('Error fetching plant details:', error);
+						popup.setContent('Error loading plant details');
+					}
+				});
 			}
 		});
 	}, [visualParams, powerPlants]);
@@ -639,35 +529,7 @@ ${JSON.stringify({
 			markerRefs.current.forEach((marker, plantId) => {
 				const plant = powerPlants.find(p => p.id === plantId);
 				if (plant) {
-					const newRadius = 
-						visualParams.sizeByOption === "capacity_factor" 
-							? (plant.capacity_factor !== undefined && plant.capacity_factor !== null)
-								? getRadiusByCapacity(
-									// Scale capacity factor based on max allowed value
-									getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
-									newZoomLevel, 
-									visualParams.sizeMultiplier, 
-									visualParams.capacityWeight
-								)
-								: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A capacity factor
-							: visualParams.sizeByOption === "generation" 
-								? (plant.generation?.generation !== undefined && plant.generation?.generation !== null)
-									? getRadiusByCapacity(
-										plant.generation.generation / 1000,
-										newZoomLevel, 
-										visualParams.sizeMultiplier, 
-										visualParams.capacityWeight
-									)
-									: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15 // Base size for N/A generation
-								: plant.nameplate_capacity_mw 
-									? getRadiusByCapacity(
-										plant.nameplate_capacity_mw, 
-										newZoomLevel, 
-										visualParams.sizeMultiplier, 
-										visualParams.capacityWeight
-									)
-									: Math.max(1, newZoomLevel - 3) * visualParams.sizeMultiplier / 15;
-					
+					const newRadius = getPlantRadius(plant, newZoomLevel);
 					marker.setRadius(newRadius);
 					marker.setStyle({
 						weight: outlineWeight
@@ -682,6 +544,36 @@ ${JSON.stringify({
 			map.off('zoomend', handleZoom);
 		};
 	}, [powerPlants, visualParams]);
+	
+	// Move getPlantRadius inside component and memoize it
+	const getPlantRadius = useCallback((plant: PowerPlant, zoomLevel: number) => {
+		return visualParams.sizeByOption === "capacity_factor" 
+			? (plant.capacity_factor !== null)
+				? getRadiusByCapacity(
+					getScaledCapacityFactorForRadius(plant.capacity_factor, filterParams.filters.max_capacity_factor), 
+					zoomLevel, 
+					visualParams.sizeMultiplier, 
+					visualParams.capacityWeight
+				)
+				: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15
+			: visualParams.sizeByOption === "generation" 
+				? (plant.generation !== null)
+					? getRadiusByCapacity(
+						plant.generation / 1000,
+						zoomLevel, 
+						visualParams.sizeMultiplier, 
+						visualParams.capacityWeight
+					)
+					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15
+				: plant.capacity 
+					? getRadiusByCapacity(
+						plant.capacity, 
+						zoomLevel, 
+						visualParams.sizeMultiplier, 
+						visualParams.capacityWeight
+					)
+					: Math.max(1, zoomLevel - 3) * visualParams.sizeMultiplier / 15;
+	}, [visualParams, filterParams.filters.max_capacity_factor]);
 	
 	return (
 		<div style={{

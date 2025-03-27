@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import postgres from "postgres";
 import cors from "cors";
-import { httpGetPowerPlantData } from "./routes/map_data.js";
+import { httpGetMinimalPowerPlantData, httpGetPowerPlantData, httpGetPowerPlantDataById } from "./routes/map_data.js";
 import { resolve, join } from 'path';
 import { existsSync } from 'fs';
 import https from 'https';
@@ -148,6 +148,8 @@ const api = express.Router();
 		});
 
 		map_data.get("/power_plants", httpGetPowerPlantData(sql));
+		map_data.get("/power_plants_minimal", httpGetMinimalPowerPlantData(sql));
+		map_data.get("/power_plant/:id", httpGetPowerPlantDataById(sql));
 	}
 	api.use("/map_data", map_data);
 }
