@@ -53,4 +53,4 @@ curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | s
 
 
 # Remote Server (prod)
-ssh -L 8006:localhost:8006 root@51.222.46.142
+ssh -L 6555:localhost:6432 ubuntu@51.222.46.142
