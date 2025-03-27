@@ -22,15 +22,8 @@ interface MapLeafletPopupProps {
 	};
 }
 
-export function MapLeafletPopup({ plant, fullPlantData }: MapLeafletPopupProps) {
-	// Format the generation date if available
-	const generationDate = fullPlantData.generation?.timestamp 
-		? new Date(fullPlantData.generation.timestamp).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		})
-		: null;
+export function MapLeafletPopup({ fullPlantData }: MapLeafletPopupProps) {
+
 
 	return (
 		<div style={{ color: 'black', minWidth: '250px' }}>

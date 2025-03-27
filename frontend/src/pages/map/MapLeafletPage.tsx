@@ -224,8 +224,6 @@ export function MapLeafletPage() {
 			: 'darkgrey';
 	}, [capacityFactorColorMap, filterParams.filters.max_capacity_factor]);
 	
-	// Add state for the currently selected plant's full data
-	const [selectedPlantData, setSelectedPlantData] = useState<any>(null);
 	
 	// Listen for messages from parent page
 	useEffect(() => {
