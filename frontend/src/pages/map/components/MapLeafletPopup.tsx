@@ -55,7 +55,7 @@ export function MapLeafletPopup({ plant, fullPlantData }: MapLeafletPopupProps) 
 				)}
 				{fullPlantData.generation && (
 					<p style={{ margin: '4px 0' }}>
-						<strong>Generation ({generationDate}):</strong>{' '}
+						<strong>Generation:</strong>{' '}
 						{fullPlantData.generation.generation 
 							? `${Math.round(fullPlantData.generation.generation).toLocaleString()} ${fullPlantData.generation.generation_units}`
 							: 'N/A'

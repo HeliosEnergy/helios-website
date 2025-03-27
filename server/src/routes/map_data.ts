@@ -412,17 +412,17 @@ export function httpGetMinimalPowerPlantData(sql: postgres.Sql<{}>): (request: R
 				params.maxCapacityFactor
 			]);
 
-			// Simplified data transformation
-			const formattedPowerPlants = [...powerPlantsResult].map((plant: any) => ({
-				id: plant.id,
-				fuel_type: plant.fuel_type,
-				operating_status: plant.operating_status,
-				latitude: parseFloat(plant.latitude),
-				longitude: parseFloat(plant.longitude),
-				capacity: plant.nameplate_capacity_mw ? parseFloat(String(plant.nameplate_capacity_mw)) : null,
-				generation: plant.gen_generation ? parseFloat(String(plant.gen_generation)) : null,
-				capacity_factor: plant.capacity_factor ? parseFloat(String(plant.capacity_factor)) : null
-			}));
+			// Transform to array format
+			const formattedPowerPlants = [...powerPlantsResult].map((plant: any) => [
+				plant.id,
+				plant.fuel_type,
+				plant.operating_status,
+				parseFloat(plant.latitude),
+				parseFloat(plant.longitude),
+				plant.nameplate_capacity_mw ? parseFloat(String(plant.nameplate_capacity_mw)) : null,
+				plant.gen_generation ? parseFloat(String(plant.gen_generation)) : null,
+				plant.capacity_factor ? parseFloat(String(plant.capacity_factor)) : null
+			]);
 
 			return response.json({
 				success: true,

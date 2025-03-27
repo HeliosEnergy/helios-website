@@ -118,6 +118,32 @@ async function fetchPlantDetails(plantId: number) {
 	return data.data;
 }
 
+// Define the array format type
+type PowerPlantArray = [
+	number,      // id
+	string,      // fuel_type
+	string,      // operating_status
+	number,      // latitude
+	number,      // longitude
+	number|null, // capacity
+	number|null, // generation
+	number|null  // capacity_factor
+];
+
+// Convert array format to PowerPlant object
+function arrayToPowerPlant(arr: PowerPlantArray): PowerPlant {
+	return {
+		id: arr[0],
+		fuel_type: arr[1] as keyof typeof fuelTypeDisplayNames,
+		operating_status: arr[2] as keyof typeof operatingStatusDisplayNames,
+		latitude: arr[3],
+		longitude: arr[4],
+		capacity: arr[5] ?? 0,
+		generation: arr[6],
+		capacity_factor: arr[7]
+	};
+}
+
 export function MapLeafletPage() {
 	const mapRef = useRef<HTMLDivElement>(null);
 	const mapInstanceRef = useRef<L.Map | null>(null);
@@ -283,7 +309,11 @@ export function MapLeafletPage() {
 				
 				if (data.success && Array.isArray(data.data)) {
 					console.log(`Loaded ${data.data.length} power plants`);
-					setPowerPlants(data.data);
+					// Convert array format to PowerPlant objects
+					const plants = data.data.map((plantArray: PowerPlantArray) => 
+						arrayToPowerPlant(plantArray)
+					);
+					setPowerPlants(plants);
 				} else {
 					throw new Error('Invalid response format from API');
 				}

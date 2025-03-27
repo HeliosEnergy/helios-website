@@ -50,3 +50,7 @@ Scrapes various cloud platforms to obtain real-time pricing info.
 
 curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | sudo sh
 
+
+
+# Remote Server (prod)
+ssh -L 8006:localhost:8006 root@51.222.46.142
