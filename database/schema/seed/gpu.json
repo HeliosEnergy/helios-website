@@ -57,6 +57,214 @@
 		"manufacturer": "nvidia",
 		"vram": 80000,
 		"aliases": ["H200 NVL"]
+	},
+	{
+		"name": "NVIDIA RTX 5090",
+		"manufacturer": "nvidia",
+		"vram": 24000,
+		"aliases": ["RTX 5090", "5090"]
+	},
+	{
+		"name": "NVIDIA RTX 4090",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 450,
+		"aliases": ["RTX 4090", "4090"]
+	},
+	{
+		"name": "NVIDIA RTX 4080 Super",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"tdp": 320,
+		"aliases": ["RTX 4080S", "4080S", "RTX 4080 S"]
+	},
+	{
+		"name": "NVIDIA RTX 4080",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"tdp": 320,
+		"aliases": ["RTX 4080", "4080"]
+	},
+	{
+		"name": "NVIDIA RTX 4060",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 115,
+		"aliases": ["RTX 4060", "4060"]
+	},
+	{
+		"name": "NVIDIA RTX 3090",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 350,
+		"aliases": ["RTX 3090", "3090"]
+	},
+	{
+		"name": "NVIDIA RTX 3080 Ti",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 350,
+		"aliases": ["RTX 3080 Ti", "3080 Ti", "3080Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 3080",
+		"manufacturer": "nvidia",
+		"vram": 10240,
+		"tdp": 320,
+		"aliases": ["RTX 3080", "3080"]
+	},
+	{
+		"name": "NVIDIA RTX 3070 Ti",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 290,
+		"aliases": ["RTX 3070 Ti", "3070 Ti", "3070Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 3070",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 220,
+		"aliases": ["RTX 3070", "3070"]
+	},
+	{
+		"name": "NVIDIA RTX 3060 Ti",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 200,
+		"aliases": ["RTX 3060 Ti", "3060 Ti", "3060Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 3060",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 170,
+		"aliases": ["RTX 3060", "3060"]
+	},
+	{
+		"name": "NVIDIA RTX 3060 Laptop GPU",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 80,
+		"aliases": ["RTX 3060 laptop", "3060 laptop"]
+	},
+	{
+		"name": "NVIDIA RTX 2080 Super",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 250,
+		"aliases": ["RTX 2080S", "2080S", "RTX 2080 S"]
+	},
+	{
+		"name": "NVIDIA RTX 2070",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 175,
+		"aliases": ["RTX 2070", "2070"]
+	},
+	{
+		"name": "NVIDIA RTX 2060 Super",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 175,
+		"aliases": ["RTX 2060S", "2060S", "RTX 2060 S"]
+	},
+	{
+		"name": "NVIDIA RTX 2060",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 160,
+		"aliases": ["RTX 2060", "2060"]
+	},
+	{
+		"name": "NVIDIA GTX 1660 Super",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 125,
+		"aliases": ["GTX 1660 S", "1660S", "1660 S"]
+	},
+	{
+		"name": "NVIDIA GTX 1660 Ti",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 120,
+		"aliases": ["GTX 1660 Ti", "1660Ti", "1660 Ti"]
+	},
+	{
+		"name": "NVIDIA GTX 1660",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 120,
+		"aliases": ["GTX 1660", "1660"]
+	},
+	{
+		"name": "NVIDIA GTX 1650",
+		"manufacturer": "nvidia",
+		"vram": 4096,
+		"tdp": 75,
+		"aliases": ["GTX 1650", "1650"]
+	},
+	{
+		"name": "NVIDIA GTX 1080 Ti",
+		"manufacturer": "nvidia",
+		"vram": 11264,
+		"tdp": 250,
+		"aliases": ["GTX 1080 Ti", "1080Ti", "1080 Ti"]
+	},
+	{
+		"name": "NVIDIA GTX 1080",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 180,
+		"aliases": ["GTX 1080", "1080"]
+	},
+	{
+		"name": "NVIDIA GTX 1070",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 150,
+		"aliases": ["GTX 1070", "1070"]
+	},
+	{
+		"name": "NVIDIA GTX 1060",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 120,
+		"aliases": ["GTX 1060", "1060"]
+	},
+	{
+		"name": "NVIDIA GTX 1050 Ti",
+		"manufacturer": "nvidia",
+		"vram": 4096,
+		"tdp": 75,
+		"aliases": ["GTX 1050 Ti", "1050Ti", "1050 Ti"]
+	},
+	{
+		"name": "NVIDIA RTX A4000",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"tdp": 140,
+		"aliases": ["RTX A4000", "A4000"]
+	},
+	{
+		"name": "NVIDIA RTX A2000",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"tdp": 70,
+		"aliases": ["RTX A2000", "A2000"]
+	},
+	{
+		"name": "NVIDIA Titan RTX",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 280,
+		"aliases": ["Titan RTX", "TitanRTX"]
+	},
+	{
+		"name": "NVIDIA Quadro K2200",
+		"manufacturer": "nvidia",
+		"vram": 4096,
+		"tdp": 68,
+		"aliases": ["Quadro K2200", "K2200"]
 	}
-		
 ]

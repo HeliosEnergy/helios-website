@@ -106,18 +106,99 @@ CREATE INDEX gpu_cloud_pricing_category_idx ON gpu_cloud_pricing (category);
 CREATE TABLE IF NOT EXISTS gpu_vast_system (
 	id SERIAL PRIMARY KEY,
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-	name VARCHAR(255) NOT NULL,
+	updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	vast_system_id INT NOT NULL,
+	name VARCHAR(255),
 	gpu_id INT NOT NULL REFERENCES gpu(id),
 	memory INT NOT NULL,
 	cpu_name VARCHAR(255),
 	cpu_cores INT,
 	cpu_speed_ghz FLOAT,
-	net_up INT,
-	net_down INT
+	cuda_version VARCHAR(255),
+	driver_version VARCHAR(255),
+	geolocation VARCHAR(255),
+	geolocode VARCHAR(255),
+	pci_gen FLOAT,
+	vms_enabled BOOLEAN,
+	mobo_name VARCHAR(255),
+	UNIQUE(vast_system_id)
 );
 CREATE INDEX gpu_vast_system_name_idx ON gpu_vast_system (name);
 CREATE INDEX gpu_vast_system_created_at_idx ON gpu_vast_system (created_at);
 CREATE INDEX gpu_vast_system_gpu_id_idx ON gpu_vast_system (gpu_id);
+CREATE INDEX gpu_vast_system_vast_system_id_idx ON gpu_vast_system (vast_system_id);
+CREATE INDEX gpu_vast_system_geolocation_idx ON gpu_vast_system (geolocation);
+CREATE INDEX gpu_vast_system_mobo_name_idx ON gpu_vast_system (mobo_name);
+CREATE INDEX gpu_vast_system_cuda_version_idx ON gpu_vast_system (cuda_version);
+CREATE INDEX gpu_vast_system_driver_version_idx ON gpu_vast_system (driver_version);
+CREATE INDEX gpu_vast_system_vms_enabled_idx ON gpu_vast_system (vms_enabled);
+CREATE INDEX gpu_vast_system_pci_gen_idx ON gpu_vast_system (pci_gen);
+
+
+
+CREATE TABLE IF NOT EXISTS gpu_vast_offer (
+	id SERIAL PRIMARY KEY,
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	offer_id INT NOT NULL,
+	offer_url VARCHAR(255),
+	offer_url_id VARCHAR(255),
+	UNIQUE(offer_id)
+);
+CREATE INDEX gpu_vast_offer_offer_id_idx ON gpu_vast_offer (offer_id);
+CREATE INDEX gpu_vast_offer_created_at_idx ON gpu_vast_offer (created_at);
+
+
+
+CREATE TABLE IF NOT EXISTS gpu_vast_system_update (
+	id SERIAL PRIMARY KEY,
+	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+	gpu_vast_system_id INT NOT NULL REFERENCES gpu_vast_system(id),
+	latest_offer_id INT NOT NULL REFERENCES gpu_vast_offer(id),
+	reliability FLOAT,
+	score FLOAT,
+	disk_space FLOAT,
+	inet_up FLOAT,
+	inet_up_cost FLOAT,
+	inet_down FLOAT,
+	inet_down_cost FLOAT,
+	is_bid BOOLEAN,
+	min_bid FLOAT,
+	ip_address VARCHAR(255),
+	storage_cost FLOAT,
+	storage_total_cost FLOAT,
+	total_flops FLOAT,
+	cost_per_hour FLOAT,
+	disk_per_hour FLOAT,
+	time_remaining VARCHAR(255),
+	time_remaining_isbid VARCHAR(255),
+	UNIQUE(gpu_vast_system_id, latest_offer_id)
+);
+CREATE INDEX gpu_vast_system_update_gpu_vast_system_id_idx ON gpu_vast_system_update (gpu_vast_system_id);
+CREATE INDEX gpu_vast_system_update_latest_offer_id_idx ON gpu_vast_system_update (latest_offer_id);
+CREATE INDEX gpu_vast_system_update_created_at_idx ON gpu_vast_system_update (created_at);
+CREATE INDEX gpu_vast_system_update_time_remaining_idx ON gpu_vast_system_update (time_remaining);
+CREATE INDEX gpu_vast_system_update_time_remaining_isbid_idx ON gpu_vast_system_update (time_remaining_isbid);
+CREATE INDEX gpu_vast_system_update_cost_per_hour_idx ON gpu_vast_system_update (cost_per_hour);
+CREATE INDEX gpu_vast_system_update_disk_per_hour_idx ON gpu_vast_system_update (disk_per_hour);
+CREATE INDEX gpu_vast_system_update_storage_cost_idx ON gpu_vast_system_update (storage_cost);
+CREATE INDEX gpu_vast_system_update_storage_total_cost_idx ON gpu_vast_system_update (storage_total_cost);
+CREATE INDEX gpu_vast_system_update_total_flops_idx ON gpu_vast_system_update (total_flops);
+CREATE INDEX gpu_vast_system_update_reliability_idx ON gpu_vast_system_update (reliability);
+CREATE INDEX gpu_vast_system_update_score_idx ON gpu_vast_system_update (score);
+CREATE INDEX gpu_vast_system_update_disk_space_idx ON gpu_vast_system_update (disk_space);
+CREATE INDEX gpu_vast_system_update_inet_up_idx ON gpu_vast_system_update (inet_up);
+CREATE INDEX gpu_vast_system_update_inet_down_idx ON gpu_vast_system_update (inet_down);
+CREATE INDEX gpu_vast_system_update_is_bid_idx ON gpu_vast_system_update (is_bid);
+CREATE INDEX gpu_vast_system_update_min_bid_idx ON gpu_vast_system_update (min_bid);
+
+
+
+
+
+
+
+
 
 
 -- +goose StatementEnd
@@ -125,12 +206,20 @@ CREATE INDEX gpu_vast_system_gpu_id_idx ON gpu_vast_system (gpu_id);
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
-DROP TABLE gpu_vast_system;
-DROP TABLE gpu_cloud_pricing;
-DROP TABLE gpu_cloud_system;
-DROP TABLE gpu_cloud;
-DROP TABLE gpu_llm_benchmark;
-DROP TABLE gpu;
-DROP TYPE gpu_manufacturer;
-DROP TYPE gpu_pricing_models;
+
+-- First drop tables that depend on gpu
+DROP TABLE IF EXISTS gpu_cloud_pricing;
+DROP TABLE IF EXISTS gpu_cloud_system;
+DROP TABLE IF EXISTS gpu_llm_benchmark;
+DROP TABLE IF EXISTS gpu_vast_system_update;
+DROP TABLE IF EXISTS gpu_vast_offer;
+DROP TABLE IF EXISTS gpu_vast_system;
+
+-- Then drop the base tables
+DROP TABLE IF EXISTS gpu_cloud;
+DROP TABLE IF EXISTS gpu;
+
+-- Finally drop the types
+DROP TYPE IF EXISTS gpu_manufacturer;
+DROP TYPE IF EXISTS gpu_pricing_models;
 -- +goose StatementEnd

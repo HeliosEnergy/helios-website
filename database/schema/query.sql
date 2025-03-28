@@ -442,11 +442,19 @@ INSERT INTO gpu (
     tdp,
     aliases
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    sqlc.arg(name),
+    sqlc.arg(manufacturer)::gpu_manufacturer,
+    sqlc.arg(vram),
+    sqlc.arg(int8_flops),
+    sqlc.arg(fp16_flops),
+    sqlc.arg(fp32_flops),
+    sqlc.arg(fp64_flops),
+    sqlc.arg(tdp),
+    sqlc.arg(aliases)
 ) RETURNING *;
 
 -- name: GetGPUByID :one
-SELECT * FROM gpu WHERE id = $1;
+SELECT * FROM gpu WHERE id = sqlc.arg(id);
 
 -- name: ListGPUs :many
 SELECT * FROM gpu ORDER BY created_at DESC;
@@ -461,21 +469,26 @@ INSERT INTO gpu_llm_benchmark (
     tokens_average_req_tps,
     runtime_ms
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    sqlc.arg(gpu_id),
+    sqlc.arg(model),
+    sqlc.arg(requests),
+    sqlc.arg(tokens_total),
+    sqlc.arg(tokens_average_req_tps),
+    sqlc.arg(runtime_ms)
 ) RETURNING *;
 
 -- name: GetGPULLMBenchmarkByID :one
-SELECT * FROM gpu_llm_benchmark WHERE id = $1;
+SELECT * FROM gpu_llm_benchmark WHERE id = sqlc.arg(id);
 
 -- name: GetGPULLMBenchmarksByGPUID :many
-SELECT * FROM gpu_llm_benchmark WHERE gpu_id = $1 ORDER BY created_at DESC;
+SELECT * FROM gpu_llm_benchmark WHERE gpu_id = sqlc.arg(gpu_id) ORDER BY created_at DESC;
 
 -- GPU Cloud queries
 -- name: CreateGPUCloud :one
-INSERT INTO gpu_cloud (name) VALUES ($1) RETURNING *;
+INSERT INTO gpu_cloud (name) VALUES (sqlc.arg(name)) RETURNING *;
 
 -- name: GetGPUCloudByID :one
-SELECT * FROM gpu_cloud WHERE id = $1;
+SELECT * FROM gpu_cloud WHERE id = sqlc.arg(id);
 
 -- name: ListGPUClouds :many
 SELECT * FROM gpu_cloud ORDER BY name;
@@ -485,6 +498,7 @@ SELECT * FROM gpu_cloud ORDER BY name;
 INSERT INTO gpu_cloud_system (
     gpu_cloud_id,
     name,
+    gpu_id,
     memory,
     cpu_name,
     cpu_cores,
@@ -493,18 +507,22 @@ INSERT INTO gpu_cloud_system (
     net_down,
     cloud_unique_name
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9
+    sqlc.arg(gpu_cloud_id),
+    sqlc.arg(name),
+    sqlc.arg(gpu_id),
+    sqlc.arg(memory),
+    sqlc.arg(cpu_name),
+    sqlc.arg(cpu_cores),
+    sqlc.arg(cpu_speed_ghz),
+    sqlc.arg(net_up),
+    sqlc.arg(net_down),
+    sqlc.arg(cloud_unique_name)
 ) RETURNING *;
-
--- name: GetGPUCloudSystemByID :one
-SELECT * FROM gpu_cloud_system WHERE id = $1;
-
--- name: GetGPUCloudSystemsByCloudID :many
-SELECT * FROM gpu_cloud_system WHERE gpu_cloud_id = $1 ORDER BY name;
 
 -- GPU Cloud Pricing queries
 -- name: CreateGPUCloudPricing :one
 INSERT INTO gpu_cloud_pricing (
+    gpu_id,
     gpu_cloud_id,
     gpu_cloud_system_id,
     price_per_hour,
@@ -512,38 +530,202 @@ INSERT INTO gpu_cloud_pricing (
     category,
     region
 ) VALUES (
-    $1, $2, $3, $4, $5, $6
+    sqlc.arg(gpu_id),
+    sqlc.arg(gpu_cloud_id),
+    sqlc.arg(gpu_cloud_system_id),
+    sqlc.arg(price_per_hour),
+    sqlc.arg(pricing_model)::gpu_pricing_models,
+    sqlc.arg(category),
+    sqlc.arg(region)
 ) RETURNING *;
-
--- name: GetGPUCloudPricingByID :one
-SELECT * FROM gpu_cloud_pricing WHERE id = $1;
-
--- name: GetGPUCloudPricingsByCloudID :many
-SELECT * FROM gpu_cloud_pricing 
-WHERE gpu_cloud_id = $1 
-ORDER BY created_at DESC;
-
--- name: GetGPUCloudPricingsBySystemID :many
-SELECT * FROM gpu_cloud_pricing 
-WHERE gpu_cloud_system_id = $1 
-ORDER BY created_at DESC;
 
 -- GPU Vast System queries
 -- name: CreateGPUVastSystem :one
 INSERT INTO gpu_vast_system (
+    vast_system_id,
     name,
+    gpu_id,
     memory,
     cpu_name,
     cpu_cores,
     cpu_speed_ghz,
-    net_up,
-    net_down
+    cuda_version,
+    driver_version,
+    geolocation,
+    geolocode,
+    pci_gen,
+    vms_enabled,
+    mobo_name
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
-) RETURNING *;
+    sqlc.arg(vast_system_id),
+    sqlc.arg(name),
+    sqlc.arg(gpu_id),
+    sqlc.arg(memory),
+    sqlc.arg(cpu_name),
+    sqlc.arg(cpu_cores),
+    sqlc.arg(cpu_speed_ghz),
+    sqlc.arg(cuda_version),
+    sqlc.arg(driver_version),
+    sqlc.arg(geolocation),
+    sqlc.arg(geolocode),
+    sqlc.arg(pci_gen),
+    sqlc.arg(vms_enabled),
+    sqlc.arg(mobo_name)
+)
+ON CONFLICT (vast_system_id) 
+DO UPDATE SET
+    name = EXCLUDED.name,
+    gpu_id = EXCLUDED.gpu_id,
+    memory = EXCLUDED.memory,
+    cpu_name = EXCLUDED.cpu_name,
+    cpu_cores = EXCLUDED.cpu_cores,
+    cpu_speed_ghz = EXCLUDED.cpu_speed_ghz,
+    cuda_version = EXCLUDED.cuda_version,
+    driver_version = EXCLUDED.driver_version,
+    geolocation = EXCLUDED.geolocation,
+    geolocode = EXCLUDED.geolocode,
+    pci_gen = EXCLUDED.pci_gen,
+    vms_enabled = EXCLUDED.vms_enabled,
+    mobo_name = EXCLUDED.mobo_name,
+    updated_at = CURRENT_TIMESTAMP
+RETURNING *;
 
 -- name: GetGPUVastSystemByID :one
-SELECT * FROM gpu_vast_system WHERE id = $1;
+SELECT * FROM gpu_vast_system WHERE id = sqlc.arg(id);
+
+-- name: GetGPUVastSystemByVastID :one
+SELECT * FROM gpu_vast_system WHERE vast_system_id = sqlc.arg(vast_system_id);
 
 -- name: ListGPUVastSystems :many
 SELECT * FROM gpu_vast_system ORDER BY created_at DESC;
+
+-- GPU Vast Offer queries
+-- name: CreateGPUVastOffer :one
+INSERT INTO gpu_vast_offer (
+    offer_id,
+    offer_url,
+    offer_url_id
+) VALUES (
+    sqlc.arg(offer_id),
+    sqlc.arg(offer_url),
+    sqlc.arg(offer_url_id)
+) RETURNING *;
+
+-- name: GetGPUVastOfferByID :one
+SELECT * FROM gpu_vast_offer WHERE id = sqlc.arg(id);
+
+-- name: GetGPUVastOfferByOfferID :one
+SELECT * FROM gpu_vast_offer WHERE offer_id = sqlc.arg(offer_id);
+
+-- GPU Vast System Update queries
+-- name: CreateGPUVastSystemUpdate :one
+INSERT INTO gpu_vast_system_update (
+    gpu_vast_system_id,
+    latest_offer_id,
+    reliability,
+    score,
+    disk_space,
+    inet_up,
+    inet_up_cost,
+    inet_down,
+    inet_down_cost,
+    is_bid,
+    min_bid,
+    ip_address,
+    storage_cost,
+    storage_total_cost,
+    total_flops,
+    cost_per_hour,
+    disk_per_hour,
+    time_remaining,
+    time_remaining_isbid
+) VALUES (
+    sqlc.arg(gpu_vast_system_id),
+    sqlc.arg(latest_offer_id),
+    sqlc.arg(reliability),
+    sqlc.arg(score),
+    sqlc.arg(disk_space),
+    sqlc.arg(inet_up),
+    sqlc.arg(inet_up_cost),
+    sqlc.arg(inet_down),
+    sqlc.arg(inet_down_cost),
+    sqlc.arg(is_bid),
+    sqlc.arg(min_bid),
+    sqlc.arg(ip_address),
+    sqlc.arg(storage_cost),
+    sqlc.arg(storage_total_cost),
+    sqlc.arg(total_flops),
+    sqlc.arg(cost_per_hour),
+    sqlc.arg(disk_per_hour),
+    sqlc.arg(time_remaining),
+    sqlc.arg(time_remaining_isbid)
+)
+ON CONFLICT (gpu_vast_system_id, latest_offer_id)
+DO UPDATE SET
+    reliability = EXCLUDED.reliability,
+    score = EXCLUDED.score,
+    disk_space = EXCLUDED.disk_space,
+    inet_up = EXCLUDED.inet_up,
+    inet_up_cost = EXCLUDED.inet_up_cost,
+    inet_down = EXCLUDED.inet_down,
+    inet_down_cost = EXCLUDED.inet_down_cost,
+    is_bid = EXCLUDED.is_bid,
+    min_bid = EXCLUDED.min_bid,
+    ip_address = EXCLUDED.ip_address,
+    storage_cost = EXCLUDED.storage_cost,
+    storage_total_cost = EXCLUDED.storage_total_cost,
+    total_flops = EXCLUDED.total_flops,
+    cost_per_hour = EXCLUDED.cost_per_hour,
+    disk_per_hour = EXCLUDED.disk_per_hour,
+    time_remaining = EXCLUDED.time_remaining,
+    time_remaining_isbid = EXCLUDED.time_remaining_isbid,
+    created_at = CURRENT_TIMESTAMP
+RETURNING *;
+
+-- Composite queries
+-- name: ListGPUVastSystemsWithLatestUpdate :many
+SELECT 
+    s.*,
+    u.reliability,
+    u.score,
+    u.disk_space,
+    u.inet_up,
+    u.inet_down,
+    u.cost_per_hour,
+    u.is_bid,
+    u.min_bid,
+    u.created_at as last_update_at,
+    g.name as gpu_name,
+    g.manufacturer as gpu_manufacturer
+FROM gpu_vast_system s
+LEFT JOIN LATERAL (
+    SELECT *
+    FROM gpu_vast_system_update
+    WHERE gpu_vast_system_id = s.id
+    ORDER BY created_at DESC
+    LIMIT 1
+) u ON true
+LEFT JOIN gpu g ON s.gpu_id = g.id
+ORDER BY s.created_at DESC;
+
+-- name: ListGPUVastSystemsByGPU :many
+SELECT * FROM gpu_vast_system
+WHERE gpu_id = sqlc.arg(gpu_id)
+ORDER BY created_at DESC;
+
+-- name: UpsertGPUVastOffer :one
+INSERT INTO gpu_vast_offer (
+    offer_id,
+    offer_url,
+    offer_url_id
+) VALUES (
+    sqlc.arg(offer_id),
+    sqlc.arg(offer_url),
+    sqlc.arg(offer_url_id)
+)
+ON CONFLICT (offer_id)
+DO UPDATE SET
+    offer_url = EXCLUDED.offer_url,
+    offer_url_id = EXCLUDED.offer_url_id,
+    created_at = CURRENT_TIMESTAMP
+RETURNING *;
