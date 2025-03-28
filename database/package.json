@@ -7,10 +7,13 @@
     "type": "module",
     "scripts": {
         "build": "tsc",
-        "generate": "sqlc generate"
+        "generate": "sqlc generate",
+        "seed-static": "NODE_OPTIONS=--loader=ts-node/esm ts-node ./seed_script_static.ts"
     },
     "dependencies": {
-        "postgres": "^3.4.5"
+        "dotenv": "^16.4.7",
+        "postgres": "^3.4.5",
+        "ts-node": "^10.9.2"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

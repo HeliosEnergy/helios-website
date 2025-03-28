@@ -1,0 +1,62 @@
+[
+	{
+		"name": "NVIDIA L40S",
+		"manufacturer": "nvidia",
+		"vram": 48000,
+		"tdp": 350,
+		"aliases": ["L40S"]
+	},
+	{
+		"name": "NVIDIA A100 SXM 80GB",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["A100 SXM"]
+	},
+	{
+		"name": "NVIDIA A100 SXM 40GB",
+		"manufacturer": "nvidia",
+		"vram": 40000
+	},
+	{
+		"name": "NVIDIA A100 PCIe 80GB",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["A100 PCIe"]
+	},
+	{
+		"name": "NVIDIA A100 PCIe 40GB",
+		"manufacturer": "nvidia",
+		"vram": 40000
+	},
+	{
+		"name": "NVIDIA H100 SXM",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["H100 SXM"]
+	},
+	{
+		"name": "NVIDIA H100 NVL",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["H100 NVL"]
+	},
+	{
+		"name": "NVIDIA H100 PCIe",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["H100 PCIe"]
+	},
+	{
+		"name": "NVIDIA H200 SXM",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["H200 SXM"]
+	},
+	{
+		"name": "NVIDIA H200 NVL",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["H200 NVL"]
+	}
+		
+]

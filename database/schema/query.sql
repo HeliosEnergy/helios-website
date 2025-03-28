@@ -428,3 +428,122 @@ SELECT
 FROM eia_generators g
 JOIN eia_power_plants p ON g.plant_id = p.id
 WHERE p.id = sqlc.arg(plant_id);
+
+-- GPU table queries
+-- name: CreateGPU :one
+INSERT INTO gpu (
+    name,
+    manufacturer,
+    vram,
+    int8_flops,
+    fp16_flops,
+    fp32_flops,
+    fp64_flops,
+    tdp,
+    aliases
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+) RETURNING *;
+
+-- name: GetGPUByID :one
+SELECT * FROM gpu WHERE id = $1;
+
+-- name: ListGPUs :many
+SELECT * FROM gpu ORDER BY created_at DESC;
+
+-- GPU LLM Benchmark queries
+-- name: CreateGPULLMBenchmark :one
+INSERT INTO gpu_llm_benchmark (
+    gpu_id,
+    model,
+    requests,
+    tokens_total,
+    tokens_average_req_tps,
+    runtime_ms
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+) RETURNING *;
+
+-- name: GetGPULLMBenchmarkByID :one
+SELECT * FROM gpu_llm_benchmark WHERE id = $1;
+
+-- name: GetGPULLMBenchmarksByGPUID :many
+SELECT * FROM gpu_llm_benchmark WHERE gpu_id = $1 ORDER BY created_at DESC;
+
+-- GPU Cloud queries
+-- name: CreateGPUCloud :one
+INSERT INTO gpu_cloud (name) VALUES ($1) RETURNING *;
+
+-- name: GetGPUCloudByID :one
+SELECT * FROM gpu_cloud WHERE id = $1;
+
+-- name: ListGPUClouds :many
+SELECT * FROM gpu_cloud ORDER BY name;
+
+-- GPU Cloud System queries
+-- name: CreateGPUCloudSystem :one
+INSERT INTO gpu_cloud_system (
+    gpu_cloud_id,
+    name,
+    memory,
+    cpu_name,
+    cpu_cores,
+    cpu_speed_ghz,
+    net_up,
+    net_down,
+    cloud_unique_name
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+) RETURNING *;
+
+-- name: GetGPUCloudSystemByID :one
+SELECT * FROM gpu_cloud_system WHERE id = $1;
+
+-- name: GetGPUCloudSystemsByCloudID :many
+SELECT * FROM gpu_cloud_system WHERE gpu_cloud_id = $1 ORDER BY name;
+
+-- GPU Cloud Pricing queries
+-- name: CreateGPUCloudPricing :one
+INSERT INTO gpu_cloud_pricing (
+    gpu_cloud_id,
+    gpu_cloud_system_id,
+    price_per_hour,
+    pricing_model,
+    category,
+    region
+) VALUES (
+    $1, $2, $3, $4, $5, $6
+) RETURNING *;
+
+-- name: GetGPUCloudPricingByID :one
+SELECT * FROM gpu_cloud_pricing WHERE id = $1;
+
+-- name: GetGPUCloudPricingsByCloudID :many
+SELECT * FROM gpu_cloud_pricing 
+WHERE gpu_cloud_id = $1 
+ORDER BY created_at DESC;
+
+-- name: GetGPUCloudPricingsBySystemID :many
+SELECT * FROM gpu_cloud_pricing 
+WHERE gpu_cloud_system_id = $1 
+ORDER BY created_at DESC;
+
+-- GPU Vast System queries
+-- name: CreateGPUVastSystem :one
+INSERT INTO gpu_vast_system (
+    name,
+    memory,
+    cpu_name,
+    cpu_cores,
+    cpu_speed_ghz,
+    net_up,
+    net_down
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7
+) RETURNING *;
+
+-- name: GetGPUVastSystemByID :one
+SELECT * FROM gpu_vast_system WHERE id = $1;
+
+-- name: ListGPUVastSystems :many
+SELECT * FROM gpu_vast_system ORDER BY created_at DESC;

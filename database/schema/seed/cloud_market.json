@@ -1,0 +1,38 @@
+[
+	{
+		"name": "AWS"
+	},
+	{
+		"name": "Azure"
+	},
+	{
+		"name": "GCP"
+	},
+	{
+		"name": "IBM"
+	},
+	{
+		"name": "Oracle"
+	},
+	{
+		"name": "DigitalOcean"
+	},
+	{
+		"name": "Vast"
+	},
+	{
+		"name": "Runpod"
+	},
+	{
+		"name": "Cudo"
+	},
+	{
+		"name": "Lambda"
+	},
+	{
+		"name": "Crusoe"
+	},
+	{
+		"name": "Fly.io"
+	}
+]

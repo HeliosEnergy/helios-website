@@ -101,3 +101,8 @@ tasks:
     cmds:
       - cd database/schema && goose -dir migrations create {{.CLI_ARGS}} sql
 
+
+  seed:
+    desc: Seed the database with static data
+    cmds:
+      - cd database && npm run seed-static

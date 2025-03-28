@@ -1,1 +1,3 @@
 src/*.js
+
+schema/analysis_db/*

@@ -113,5 +113,5 @@
   "include": [
     "src/**/*.ts",
     "../database/schema/**/*.ts"
-  ]
+, "../database/seed_script_static.ts"  ]
 }
