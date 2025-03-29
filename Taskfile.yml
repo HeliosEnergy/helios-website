@@ -112,4 +112,6 @@ tasks:
     desc: Initialize n8n
     cmds:
       - docker volume create n8n_data
+      - docker volume create timescaledb_data
+      - docker volume create grafana_data
   

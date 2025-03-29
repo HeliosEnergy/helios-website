@@ -89,10 +89,15 @@ services:
 
 volumes:
   app_home:
+    external: true
   conda_data:
+    external: true
   timescaledb_data:
+    external: true
   grafana_data:
+    external: true
   n8n_data:
+    external: true
 
 networks:
   data_analysis_net:
