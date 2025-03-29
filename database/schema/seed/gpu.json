@@ -10,7 +10,7 @@
 		"name": "NVIDIA A100 SXM 80GB",
 		"manufacturer": "nvidia",
 		"vram": 80000,
-		"aliases": ["A100 SXM"]
+		"aliases": ["A100 SXM", "A100 SXM4"]
 	},
 	{
 		"name": "NVIDIA A100 SXM 40GB",
@@ -266,5 +266,247 @@
 		"vram": 4096,
 		"tdp": 68,
 		"aliases": ["Quadro K2200", "K2200"]
+	},
+	{
+		"name": "NVIDIA RTX 5080",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"aliases": ["RTX 5080", "5080"]
+	},
+	{
+		"name": "NVIDIA RTX 5070 Ti",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"aliases": ["RTX 5070 Ti", "5070 Ti", "5070Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 5070",
+		"manufacturer": "nvidia",
+		"vram": 10240,
+		"aliases": ["RTX 5070", "5070"]
+	},
+	{
+		"name": "NVIDIA RTX 4070 Ti",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 285,
+		"aliases": ["RTX 4070 Ti", "4070 Ti", "4070Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 4070 Super",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 220,
+		"aliases": ["RTX 4070S", "4070S", "RTX 4070 S"]
+	},
+	{
+		"name": "NVIDIA RTX 4070",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 200,
+		"aliases": ["RTX 4070", "4070"]
+	},
+	{
+		"name": "NVIDIA RTX 4060 Ti",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 160,
+		"aliases": ["RTX 4060 Ti", "4060 Ti", "4060Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 4000 Ada Generation",
+		"manufacturer": "nvidia",
+		"vram": 20480,
+		"aliases": ["RTX 4000Ada", "4000 Ada"]
+	},
+	{
+		"name": "NVIDIA RTX 3090 Ti",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 450,
+		"aliases": ["RTX 3090 Ti", "3090 Ti", "3090Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 3070 Laptop GPU",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"aliases": ["RTX 3070 laptop", "3070 laptop"]
+	},
+	{
+		"name": "NVIDIA RTX 6000 Ada Generation",
+		"manufacturer": "nvidia",
+		"vram": 48000,
+		"tdp": 300,
+		"aliases": ["RTX 6000Ada", "6000 Ada"]
+	},
+	{
+		"name": "NVIDIA RTX A6000",
+		"manufacturer": "nvidia",
+		"vram": 48000,
+		"tdp": 300,
+		"aliases": ["RTX A6000", "A6000"]
+	},
+	{
+		"name": "NVIDIA RTX A5000",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 230,
+		"aliases": ["RTX A5000", "A5000"]
+	},
+	{
+		"name": "NVIDIA RTX A4500",
+		"manufacturer": "nvidia",
+		"vram": 20480,
+		"aliases": ["RTX A4500", "A4500"]
+	},
+	{
+		"name": "NVIDIA A800 PCIe",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["A800 PCIE"]
+	},
+	{
+		"name": "NVIDIA A100X",
+		"manufacturer": "nvidia",
+		"vram": 80000,
+		"aliases": ["A100X"]
+	},
+	{
+		"name": "NVIDIA Tesla V100",
+		"manufacturer": "nvidia",
+		"vram": 32768,
+		"tdp": 300,
+		"aliases": ["Tesla V100"]
+	},
+	{
+		"name": "NVIDIA Tesla P100",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"tdp": 250,
+		"aliases": ["Tesla P100"]
+	},
+	{
+		"name": "NVIDIA Tesla P40",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 250,
+		"aliases": ["Tesla P40"]
+	},
+	{
+		"name": "NVIDIA Tesla P4",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 75,
+		"aliases": ["Tesla P4"]
+	},
+	{
+		"name": "NVIDIA Tesla T4",
+		"manufacturer": "nvidia",
+		"vram": 16384,
+		"tdp": 70,
+		"aliases": ["Tesla T4"]
+	},
+	{
+		"name": "NVIDIA TITAN V",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 250,
+		"aliases": ["Titan V"]
+	},
+	{
+		"name": "NVIDIA TITAN X",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 250,
+		"aliases": ["GTX TITAN X", "TITAN X"]
+	},
+	{
+		"name": "NVIDIA TITAN Xp",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 250,
+		"aliases": ["Titan Xp"]
+	},
+	{
+		"name": "NVIDIA P104-100",
+		"manufacturer": "nvidia",
+		"vram": 4096,
+		"aliases": ["P104-100"]
+	},
+	{
+		"name": "NVIDIA P106-100",
+		"manufacturer": "nvidia",
+		"vram": 6144,
+		"aliases": ["P106-100"]
+	},
+	{
+		"name": "NVIDIA GTX 1070 Ti",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 180,
+		"aliases": ["GTX 1070 Ti", "1070Ti", "1070 Ti"]
+	},
+	{
+		"name": "NVIDIA Quadro RTX 8000",
+		"manufacturer": "nvidia",
+		"vram": 48000,
+		"tdp": 260,
+		"aliases": ["Q RTX 8000"]
+	},
+	{
+		"name": "NVIDIA Quadro RTX 6000",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 260,
+		"aliases": ["Q RTX 6000"]
+	},
+	{
+		"name": "NVIDIA GeForce GTX 970",
+		"manufacturer": "nvidia",
+		"vram": 4096,
+		"tdp": 145,
+		"aliases": ["970"]
+	},
+	{
+		"name": "NVIDIA RTX 4070 Super Ti",
+		"manufacturer": "nvidia",
+		"vram": 12288,
+		"tdp": 285,
+		"aliases": ["RTX 4070S Ti", "4070S Ti", "4070STi"]
+	},
+	{
+		"name": "NVIDIA RTX 2080 Ti",
+		"manufacturer": "nvidia",
+		"vram": 11264,
+		"tdp": 260,
+		"aliases": ["RTX 2080 Ti", "2080Ti", "2080 Ti"]
+	},
+	{
+		"name": "NVIDIA RTX 2070 Super",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 215,
+		"aliases": ["RTX 2070S", "2070S", "RTX 2070 S", "2070 Super"]
+	},
+	{
+		"name": "NVIDIA RTX 3050",
+		"manufacturer": "nvidia",
+		"vram": 8192,
+		"tdp": 130,
+		"aliases": ["RTX 3050", "3050"]
+	},
+	{
+		"name": "NVIDIA RTX 5000 Ada Generation",
+		"manufacturer": "nvidia",
+		"vram": 32768,
+		"tdp": 165,
+		"aliases": ["RTX 5000Ada", "5000 Ada"]
+	},
+	{
+		"name": "NVIDIA RTX 4500 Ada Generation",
+		"manufacturer": "nvidia",
+		"vram": 24576,
+		"tdp": 150,
+		"aliases": ["RTX 4500Ada", "4500 Ada"]
 	}
 ]

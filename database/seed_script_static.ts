@@ -40,32 +40,53 @@ interface CloudMarket {
 
 async function seedGPUs() {
   try {
-	// Read GPU data
-	const gpuPath = join(__dirname, 'schema/seed/gpu.json');
-	const gpuData: GPU[] = JSON.parse(readFileSync(gpuPath, 'utf-8'));
+    // Read GPU data
+    const gpuPath = join(__dirname, 'schema/seed/gpu.json');
+    const gpuData: GPU[] = JSON.parse(readFileSync(gpuPath, 'utf-8'));
 
-	console.log('Seeding GPUs...');
-	for (const gpu of gpuData) {
-	  try {
-		await createGPU(sql, {
-		  name: gpu.name,
-		  manufacturer: gpu.manufacturer,
-		  vram: gpu.vram,
-		  // These fields should be made optional in the database schema
-		  int8Flops: gpu.int8Flops ?? null,
-		  fp16Flops: gpu.fp16Flops ?? null,
-		  fp32Flops: gpu.fp32Flops ?? null,
-		  fp64Flops: gpu.fp64Flops ?? null,
-		  tdp: gpu.tdp ?? null,
-		  aliases: gpu.aliases ?? []
-		});
-		console.log(`Created/Updated GPU: ${gpu.name}`);
-	  } catch (error) {
-		console.error(`Error processing GPU ${gpu.name}:`, error);
-	  }
-	}
+    console.log('Seeding GPUs...');
+    for (const gpu of gpuData) {
+      try {
+        await sql`
+          INSERT INTO gpu (
+            name,
+            manufacturer,
+            vram,
+            int8_flops,
+            fp16_flops,
+            fp32_flops,
+            fp64_flops,
+            tdp,
+            aliases
+          ) VALUES (
+            ${gpu.name},
+            ${gpu.manufacturer},
+            ${gpu.vram},
+            ${gpu.int8Flops ?? null},
+            ${gpu.fp16Flops ?? null},
+            ${gpu.fp32Flops ?? null},
+            ${gpu.fp64Flops ?? null},
+            ${gpu.tdp ?? null},
+            ${gpu.aliases ?? []}
+          )
+          ON CONFLICT (name)
+          DO UPDATE SET
+            manufacturer = EXCLUDED.manufacturer,
+            vram = EXCLUDED.vram,
+            int8_flops = EXCLUDED.int8_flops,
+            fp16_flops = EXCLUDED.fp16_flops,
+            fp32_flops = EXCLUDED.fp32_flops,
+            fp64_flops = EXCLUDED.fp64_flops,
+            tdp = EXCLUDED.tdp,
+            aliases = EXCLUDED.aliases
+        `;
+        console.log(`Created/Updated GPU: ${gpu.name}`);
+      } catch (error) {
+        console.error(`Error processing GPU ${gpu.name}:`, error);
+      }
+    }
   } catch (error) {
-	console.error('Error seeding GPUs:', error);
+    console.error('Error seeding GPUs:', error);
   }
 }
 
@@ -78,9 +99,13 @@ async function seedCloudMarkets() {
 	console.log('Seeding Cloud Markets...');
 	for (const cloud of cloudData) {
 	  try {
-		await createGPUCloud(sql, {
-		  name: cloud.name,
-		});
+		await sql`
+		  INSERT INTO gpu_cloud (name)
+		  VALUES (${cloud.name})
+		  ON CONFLICT (name) 
+		  DO UPDATE SET
+			name = EXCLUDED.name
+		`;
 		console.log(`Created/Updated Cloud Market: ${cloud.name}`);
 	  } catch (error) {
 		console.error(`Error processing Cloud Market ${cloud.name}:`, error);

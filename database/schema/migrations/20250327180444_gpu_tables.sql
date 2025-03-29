@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS gpu_vast_system (
 	vast_system_id INT NOT NULL,
 	name VARCHAR(255),
 	gpu_id INT NOT NULL REFERENCES gpu(id),
-	memory INT NOT NULL,
+	memory INT,
 	cpu_name VARCHAR(255),
 	cpu_cores INT,
 	cpu_speed_ghz FLOAT,
