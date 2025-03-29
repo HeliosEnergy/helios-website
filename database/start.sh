@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Explicitly set the PATH at the beginning of the script
+export PATH="/usr/lib/postgresql/17/bin:$PATH"
+
+ls -la /usr/lib/postgresql/17/bin/
+
 # Initialize PostgreSQL data directory if it doesn't exist
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
     mkdir -p "$PGDATA"

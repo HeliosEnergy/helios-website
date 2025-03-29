@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Add ARG at the top to receive build-time variable
 ARG POSTGRES_PASSWORD
@@ -50,6 +50,12 @@ RUN echo "host all all 0.0.0.0/0 md5" >> /etc/postgresql/17/main/pg_hba.conf && 
 
 EXPOSE 5432
 
-ADD start.sh /start.sh
+# Make sure start.sh can find the initdb command
+RUN echo 'export PATH="/usr/lib/postgresql/17/bin:$PATH"' >> /etc/profile
+RUN echo 'export PATH="/usr/lib/postgresql/17/bin:$PATH"' >> /etc/bash.bashrc
 
-CMD bash start.sh
+# Make start.sh executable
+ADD start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/bin/bash", "/start.sh"]
