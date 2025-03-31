@@ -348,7 +348,7 @@ export async function pricingCloud(args: ScriptArgs) {
 	const promises = await Promise.all([
 		lambdaPricing(args),
 	]);
-	const data = {
+	const data: any = {
 		lambda: promises[0],
 	};
 

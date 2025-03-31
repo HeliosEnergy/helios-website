@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS gpu_cloud_pricing (
 	gpu_id INT NOT NULL REFERENCES gpu(id),
 	gpu_cloud_id INT NOT NULL REFERENCES gpu_cloud(id),
 	gpu_cloud_system_id INT REFERENCES gpu_cloud_system(id),
+	gpu_count INT NOT NULL,
 	price_per_hour FLOAT NOT NULL,
 	pricing_model gpu_pricing_models NOT NULL,
 	category VARCHAR(255),
