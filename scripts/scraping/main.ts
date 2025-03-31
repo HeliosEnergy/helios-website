@@ -2,9 +2,11 @@ import puppeteer from 'puppeteer';
 import * as repl from 'repl';
 import * as dotenv from 'dotenv';
 import { ScriptArgs } from './utils';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables from .env file
-dotenv.config();
+console.log("__dirname", __dirname);
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 
 process.on('SIGINT', () => {

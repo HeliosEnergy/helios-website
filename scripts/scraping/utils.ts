@@ -55,7 +55,7 @@ export function multilineTrim(content: string) {
 }
 
 export type ScriptArgs = {
-	repl: repl.REPLServer
+	repl?: repl.REPLServer
 	browser: Browser
 	page: Page
 }

@@ -5,11 +5,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node --interactive main.ts",
-    "textify": "ts-node textify.ts"
+    "textify": "ts-node textify.ts",
+    "gpu_pricing": "ts-node no-repl/no-repl-gpu-pricing.ts"
   },
   "author": "",
   "description": "",
   "dependencies": {
+    "@google/genai": "^0.7.0",
     "@googleapis/sheets": "^9.3.1",
     "@types/html": "^1.0.4",
     "dotenv": "^16.4.7",

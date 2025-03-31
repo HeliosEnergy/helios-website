@@ -1,13 +1,17 @@
 import OpenAI from 'openai';
+import { GoogleGenAI } from "@google/genai";
 
-console.log(process.env['OPENAI_BASE_URL']);
+
+console.log("OpenAI base url", process.env['OPENAI_BASE_URL']);
 const client = new OpenAI({
-	apiKey: process.env['OPENAI_API_KEY'],
-	baseURL: process.env['OPENAI_BASE_URL'],
+	apiKey: process.env['OPENAI_API_KEY'] == "" ? undefined : process.env['OPENAI_API_KEY'],
+	baseURL: process.env['OPENAI_BASE_URL'] == "" ? undefined : process.env['OPENAI_BASE_URL'],
 	defaultHeaders: {
 		'Content-Type': 'application/json'
 	}
 });
+
+const gemini = new GoogleGenAI({ apiKey: process.env['GEMINI_API_KEY'] });
 
 
 
@@ -46,7 +50,7 @@ export async function simpleResponse(prompt: string) {
 }
 
 export async function extractWebData(prompt: string, webContent: string) {
-	const chatCompletion = await client.chat.completions.create({
+/* 	const chatCompletion = await client.chat.completions.create({
 		messages: [
 			{ role: 'user', content: `
 
@@ -54,7 +58,13 @@ export async function extractWebData(prompt: string, webContent: string) {
 		],
 		model: process.env['SERVED_MODEL_NAME'] || 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B', // Update this to your actual model
 	});
-	return chatCompletion.choices[0].message.content || "";
+	return chatCompletion.choices[0].message.content || ""; */
+	const response = await gemini.models.generateContent({
+		model: "gemini-2.0-flash",
+		contents: prompt + "\n\n" + webContent,
+	});
+	console.log("response", response);
+	return response.text!;
 }
 
 export async function fixJSONFormat(json: string) {

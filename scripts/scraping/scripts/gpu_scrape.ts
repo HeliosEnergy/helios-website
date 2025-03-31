@@ -97,8 +97,6 @@ async function runpodPricing({ browser }: ScriptArgs) {
 
 	await page.close();
 
-	console.log("blip");
-
 	// 	Start by removing all unnecessary elements from the HTML, think about the reduced HTML structure, and then write out all information from the HTML.
 
 	let prompt = multilineTrim(`
