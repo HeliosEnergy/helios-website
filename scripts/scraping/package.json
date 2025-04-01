@@ -4,9 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node --interactive main.ts",
-    "textify": "ts-node textify.ts",
-    "gpu_pricing": "ts-node no-repl/no-repl-gpu-pricing.ts"
+    "start": "tsx --interactive main.ts",
+    "textify": "tsx textify.ts",
+    "gpu_pricing": "tsx no-repl/gpu-pricing-all.ts",
+    "gpu_platform_pricing": "tsx no-repl/gpu-pricing-platform.ts"
   },
   "author": "",
   "description": "",
@@ -20,6 +21,7 @@
     "openai": "^4.80.1",
     "postgres": "^3.4.5",
     "puppeteer": "^22.15.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3"
   }
 }

@@ -20,6 +20,7 @@ import {
 	getMetricsByName
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
+import { executeScriptEIACapacity, executeScriptEIAGeneration, executeScriptGPUPricing } from "./iternal_routes/execute_scripts.js";
 
 // Replace the existing unhandledRejection handler with this more detailed one
 process.on('unhandledRejection', (reason: any, promise) => {
@@ -83,13 +84,12 @@ try {
 	process.exit(1);
 }
 
-const PORT = parseInt(process.env.PORT || "4777");
-const app = express();
-app.use(express.json());
-app.use(cors());
+const external = express();
+external.use(express.json());
+external.use(cors());
 
 console.log("adding route");
-app.get("/", (req: Request, res: Response) => {
+external.get("/", (req: Request, res: Response) => {
 	res.send("Hello World");
 });
 
@@ -161,7 +161,20 @@ const api = express.Router();
 
 
 }
-app.use("/api", api);
+external.use("/api", api);
+
+
+
+
+const internal = express();
+internal.use(express.json());
+internal.use(cors());
+
+
+internal.post("/execute_script/eia_capacity", executeScriptEIACapacity);
+internal.post("/execute_script/eia_generation", executeScriptEIAGeneration);
+internal.post("/execute_script/gpu_pricing/:platform", executeScriptGPUPricing);
+
 
 
 // Graceful shutdown
@@ -195,19 +208,24 @@ try {
 		const cert = readFileSync(certFile, 'utf8');
 		
 		// Create HTTPS server
-		const httpsServer = https.createServer({ key, cert }, app);
+		const httpsServer = https.createServer({ key, cert }, external);
 		
-		httpsServer.listen(PORT, () => {
-			console.log(`HTTPS Server is running on port ${PORT}`);
-			console.log(`https://localhost:${PORT}`);
+		httpsServer.listen(process.env.PORT, () => {
+			console.log(`HTTPS Server is running on port ${process.env.PORT}`);
+			console.log(`https://localhost:${process.env.PORT}`);
 		});
 	} else {
 		// Create HTTP server (existing functionality)
-		app.listen(PORT, () => {
-			console.log(`HTTP Server is running on port ${PORT}`);
-			console.log(`http://localhost:${PORT}`);
+		external.listen(process.env.PORT, () => {
+			console.log(`HTTP Server is running on port ${process.env.PORT}`);
+			console.log(`http://localhost:${process.env.PORT}`);
 		});
 	}
+
+	internal.listen(process.env.INTERNAL_PORT, () => {
+		console.log(`Internal Server is running on port ${process.env.INTERNAL_PORT}`);
+		console.log(`http://localhost:${process.env.INTERNAL_PORT}`);
+	});
 } catch (error) {
 	console.error('Failed to start server:', error);
 	process.exit(1);
