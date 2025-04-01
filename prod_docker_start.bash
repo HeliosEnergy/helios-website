@@ -63,7 +63,7 @@ docker run \
 docker run \
 	--name prod_da_n8n \
 	-e DB_TYPE=postgresdb \
-	-e DB_POSTGRESDB_DATABASE=postgres \
+	-e DB_POSTGRESDB_DATABASE=${N8N_DB_NAME} \
 	-e DB_POSTGRESDB_HOST=localhost \
 	-e DB_POSTGRESDB_PORT=16432 \
 	-e DB_POSTGRESDB_USER=postgres \
