@@ -160,7 +160,6 @@ app.use("/api", api);
 const tunnel = express.Router();
 {
 	tunnel.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel());
-	tunnel.use("/n8n/slack_webhook/*", httpAnyN8NSlackWebhookTunnel());
 }
 app.use("/tunnel", tunnel);
 
