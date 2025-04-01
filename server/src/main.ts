@@ -21,6 +21,23 @@ import {
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
 
+// Replace the existing unhandledRejection handler with this more detailed one
+process.on('unhandledRejection', (reason: any, promise) => {
+	console.error('=== Unhandled Promise Rejection ===');
+	console.error('Promise:', promise);
+	console.error('Reason:', reason);
+	if (reason instanceof Error) {
+		console.error('Stack:', reason.stack);
+	}
+	if (reason && reason.code) {
+		console.error('Error code:', reason.code);
+	}
+	if (reason && reason.message) {
+		console.error('Error message:', reason.message);
+	}
+	console.error('===============================');
+});
+
 // Load environment variables with fallback and error handling
 const loadEnvConfig = () => {
 	// First try in current working directory
@@ -50,22 +67,6 @@ loadEnvConfig();
 
 console.log("DB HOST",process.env.DB_HOST);
 
-// Replace the existing unhandledRejection handler with this more detailed one
-process.on('unhandledRejection', (reason: any, promise) => {
-	console.error('=== Unhandled Promise Rejection ===');
-	console.error('Promise:', promise);
-	console.error('Reason:', reason);
-	if (reason instanceof Error) {
-		console.error('Stack:', reason.stack);
-	}
-	if (reason && reason.code) {
-		console.error('Error code:', reason.code);
-	}
-	if (reason && reason.message) {
-		console.error('Error message:', reason.message);
-	}
-	console.error('===============================');
-});
 
 // Database configuration
 let sql;
@@ -155,8 +156,9 @@ const api = express.Router();
 	api.use("/map_data", map_data);
 
 
+	api.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel("webhook"));
+	api.use("/n8n/webhook-test/*", httpAnyN8NWebhookTunnel("webhook-test"));
 
-	api.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel());
 
 }
 app.use("/api", api);
