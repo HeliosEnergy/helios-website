@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-// http://API_HOST/tunnel/n8n/webhook
+// http://API_HOST/api/n8n/webhook
 export function httpAnyN8NWebhookTunnel(): (request: Request, response: Response) => Promise<any> {
     return async function (request: Request, response: Response) {
        // extract url after /tunnel/n8n/webhook

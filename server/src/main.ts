@@ -153,15 +153,14 @@ const api = express.Router();
 		map_data.get("/power_plant/:id", httpGetPowerPlantDataById(sql));
 	}
 	api.use("/map_data", map_data);
+
+
+
+	api.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel());
+
 }
 app.use("/api", api);
 
-
-const tunnel = express.Router();
-{
-	tunnel.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel());
-}
-app.use("/tunnel", tunnel);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
