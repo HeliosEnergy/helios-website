@@ -19,6 +19,7 @@ import {
 	deleteMetric,
 	getMetricsByName
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
+import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
 
 // Load environment variables with fallback and error handling
 const loadEnvConfig = () => {
@@ -154,6 +155,14 @@ const api = express.Router();
 	api.use("/map_data", map_data);
 }
 app.use("/api", api);
+
+
+const tunnel = express.Router();
+{
+	tunnel.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel());
+	tunnel.use("/n8n/slack_webhook/*", httpAnyN8NSlackWebhookTunnel());
+}
+app.use("/tunnel", tunnel);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
