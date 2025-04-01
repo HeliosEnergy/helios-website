@@ -31,7 +31,7 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - PGDATA=/var/lib/postgresql/17/main
     ports:
-      - "6432:5432"
+      - "${TAILSCALE_IP}:6432:5432"
     volumes:
       - timescaledb_data:/var/lib/postgresql/17
       - ./database/schema:/app/database/schema
@@ -52,7 +52,7 @@ services:
       - GF_SERVER_DOMAIN=localhost
       - GF_SERVER_ROOT_URL=http://localhost:3000
     ports:
-      - 6700:3000
+      - "${TAILSCALE_IP}:6700:3000"
     volumes:
       - ./data/grafana:/var/lib/grafana
     depends_on:
@@ -65,7 +65,7 @@ services:
     image: docker.n8n.io/n8nio/n8n
     container_name: da_n8n
     ports:
-      - "5678:5678"
+      - "${TAILSCALE_IP}:5678:5678"
     environment:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_DATABASE=postgres
