@@ -8,11 +8,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
+/* 
 // Load environment variables from root .env file
 config({ path: resolve(__dirname, '../.env') });
 
+ */
 
+console.log("DB_HOST", process.env.DB_HOST);
 // Database connection configuration
 const sql = postgres({
   host: process.env.DB_HOST,

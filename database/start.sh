@@ -6,11 +6,23 @@ export PATH="/usr/lib/postgresql/17/bin:$PATH"
 
 ls -la /usr/lib/postgresql/17/bin/
 
+
+echo "PGDATA: $PGDATA"
+if [ ! -d "$PGDATA" ]; then
+    echo "PGDATA directory does not exist, creating it"
+    mkdir -p "$PGDATA"
+fi
+chown -R postgres:postgres "$PGDATA"
+ls -la $PGDATA
+
 # Initialize PostgreSQL data directory if it doesn't exist
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
     mkdir -p "$PGDATA"
     chown -R postgres:postgres "$PGDATA"
+    echo "Initializing PostgreSQL data directory..."
     cd /usr/lib/postgresql/17/bin/ && su postgres -c "./initdb -D $PGDATA"
+else
+    echo "PostgreSQL data directory already initialized"
 fi
 
 # Start PostgreSQL

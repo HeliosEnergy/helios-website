@@ -54,3 +54,10 @@ curl -fsSL https://raw.githubusercontent.com/pressly/goose/master/install.sh | s
 
 # Remote Server (prod)
 ssh -L 6555:localhost:6432 ubuntu@51.222.46.142
+
+
+# Testing Prod Docker
+How to kill when testing, DO NOT USE IN PROD! VERIFY WHERE YOU ARE USING THIS!
+```
+bash prod_docker_stop.bash; docker container rm prod_da_grafana; docker container rm prod_da_timescaledb; docker container rm prod_da_app; docker container rm prod_da_n8n;
+```

@@ -83,18 +83,18 @@ tasks:
   goose-up:
     desc: Run database migrations (up)
     cmds:
-      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" up
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" up
       - cd database/schema && sqlc generate
 
   goose-down:
     desc: Revert all database migrations (down)
     cmds:
-      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" down
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" down
 
   goose-status:
     desc: Check database migration status
     cmds:
-      - cd database/schema && goose -dir migrations postgres "user=admin password=admin123 dbname=metrics host=localhost port=6432 sslmode=disable" status
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" status
 
   goose-create:
     desc: Create a new migration file
