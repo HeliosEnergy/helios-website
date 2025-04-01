@@ -83,6 +83,8 @@ services:
       - n8n_data:/home/node/.n8n
     depends_on:
       - timescaledb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     networks:
       - data_analysis_net

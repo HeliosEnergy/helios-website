@@ -18,7 +18,7 @@ async function main() {
 
 	// Launch the browser and open a new blank page
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: process.env.BROWSER_HEADLESS === 'false' ? false : true,
 		defaultViewport: null,
 		userDataDir: './user_data',
 		//set height and width
