@@ -4,8 +4,8 @@ import { Request, Response } from "express";
 export function httpAnyN8NWebhookTunnel(): (request: Request, response: Response) => Promise<any> {
     return async function (request: Request, response: Response) {
        // extract url after /tunnel/n8n/webhook
-       const url = request.url.split("/tunnel/n8n/webhook")[1];
-       console.log(url);
+       console.log(request.url);
+       const url = request.url.split("/api/n8n/webhook")[1];
        const n8n_response = await fetch(`${process.env.N8N_HOST}/webhook/${url}`, {
         method: request.method,
         body: request.body,
