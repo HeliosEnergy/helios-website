@@ -74,7 +74,7 @@ services:
       - DB_POSTGRESDB_USER=${DB_USER}
       - DB_POSTGRESDB_SCHEMA=${N8N_DB_NAME}
       - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
-      - N8N_HOST=0.0.0.0
+      - N8N_HOST=${N8N_HOST:-0.0.0.0}
       - N8N_PROTOCOL=http
       - N8N_SECURE_COOKIE=false
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-a-secure-encryption-key-for-n8n}
