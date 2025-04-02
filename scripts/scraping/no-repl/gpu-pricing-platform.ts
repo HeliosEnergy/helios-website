@@ -19,11 +19,21 @@ if (!validPlatforms.includes(platform)) {
 }
 
 async function main() {
+
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: process.env.BROWSER_HEADLESS !== 'false',
 		defaultViewport: null,
 		userDataDir: './user_data',
-		args: ['--window-size=500,500'],
+		args: [
+			'--window-size=1920,1080',
+			'--no-sandbox',
+			'--disable-setuid-sandbox',
+			'--disable-dev-shm-usage',
+			'--disable-accelerated-2d-canvas',
+			'--no-first-run',
+			'--no-zygote',
+			'--disable-gpu'
+		],
 	});
 
 	async function kill() {

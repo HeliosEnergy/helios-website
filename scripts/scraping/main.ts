@@ -22,7 +22,7 @@ async function main() {
 		defaultViewport: null,
 		userDataDir: './user_data',
 		//set height and width
-		args: ['--window-size=500,500'],
+		args: ['--window-size=1920,1080'],
 	});
 
 	async function kill() {
