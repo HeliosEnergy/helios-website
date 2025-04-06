@@ -20,7 +20,7 @@ import {
 	getMetricsByName
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
-import { executeScriptEIACapacity, executeScriptEIAGeneration, executeScriptGPUPricing } from "./iternal_routes/execute_scripts.js";
+import { executeScriptEIACapacity, executeScriptEIAGeneration, executeScriptGPUPricing, executeScriptVastAPIScraping } from "./iternal_routes/execute_scripts.js";
 
 // Replace the existing unhandledRejection handler with this more detailed one
 process.on('unhandledRejection', (reason: any, promise) => {
@@ -174,7 +174,7 @@ internal.use(cors());
 internal.post("/execute_script/eia_capacity", executeScriptEIACapacity);
 internal.post("/execute_script/eia_generation", executeScriptEIAGeneration);
 internal.post("/execute_script/gpu_pricing/:platform", executeScriptGPUPricing);
-
+internal.get("/execute_script/vast_api_scraping", executeScriptVastAPIScraping);
 
 
 // Graceful shutdown

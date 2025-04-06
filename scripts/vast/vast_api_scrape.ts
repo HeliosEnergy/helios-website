@@ -381,6 +381,46 @@ async function processVastData(offers: VastOffer[]): Promise<void> {
 	}
 }
 
+
+type VastStats = {[gpuName: string]: {
+	offers: VastOffer[];
+	total_offers: number;
+	min_price: number;
+	max_price: number;
+	avg_price: number;
+}}
+
+function aggregateVastStats(offers: VastOffer[]): VastStats {
+	const stats: VastStats = {};
+
+	for (const offer of offers) {
+		if (!stats[offer.gpu_name]) {
+			stats[offer.gpu_name] = {
+				offers: [],
+				total_offers: 0,
+				min_price: offer.dph_total,
+				max_price: offer.dph_total,
+				avg_price: offer.dph_total
+			};
+		}
+
+		stats[offer.gpu_name].offers.push(offer);
+	}
+
+	for (const gpuName in stats) {
+		const gpuStats = stats[gpuName];
+		gpuStats.total_offers = gpuStats.offers.length;
+		gpuStats.avg_price = gpuStats.offers.reduce((sum, offer) => sum + offer.dph_total, 0) / gpuStats.offers.length;
+		gpuStats.min_price = Math.min(...gpuStats.offers.map(offer => offer.dph_total));
+		gpuStats.max_price = Math.max(...gpuStats.offers.map(offer => offer.dph_total));
+		gpuStats.offers = [];
+	}
+
+	return stats;
+}
+
+
+
 async function fetchVastData(): Promise<void> {
 	try {
 		await resetApiResponsesFile();
@@ -411,10 +451,13 @@ async function fetchVastData(): Promise<void> {
 		
 		const data = JSON.parse(result);
 		console.log(`Retrieved ${data.offers.length} offers`);
+
+		const statsFilePath = resolve(TEMP_DIR_PATH, 'vast_stats.json');
+		const stats = aggregateVastStats(data.offers);
+		await fsp.writeFile(statsFilePath, JSON.stringify(stats, null, 2));
+
 		
-		// Process the data
-		await processVastData(data.offers);
-		
+		console.log("%%FILE%%" + statsFilePath + "%%/FILE%%");
 	} catch (error) {
 		console.error('Error:', error);
 	} finally {

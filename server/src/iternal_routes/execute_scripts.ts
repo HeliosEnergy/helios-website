@@ -107,3 +107,52 @@ export async function executeScriptGPUPricing(req: Request, res: Response) {
 	}
 
 }
+
+
+export async function executeScriptVastAPIScraping(req: Request, res: Response) {
+	if (!req.body) {
+		res.status(400).json({ error: "No body provided" });
+		return;
+	}
+
+	const proc = spawnSync("npm", ["run", "api-scrape"], {
+		cwd: path.resolve(path.join(__dirname, "scripts/vast")),
+		stdio: "pipe",
+	});
+	
+	if (proc.status !== 0) {
+		res.status(500).json({
+			error: "Failed to execute script",
+			stdout: proc.stdout.toString(),
+			stderr: proc.stderr.toString(),
+			status: proc.status,
+		});
+		return;
+	}
+
+	const stdoutData = proc.stdout.toString();
+	console.log(stdoutData);
+
+	// Extract content between %%FILE%% and %%/FILE%% markers
+	let extractedData = '';
+	const fileRegex = /%%FILE%%([\s\S]*?)%%\/FILE%%/;
+	const match = stdoutData.match(fileRegex);
+	
+	if (match && match[1]) {
+		extractedData = match[1].trim();
+	}
+
+	if (!extractedData) {
+		res.status(500).json({ error: "Failed to execute script, no output found" });
+		return;
+	}
+
+	const fileContent = await fsp.readFile(extractedData, "utf8");
+	const fileData = JSON.parse(fileContent);
+
+	res.json({
+		success: true,
+		message: "Script executed successfully",
+		result: fileData,
+	});
+}
