@@ -88,14 +88,18 @@ async function main() {
 		
 		// Insert data into the database
 		try {
-			// Get the cloud provider ID
+			// Get the cloud provider ID from the seeded table
 			const cloudIds: CloudIdMap = {};
 			const cloudResult = await sql`
-				INSERT INTO gpu_cloud (name)
-				VALUES (${platform})
-				ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
-				RETURNING id
+				SELECT id, name 
+				FROM gpu_cloud 
+				WHERE name = ${platform}
 			`;
+			
+			if (cloudResult.length === 0) {
+				throw new Error(`Cloud provider ${platform} not found in gpu_cloud table`);
+			}
+			
 			cloudIds[platform] = cloudResult[0].id;
 			console.log(`Cloud provider ${platform} has ID ${cloudIds[platform]}`);
 			

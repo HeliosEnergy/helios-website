@@ -58,6 +58,13 @@ export async function executeScriptGPUPricing(req: Request, res: Response) {
 	
 	const platform = req.params.platform;
 
+	const regex = /[A-Za-z0-9\_\-]+/;
+
+	if (!regex.test(platform)) {
+		res.status(400).json({ error: "Invalid platform" });
+		return;
+	}
+
 	try {
 		
 		const proc = spawnSync("npm", ["run", "gpu_platform_pricing", platform], {

@@ -47,19 +47,19 @@ async function main() {
 	
 	// do DB insertions here
 	try {
-		// First, ensure cloud providers are in the database
-		const clouds = ['runpod', 'vast', 'cudo', 'tensorDock', 'lambda'];
+		// Get cloud provider IDs from the seeded table
+		const clouds = ["Runpod", "Vast", "Cudo", "TensorDock", "Lambda"];
 		const cloudIds: CloudIdMap = {};
 		
-		for (const cloudName of clouds) {
-			const result = await sql`
-				INSERT INTO gpu_cloud (name)
-				VALUES (${cloudName})
-				ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
-				RETURNING id
-			`;
-			cloudIds[cloudName] = result[0].id;
-			console.log(`Cloud provider ${cloudName} has ID ${cloudIds[cloudName]}`);
+		const cloudResults = await sql`
+			SELECT id, name 
+			FROM gpu_cloud 
+			WHERE name = ANY(${clouds})
+		`;
+		
+		for (const result of cloudResults) {
+			cloudIds[result.name] = result.id;
+			console.log(`Cloud provider ${result.name} has ID ${result.id}`);
 		}
 		
 		// Process RunPod pricing - RunPod usually has 1 GPU per instance

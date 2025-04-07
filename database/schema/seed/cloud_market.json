@@ -1,38 +1,80 @@
 [
 	{
-		"name": "AWS"
+		"name": "AWS",
+		"type": "self_hosted",
+		"global_relevancy": 10,
+		"founding_year": 2006
 	},
 	{
-		"name": "Azure"
+		"name": "Azure",
+		"type": "self_hosted",
+		"global_relevancy": 10,
+		"founding_year": 2010
 	},
 	{
-		"name": "GCP"
+		"name": "GCP",
+		"type": "self_hosted",
+		"global_relevancy": 10,
+		"founding_year": 2008
 	},
 	{
-		"name": "IBM"
+		"name": "IBM",
+		"type": "self_hosted",
+		"global_relevancy": 8,
+		"founding_year": 2007
 	},
 	{
-		"name": "Oracle"
+		"name": "Oracle",
+		"type": "self_hosted",
+		"global_relevancy": 8,
+		"founding_year": 2016
 	},
 	{
-		"name": "DigitalOcean"
+		"name": "DigitalOcean",
+		"type": "self_hosted",
+		"global_relevancy": 5,
+		"founding_year": 2011
 	},
 	{
-		"name": "Vast"
+		"name": "Vast",
+		"type": "market",
+		"global_relevancy": 3,
+		"founding_year": 2018
 	},
 	{
-		"name": "Runpod"
+		"name": "Runpod",
+		"type": "market",
+		"global_relevancy": 6,
+		"founding_year": 2022
 	},
 	{
-		"name": "Cudo"
+		"name": "Cudo",
+		"type": "market",
+		"global_relevancy": 4,
+		"founding_year": 2017
 	},
 	{
-		"name": "Lambda"
+		"name": "Lambda",
+		"type": "colocation_user",
+		"global_relevancy": 6,
+		"founding_year": 2020
 	},
 	{
-		"name": "Crusoe"
+		"name": "Crusoe",
+		"type": "self_hosted",
+		"global_relevancy": 4,
+		"founding_year": 2021
 	},
 	{
-		"name": "Fly.io"
+		"name": "Fly.io",
+		"type": "colocation_user",
+		"global_relevancy": 7,
+		"founding_year": 2016
+	},
+	{
+		"name": "TensorDock",
+		"type": "market",
+		"global_relevancy": 2,
+		"founding_year": 2021
 	}
 ]
