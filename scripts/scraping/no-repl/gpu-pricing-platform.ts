@@ -93,8 +93,9 @@ async function main() {
 			const cloudResult = await sql`
 				SELECT id, name 
 				FROM gpu_cloud 
-				WHERE name = ${platform}
+				WHERE lower(name) = lower(${platform})
 			`;
+
 			
 			if (cloudResult.length === 0) {
 				throw new Error(`Cloud provider ${platform} not found in gpu_cloud table`);
@@ -318,6 +319,7 @@ async function main() {
 			console.error(`\nFatal error processing ${platform}:`, error);
 			throw error; // Re-throw to be caught by the outer try-catch
 		} finally {
+			console.log("Closing database connection after", platform);
 			await sql.end();
 		}
 		
