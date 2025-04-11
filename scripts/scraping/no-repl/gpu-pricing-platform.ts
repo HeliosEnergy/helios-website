@@ -384,6 +384,8 @@ async function insertPricing(
 	category: string | null = null, 
 	region: string | null = null
 ): Promise<void> {
+
+	console.log("Inserting pricing for GPU", gpuId, "Cloud", cloudId);
 	try {
 		const result = await sql`
 			INSERT INTO gpu_cloud_pricing (
