@@ -105,10 +105,13 @@ async function main() {
 			
 			let insertedCount = 0;
 			let errorCount = 0;
+
+			console.log("Inserting pricing for", platform);
 			
 			// Process the data based on the platform
 			switch (platform) {
 				case 'runpod':
+					console.log("Results length", result?.length);
 					if (result && result.length > 0) {
 						for (const item of result) {
 							try {
