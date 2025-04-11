@@ -103,39 +103,49 @@ async function main() {
 			cloudIds[platform] = cloudResult[0].id;
 			console.log(`Cloud provider ${platform} has ID ${cloudIds[platform]}`);
 			
+			let insertedCount = 0;
+			let errorCount = 0;
+			
 			// Process the data based on the platform
 			switch (platform) {
 				case 'runpod':
 					if (result && result.length > 0) {
 						for (const item of result) {
-							const gpuId = await findGPUByNameOrAlias(item.gpuName);
-							if (!gpuId) {
-								console.warn(`Could not find GPU for "${item.gpuName}" - skipping`);
-								continue;
-							}
-							
-							const gpuCount = item.gpuCount || 1;
-							
-							if (item.secureCloudHourlyPricing !== null) {
-								await insertPricing(
-									gpuId, 
-									cloudIds[platform], 
-									gpuCount,
-									item.secureCloudHourlyPricing, 
-									'ondemand',
-									'secure'
-								);
-							}
-							
-							if (item.communityCloudHourlyPricing !== null) {
-								await insertPricing(
-									gpuId, 
-									cloudIds[platform], 
-									gpuCount,
-									item.communityCloudHourlyPricing, 
-									'ondemand',
-									'community'
-								);
+							try {
+								const gpuId = await findGPUByNameOrAlias(item.gpuName);
+								if (!gpuId) {
+									console.warn(`Could not find GPU for "${item.gpuName}" - skipping`);
+									continue;
+								}
+								
+								const gpuCount = item.gpuCount || 1;
+								
+								if (item.secureCloudHourlyPricing !== null) {
+									await insertPricing(
+										gpuId, 
+										cloudIds[platform], 
+										gpuCount,
+										item.secureCloudHourlyPricing, 
+										'ondemand',
+										'secure'
+									);
+									insertedCount++;
+								}
+								
+								if (item.communityCloudHourlyPricing !== null) {
+									await insertPricing(
+										gpuId, 
+										cloudIds[platform], 
+										gpuCount,
+										item.communityCloudHourlyPricing, 
+										'ondemand',
+										'community'
+									);
+									insertedCount++;
+								}
+							} catch (error) {
+								console.error(`Error processing item for ${platform}:`, error);
+								errorCount++;
 							}
 						}
 					}
@@ -292,9 +302,18 @@ async function main() {
 					break;
 			}
 			
-			console.log(`All ${platform} pricing data has been inserted successfully!`);
+			console.log(`\nSummary for ${platform}:`);
+			console.log(`- Total records processed: ${result?.length || 0}`);
+			console.log(`- Successfully inserted: ${insertedCount}`);
+			console.log(`- Errors encountered: ${errorCount}`);
+			
+			if (errorCount > 0) {
+				throw new Error(`Failed to insert ${errorCount} records for ${platform}`);
+			}
+			
 		} catch (error) {
-			console.error(`Error inserting ${platform} pricing data:`, error);
+			console.error(`\nFatal error processing ${platform}:`, error);
+			throw error; // Re-throw to be caught by the outer try-catch
 		} finally {
 			await sql.end();
 		}
@@ -366,7 +385,7 @@ async function insertPricing(
 	region: string | null = null
 ): Promise<void> {
 	try {
-		await sql`
+		const result = await sql`
 			INSERT INTO gpu_cloud_pricing (
 				gpu_id,
 				gpu_cloud_id,
@@ -384,10 +403,17 @@ async function insertPricing(
 				${category},
 				${region}
 			)
+			RETURNING id
 		`;
-		console.log(`Inserted pricing for GPU ${gpuId}, Count ${gpuCount}, Cloud ${cloudId}, Price ${price}, Model ${pricingModel}${category ? ', Category ' + category : ''}`);
+		if (result && result.length > 0) {
+			console.log(`Successfully inserted pricing record with ID ${result[0].id} for GPU ${gpuId}, Count ${gpuCount}, Cloud ${cloudId}, Price ${price}, Model ${pricingModel}${category ? ', Category ' + category : ''}`);
+		} else {
+			throw new Error('No record was inserted');
+		}
 	} catch (error) {
 		console.error(`Error inserting pricing:`, error);
+		console.error('SQL Parameters:', { gpuId, cloudId, gpuCount, price, pricingModel, category, region });
+		throw error; // Re-throw to be caught by the outer try-catch
 	}
 }
 
