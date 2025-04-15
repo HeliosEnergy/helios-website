@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import dotenv from "dotenv";
 import postgres from "postgres";
 import cors from "cors";
@@ -21,6 +21,7 @@ import {
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
 import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
 import { executeScriptEIACapacity, executeScriptEIAGeneration, executeScriptGPUPricing, executeScriptVastAPIScraping } from "./iternal_routes/execute_scripts.js";
+import { getCompanies } from "./iternal_routes/site/notion-databases.js";
 
 // Replace the existing unhandledRejection handler with this more detailed one
 process.on('unhandledRejection', (reason: any, promise) => {
@@ -87,6 +88,14 @@ try {
 const external = express();
 external.use(express.json());
 external.use(cors());
+external.use(async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		await next();
+	} catch (error) {
+		console.error('Failed to process request:', error);
+		res.status(500).json({ error: 'Internal server error' });
+	}
+});
 
 console.log("adding route");
 external.get("/", (req: Request, res: Response) => {
@@ -169,12 +178,26 @@ external.use("/api", api);
 const internal = express();
 internal.use(express.json());
 internal.use(cors());
+internal.use(async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		await next();
+	} catch (error) {
+		console.error('Failed to process request:', error);
+		res.status(500).json({ error: 'Internal server error' });
+	}
+});
 
 
 internal.post("/execute_script/eia_capacity", executeScriptEIACapacity);
 internal.post("/execute_script/eia_generation", executeScriptEIAGeneration);
 internal.post("/execute_script/gpu_pricing/:platform", executeScriptGPUPricing);
 internal.get("/execute_script/vast_api_scraping", executeScriptVastAPIScraping);
+
+const internal_site = express.Router();
+{
+	internal_site.get("/notion-databases/companies", getCompanies);
+}
+internal.use("/site", internal_site);
 
 
 // Graceful shutdown
