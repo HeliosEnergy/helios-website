@@ -157,20 +157,37 @@ type NotionCompanyPageRaw = {
 export type NotionCompany = {
 	id: string;
 	name: string;
-	address: string;
-	city: string;
-	state: string;
-	contacts?: NotionContact[];
+	priority: string;
+	status: string;
+	relevancy: number;
+	expectedClose: string;
+	contactHistory: NotionContactHistory[];
+	difficulty: number;
+	added: string;
+	text: string;
+	complianceFrameworks: string[];
+	acceleator: string;
+	estimatedValuation: number;
+	contactedButton: boolean;
+	contactIds: string[];
+	contacts?: {[id: string]: NotionContact};
+	lastContact: string;
+	accountOwner: string;
 }
 
 
-export async function notionGetCompanies(): Promise<NotionCompany[]> {
+export type GetCompanyQuery = {
+
+}
+
+export async function notionGetCompanies(options: GetCompanyQuery): Promise<NotionCompany[]> {
 	const notion = notionClient();
 	const databaseId = '1d3d8fcace7281a78cf7e704f94548f2';
+
 	const response = await notion.databases.query({
 		database_id: databaseId,
 	});
-	console.log(JSON.stringify(response.results[0], null, 4));
+
 	return (response.results as PageObjectResponse[]).map((result) => {
 		const page = result as NotionCompanyPageRaw;
 		return {
