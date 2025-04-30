@@ -11,10 +11,18 @@ export function httpAnyN8NWebhookTunnel(webhook_path: string): (request: Request
        console.log(request.params[0].split("/" + webhook_path)[1]);
        const webhook_url = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/${webhook_path}/${request.params[0]}`;
        console.log(webhook_url);
+       console.log("Content-Type", request.headers["content-type"]);
        console.log("========================");
+
+
+       let fixedBody = reqBody;
+       if (typeof fixedBody === "object") {
+        fixedBody = JSON.stringify(fixedBody);
+       }
+
        const n8n_response = await fetch(webhook_url, {
         method: request.method,
-        body: !["GET", "HEAD"].includes(request.method) ? reqBody : undefined,
+        body: !["GET", "HEAD"].includes(request.method) ? fixedBody : undefined,
         headers: [
             ["Content-Type", request.headers["content-type"] || "application/json"],
             ["Authorization", request.headers["authorization"] || ""]
