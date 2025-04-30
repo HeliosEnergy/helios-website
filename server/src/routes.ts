@@ -19,7 +19,7 @@ import {
 	deleteMetric,
 	getMetricsByName
 } from "@helios/analysis_db/schema/analysis_db/query_sql.js";
-import { httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
+import { httpAnyN8NClientRedirect, httpAnyN8NWebhookTunnel } from "./routes/n8n_tunnel.js";
 import { executeScriptEIACapacity, executeScriptEIAGeneration, executeScriptGPUPricing, executeScriptVastAPIScraping } from "./iternal_routes/execute_scripts.js";
 import { getCompanies } from "./iternal_routes/notion-databases";
 
@@ -94,6 +94,7 @@ export function externalRoutes(external: Express, sql: postgres.Sql) {
 
 		api.use("/n8n/webhook/*", httpAnyN8NWebhookTunnel("webhook"));
 		api.use("/n8n/webhook-test/*", httpAnyN8NWebhookTunnel("webhook-test"));
+		api.use("/n8n/rest/oauth2-credential/callback", httpAnyN8NClientRedirect());
 
 
 	}
