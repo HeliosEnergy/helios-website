@@ -45,54 +45,32 @@ export function httpAnyN8NWebhookTunnel(webhook_path: string): (request: Request
 
 export function httpAnyN8NClientRedirect(): (request: Request, response: Response) => Promise<any> {
     return async function (request: Request, response: Response) {
-       const reqBody = request.body;
-       console.log("====  request  ====");
-       console.log(request.originalUrl);
-       console.log("Content-Type", request.headers["content-type"]);
-       console.log("Query Params:", request.query);
-       console.log("========================");
+       console.log("====  OAuth Redirect Request  ====");
+       console.log("Full URL:", request.protocol + '://' + request.get('host') + request.originalUrl);
+       console.log("Query:", JSON.stringify(request.query));
        
-       // Preserve all query parameters exactly as received
-       const queryParams = new URLSearchParams();
-       for (const [key, value] of Object.entries(request.query)) {
-           if (typeof value === 'string') {
-               queryParams.append(key, value);
-           } else if (Array.isArray(value)) {
-               value.forEach((v) => {
-                   if (v !== null && v !== undefined) {
-                       queryParams.append(key, v.toString());
-                   }
-               });
-           }
-       }
-       
-       const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-       const clientRedirectURL = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/rest/oauth2-credential/callback${queryString}`;
-       console.log("Forwarding to:", clientRedirectURL);
+       // Don't modify or reconstruct the query string - use it exactly as received
+       const originalQueryString = request.originalUrl.includes('?') 
+           ? request.originalUrl.substring(request.originalUrl.indexOf('?')) 
+           : '';
+           
+       const clientRedirectURL = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/rest/oauth2-credential/callback${originalQueryString}`;
+       console.log("Redirecting to:", clientRedirectURL);
 
-       let fixedBody = reqBody;
-       if (typeof fixedBody === "object") {
-        fixedBody = JSON.stringify(fixedBody);
-       }
-
-       // Preserve all original headers
-       const headers = new Headers();
-       for (const [key, value] of Object.entries(request.headers)) {
-           if (value) headers.append(key, value.toString());
-       }
-
+       // For OAuth flows, preserve the exact request method and parameters
        const n8n_response = await fetch(clientRedirectURL, {
         method: request.method,
-        body: !["GET", "HEAD"].includes(request.method) ? fixedBody : undefined,
-        headers: headers
+        headers: {
+            // Only pass minimal required headers
+            'Accept': request.headers.accept || '*/*',
+            'User-Agent': request.headers['user-agent'] || '',
+            'Content-Type': request.headers['content-type'] || 'application/json'
+        },
+        // Let fetch handle redirects automatically
+        redirect: 'follow'
        });
-
-       console.log("====  n8n_response  ====");
-       console.log(n8n_response.status);
-       console.log(n8n_response.statusText);
-       console.log(n8n_response.headers);
-       console.log(n8n_response.body);
-       console.log("========================");
+       
+       console.log(`N8N Response: ${n8n_response.status} ${n8n_response.statusText}`);
        
        const body = await n8n_response.text();
        return response.status(n8n_response.status).send(body);
