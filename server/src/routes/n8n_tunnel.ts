@@ -8,7 +8,10 @@ export function httpAnyN8NWebhookTunnel(webhook_path: string): (request: Request
        console.log(request.originalUrl);
        console.log(webhook_path, request.params[0]);
        console.log(request.params[0].split("/" + webhook_path)[1]);
-       const webhook_url = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/${webhook_path}/${request.params[0]}`;
+
+       // Build query string if present
+       const queryString = request.url.includes('?') ? request.url.substring(request.url.indexOf('?')) : '';
+       const webhook_url = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/${webhook_path}/${request.params[0]}${queryString}`;
        console.log(webhook_url);
        console.log("Content-Type", request.headers["content-type"]);
        console.log("========================");
@@ -49,7 +52,9 @@ export function httpAnyN8NClientRedirect(): (request: Request, response: Respons
        console.log("Content-Type", request.headers["content-type"]);
        console.log("========================");
        
-       const clientRedirectURL = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/rest/oauth2-credential/callback`;
+       // Build query string if present
+       const queryString = request.url.includes('?') ? request.url.substring(request.url.indexOf('?')) : '';
+       const clientRedirectURL = `${process.env.N8N_PROTOCOL}://${process.env.N8N_HOST}:${process.env.N8N_PORT}/rest/oauth2-credential/callback${queryString}`;
        console.log(clientRedirectURL);
 
        let fixedBody = reqBody;
