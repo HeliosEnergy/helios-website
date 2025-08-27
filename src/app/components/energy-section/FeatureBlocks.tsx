@@ -74,7 +74,7 @@ const FeatureBlock = ({
             unoptimized
             className="object-cover"
             onError={(e) => {
-              console.error('Image failed to load:', imageSrc);
+              console.error('Image failed to load:', imageSrc, e);
             }}
             onLoad={() => {
               console.log('Image loaded successfully:', imageSrc);

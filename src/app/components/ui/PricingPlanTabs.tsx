@@ -61,8 +61,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
     const activeTab = tabRefs.current[activeIndex];
     
     if (activeTab && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const tabRect = activeTab.getBoundingClientRect();
+      
       
       setSliderStyle({
         width: activeTab.offsetWidth,

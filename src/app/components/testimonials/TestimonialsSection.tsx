@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 interface Testimonial {
@@ -65,6 +66,8 @@ const testimonials: Testimonial[] = [
 export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsToShow, setCardsToShow] = useState(3);
+  const [avatarError, setAvatarError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   
   // Handle responsive cards count
   useEffect(() => {
@@ -145,22 +148,20 @@ export default function TestimonialsSection() {
                     {/* Avatar and Author Info */}
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                        <img
-                          src={testimonial.author.avatar}
-                          alt={testimonial.author.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // Replace with generated avatar on error
-                            const target = e.target as HTMLImageElement;
-                            const parent = target.parentElement;
-                            if (parent) {
-                              const initials = testimonial.author.name.split(' ').map(n => n[0]).join('');
-                              const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
-                              const colorIndex = testimonial.author.name.length % colors.length;
-                              parent.innerHTML = `<div class="w-10 h-10 rounded-full ${colors[colorIndex]} flex items-center justify-center text-white text-sm font-medium">${initials}</div>`;
-                            }
-                          }}
-                        />
+                        {avatarError ? (
+                          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium">
+                            {testimonial.author.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                        ) : (
+                          <Image
+                            src={testimonial.author.avatar}
+                            alt={testimonial.author.name}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                            onError={() => setAvatarError(true)}
+                          />
+                        )}
                       </div>
                       <div className="ml-3">
                         <p className="text-sm font-semibold text-gray-900">
@@ -175,19 +176,20 @@ export default function TestimonialsSection() {
                     {/* Company Logo */}
                     <div className="flex-shrink-0">
                       <div className="h-8 flex items-center">
-                        <img
+                        {logoError ? (
+                        <span className="text-sm font-semibold text-gray-800">
+                          {testimonial.author.companyName}
+                        </span>
+                      ) : (
+                        <Image
                           src={testimonial.author.companyLogo}
                           alt={testimonial.author.companyName}
-                          className="h-7 w-auto max-w-[100px] object-contain filter brightness-0"
-                          onError={(e) => {
-                            // Fallback to company name text if logo fails to load
-                            const target = e.target as HTMLImageElement;
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = `<span class="text-sm font-semibold text-gray-800">${testimonial.author.companyName}</span>`;
-                            }
-                          }}
+                          height={28} // h-7 is 28px
+                          width={100} // max-w-[100px]
+                          className="object-contain filter brightness-0"
+                          onError={() => setLogoError(true)}
                         />
+                      )}
                       </div>
                     </div>
                   </div>
