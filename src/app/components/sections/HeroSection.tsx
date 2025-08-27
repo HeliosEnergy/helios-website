@@ -4,14 +4,22 @@ import React from 'react';
 import Image from 'next/image';
 import Button from '../ui/Button';
 import CalendlyButton from '../ui/CalendlyButton';
+import ParticleBackground from '../ui/ParticleBackground';
 
 const HeroSection = () => {
   return (
-    <section className="relative h-screen flex flex-col justify-center items-start bg-black text-white">
-      {/* Placeholder for particle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900 to-black opacity-80"></div>
+    <section className="relative h-screen flex flex-col justify-center items-start bg-black text-white overflow-hidden">
+      {/* Three.js Particle Background with Parallax */}
+      <ParticleBackground 
+        enableParallax={true}
+        parallaxIntensity={0.2}
+        brightnessReduction={0.7}
+      />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-6">
+      {/* Overlay for better text readability */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" style={{ zIndex: 2 }}></div>
+      
+      <div className="relative max-w-7xl mx-auto px-6" style={{ zIndex: 10 }}>
         <h1 className="text-6xl md:text-8xl font-normal leading-tight">
           Modular AI Data Centers <br />
           built 10x faster

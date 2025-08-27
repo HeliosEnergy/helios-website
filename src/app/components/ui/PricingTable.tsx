@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Logo from './Logo';
+import { PricingPlan } from './PricingPlanTabs';
 
 interface PricingData {
   gpu: string;
@@ -10,6 +11,10 @@ interface PricingData {
   googleCloud: string;
   runPod: string;
   modal: string;
+}
+
+interface PricingTableProps {
+  selectedPlan?: PricingPlan;
 }
 
 const pricingData: PricingData[] = [
@@ -55,7 +60,22 @@ const pricingData: PricingData[] = [
   }
 ];
 
-const PricingTable = () => {
+const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan }) => {
+  // Calculate discounted price helper
+  const calculateDiscountedPrice = (originalPrice: string, discountPercent: number): string => {
+    const price = parseFloat(originalPrice);
+    if (isNaN(price)) return originalPrice;
+    const discountedPrice = price * (1 - discountPercent / 100);
+    return discountedPrice.toFixed(2);
+  };
+  
+  // Get display price for Helios column
+  const getHeliosPrice = (originalPrice: string): string => {
+    if (!selectedPlan || selectedPlan.discount === 0) {
+      return originalPrice;
+    }
+    return calculateDiscountedPrice(originalPrice, selectedPlan.discount);
+  };
   return (
     <div className="w-full bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -89,8 +109,13 @@ const PricingTable = () => {
                         linkToHome={false}
                         className="opacity-90"
                       />
-          
+                      <span className="font-bold">Helios</span>
                     </div>
+                    {selectedPlan && selectedPlan.discount > 0 && (
+                      <div className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">
+                        {selectedPlan.badge}
+                      </div>
+                    )}
                   </div>
                 </th>
                 <th className="text-left py-8 px-8 font-semibold text-gray-900 text-lg">
@@ -119,9 +144,16 @@ const PricingTable = () => {
                     {row.gpu}
                   </td>
                   <td className="py-8 px-8">
-                    <span className="text-black font-bold text-lg">
-                      ${row.heliosCompute}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-black font-bold text-lg">
+                        ${getHeliosPrice(row.heliosCompute)}
+                      </span>
+                      {selectedPlan && selectedPlan.discount > 0 && (
+                        <span className="text-xs text-gray-500 line-through">
+                          ${row.heliosCompute}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-8 px-8 text-gray-600 text-base">
                     {row.aws === 'Not listed' ? (
