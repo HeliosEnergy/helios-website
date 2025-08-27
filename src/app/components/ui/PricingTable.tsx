@@ -3,6 +3,7 @@
 import React from 'react';
 import Logo from './Logo';
 import { PricingPlan } from './PricingPlanTabs';
+import PricingPlanTabs from './PricingPlanTabs';
 
 interface PricingData {
   gpu: string;
@@ -15,6 +16,7 @@ interface PricingData {
 
 interface PricingTableProps {
   selectedPlan?: PricingPlan;
+  onPlanChange?: (plan: PricingPlan) => void;
 }
 
 const pricingData: PricingData[] = [
@@ -60,7 +62,7 @@ const pricingData: PricingData[] = [
   }
 ];
 
-const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan }) => {
+const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange }) => {
   // Calculate discounted price helper
   const calculateDiscountedPrice = (originalPrice: string, discountPercent: number): string => {
     const price = parseFloat(originalPrice);
@@ -80,7 +82,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan }) => {
     <div className="w-full bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Section Header */}
-        <div className="mb-16 text-center">
+        <div className="mb-8 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-normal text-black mb-6">
             GPU Pricing Comparison
           </h1>
@@ -92,6 +94,16 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan }) => {
           </div>
         </div>
 
+        {/* Pricing Plan Tabs */}
+        {selectedPlan && onPlanChange && (
+          <div className="flex justify-center mb-12">
+            <PricingPlanTabs 
+              selectedPlan={selectedPlan}
+              onPlanChange={onPlanChange}
+            />
+          </div>
+        )}
+
         {/* Pricing Table */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse bg-white rounded-sm shadow-sm">
@@ -101,18 +113,17 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan }) => {
                   GPU
                 </th>
                 <th className="text-left py-8 px-8">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-[#fbbf24] text-black px-4 py-2 rounded-full flex items-center space-x-2">
+                  <div className="relative flex items-center">
+                    <div className="bg-[#fbbf24] text-black px-4 py-2 rounded-full flex items-center">
                       <Logo 
                         shouldInvert={true} 
                         height={20} 
                         linkToHome={false}
                         className="opacity-90"
                       />
-                      <span className="font-bold">Helios</span>
                     </div>
                     {selectedPlan && selectedPlan.discount > 0 && (
-                      <div className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">
+                      <div className="absolute -top-1 -right-2 bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold z-10 shadow-sm">
                         {selectedPlan.badge}
                       </div>
                     )}
