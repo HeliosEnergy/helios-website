@@ -10,7 +10,7 @@ interface PricingData {
   heliosCompute: string;
   aws: string;
   googleCloud: string;
-  runPod: string;
+  lambda: string;
   modal: string;
 }
 
@@ -25,7 +25,7 @@ const pricingData: PricingData[] = [
     heliosCompute: '2.47',
     aws: '5.88',
     googleCloud: 'Not listed',
-    runPod: '2.79',
+    lambda: '2.49',
     modal: '3.95'
   },
   {
@@ -33,7 +33,7 @@ const pricingData: PricingData[] = [
     heliosCompute: '2.25',
     aws: '4.40',
     googleCloud: '11.06',
-    runPod: '2.69',
+    lambda: '2.99',
     modal: '3.95'
   },
   {
@@ -41,7 +41,7 @@ const pricingData: PricingData[] = [
     heliosCompute: '0.45',
     aws: '1.38',
     googleCloud: '0.35',
-    runPod: '0.77',
+    lambda: '0.80',
     modal: 'Not listed'
   },
   {
@@ -49,7 +49,7 @@ const pricingData: PricingData[] = [
     heliosCompute: '0.87',
     aws: '1.86-2.24',
     googleCloud: 'Not listed',
-    runPod: '0.86',
+    lambda: 'Not Available',
     modal: '1.95'
   },
   {
@@ -57,7 +57,7 @@ const pricingData: PricingData[] = [
     heliosCompute: '1.35',
     aws: '3.67-4.10',
     googleCloud: '3.67',
-    runPod: '1.64',
+    lambda: '1.29',
     modal: '2.50'
   }
 ];
@@ -136,7 +136,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                   Google Cloud
                 </th>
                 <th className="text-left py-8 px-8 font-semibold text-gray-900 text-lg">
-                  RunPod
+                  Lambda
                 </th>
                 <th className="text-left py-8 px-8 font-semibold text-gray-900 text-lg">
                   Modal
@@ -181,10 +181,10 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                     )}
                   </td>
                   <td className="py-8 px-8 text-gray-600 text-base">
-                    {row.runPod === 'Not listed' ? (
-                      <span className="text-gray-400 italic">{row.runPod}</span>
+                    {row.lambda === 'Not Available' ? (
+                      <span className="text-gray-400 italic">{row.lambda}</span>
                     ) : (
-                      `$${row.runPod}`
+                      `$${row.lambda}`
                     )}
                   </td>
                   <td className="py-8 px-8 text-gray-600 text-base">

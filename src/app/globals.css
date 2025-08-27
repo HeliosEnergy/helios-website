@@ -36,3 +36,31 @@ body {
     border-radius: 10px;
   }
 }
+
+/* Text Sheen effect for "Partner with us" */
+@keyframes text-sheen {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.sheen-effect {
+  background: linear-gradient(
+    to right,
+    var(--base-text-color) 0%,
+    var(--sheen-highlight-color) 10%, /* Subtle white sheen */
+    var(--base-text-color) 20%,
+    var(--base-text-color) 80%,
+    var(--sheen-highlight-color) 90%,
+    var(--base-text-color) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent; /* Make text transparent to show background */
+  animation: text-sheen 15s infinite linear; /* Very slow animation */
+  animation-delay: 2s;
+}
