@@ -17,28 +17,28 @@ const AccordionItem = ({
     <div className="border-b border-gray-200 last:border-b-0">
       <button
         onClick={onToggle}
-        className="w-full py-4 flex justify-between items-center group hover:bg-gray-50 px-4 -mx-4 rounded transition-colors duration-200"
+        className="w-full py-6 flex justify-start items-center gap-6 group hover:bg-gray-50 px-6 -mx-6 rounded transition-colors duration-200"
       >
-        <span className="text-lg font-medium text-gray-900 group-hover:text-gray-700 text-left">
-          {title}
-        </span>
         <svg 
-          width="20" 
-          height="20" 
+          width="32" 
+          height="32" 
           viewBox="0 0 24 24" 
           fill="none" 
-          className={`text-gray-600 group-hover:text-gray-800 transition-all duration-300 ${
+          className={`text-[#fbbf24] group-hover:text-[#f59e0b] transition-all duration-300 flex-shrink-0 ${
             isExpanded ? 'rotate-45' : 'rotate-0'
           }`}
         >
           <path 
             d="M12 5V19M5 12H19" 
             stroke="currentColor" 
-            strokeWidth="2" 
+            strokeWidth="2.5" 
             strokeLinecap="round" 
             strokeLinejoin="round"
           />
         </svg>
+        <span className="text-xl font-medium text-gray-900 group-hover:text-gray-700 text-left">
+          {title}
+        </span>
       </button>
     </div>
   );
@@ -63,10 +63,10 @@ const FeatureBlock = ({
   onAccordionToggle: (index: number) => void;
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start py-16">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start py-24">
       {/* Image */}
       <div className="relative">
-        <div className="aspect-[4/3] rounded-sm overflow-hidden bg-gray-100">
+        <div className="aspect-[4/3] rounded-sm overflow-hidden bg-gray-100 min-h-[400px]">
           <Image 
             src={imageSrc} 
             alt={imageAlt} 
@@ -85,15 +85,15 @@ const FeatureBlock = ({
       
       {/* Content */}
       <div className="lg:pl-8">
-        <h3 className="text-3xl md:text-4xl font-normal text-gray-900 mb-6">
+        <h3 className="text-3xl md:text-4xl font-normal text-gray-900 mb-8">
           {title}
         </h3>
-        <p className="text-lg text-gray-600 leading-relaxed mb-8">
+        <p className="text-xl text-gray-600 leading-relaxed mb-12">
           {description}
         </p>
         
         {/* Accordion items */}
-        <div className="space-y-0">
+        <div className="space-y-2">
           {accordionItems.map((item, index) => (
             <AccordionItem
               key={index}
@@ -159,7 +159,7 @@ const FeatureBlocks = () => {
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
         {featureBlocks.map((block, blockIndex) => (
           <FeatureBlock

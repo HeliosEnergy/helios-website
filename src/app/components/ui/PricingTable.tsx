@@ -37,8 +37,8 @@ const pricingData: PricingData[] = [
     modal: '3.95'
   },
   {
-    gpu: 'RTX 6000 Pro',
-    heliosCompute: '0.45',
+    gpu: 'RTX Pro 6000 ',
+    heliosCompute: '1.19',
     aws: 'Not listed',
     googleCloud: 'Not listed',
     lambda: 'Not listed',
@@ -123,11 +123,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                         className="opacity-90"
                       />
                     </div>
-                    {selectedPlan && selectedPlan.discount > 0 && (
-                      <div className="absolute -top-1 -right-2 bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold z-10 shadow-sm">
-                        {selectedPlan.badge}
-                      </div>
-                    )}
+                    
                   </div>
                 </th>
                 <th className="text-left py-8 px-8 font-semibold text-gray-900 text-lg">
@@ -234,11 +230,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                       )}
                     </div>
                   </div>
-                  {selectedPlan && selectedPlan.discount > 0 && (
-                    <div className="bg-green-100 text-green-800 px-2 py-1 rounded-md text-xs font-semibold">
-                      {selectedPlan.badge}
-                    </div>
-                  )}
+                  
                 </div>
               </div>
               

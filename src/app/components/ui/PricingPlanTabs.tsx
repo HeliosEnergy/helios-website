@@ -25,24 +25,21 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     id: 'quarterly',
-    label: 'Quarterly',
+    label: '3 months',
     duration: '3-month commitment',
     discount: 5,
-    badge: '5% OFF'
   },
   {
     id: 'semi-annually',
-    label: 'Semi-Annually',
+    label: '6 months',
     duration: '6-month commitment',
     discount: 10,
-    badge: '10% OFF'
   },
   {
     id: 'annually',
-    label: 'Annually',
+    label: '1 year',
     duration: '12-month commitment',
     discount: 15,
-    badge: '15% OFF'
   }
 ];
 
@@ -120,12 +117,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
             aria-label={`Select ${plan.label} billing plan${plan.badge ? ` with ${plan.badge}` : ''}`}
           >
             <div className="flex flex-col items-center space-y-1">
-              <span className="text-center leading-tight whitespace-nowrap">{plan.label}</span>
-              {plan.badge && (
-                <span className="text-xs text-[#fbbf24] font-semibold whitespace-nowrap">
-                  {plan.badge}
-                </span>
-              )}
+              <span className="text-center leading-tight whitespace-nowrap font-semibold">{plan.label}</span>
             </div>
           </button>
         ))}
@@ -136,11 +128,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
         <p className="text-sm text-gray-600">
           {selectedPlan.duration}
         </p>
-        {selectedPlan.discount > 0 && (
-          <p className="text-xs text-green-600 font-medium mt-1">
-            Save {selectedPlan.discount}% on Helios pricing
-          </p>
-        )}
+        
       </div>
     </div>
   );
