@@ -48,7 +48,7 @@ const gpuData = [
     performance: 'Blackwell Architecture',
     bandwidth: 'GDDR7 ECC',
     power: '600W',
-    image: 'nvidia-rack-2.webp',
+    image: 'nvidia-rtx-pro-6000.jpg',
     isCopper: true,
     specs: [
       '96 GB GDDR7 ECC memory',
@@ -66,7 +66,7 @@ const gpuData = [
     performance: '1,466 TFLOPS FP8',
     bandwidth: 'GDDR6',
     power: '350W',
-    image: 'nvidia-rack-3.webp',
+    image: 'nvidia-l40s.jpg',
     specs: [
       '48 GB memory',
       '1,466 TFLOPS FP8',
@@ -113,7 +113,7 @@ const GPUSelectionSection = () => {
             <h2 className="text-[48px] md:text-[64px] font-normal leading-tight">
               <span className="text-black">Built for the demands of AI.</span>
               <br />
-              <span className="text-mutedBlueGray">Ready for what&apos;s next.</span>
+              <span style={{color: '#C4A484'}}>Ready for what&apos;s next.</span>
             </h2>
           </div>
           

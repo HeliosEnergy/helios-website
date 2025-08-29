@@ -13,7 +13,7 @@ const EnhancedFeatureSection = () => {
           <h2 className="text-[48px] md:text-[64px] font-normal leading-tight">
             <span className="text-black">From energy to</span>
             <br />
-            <span className="text-mutedBlueGray">AI cloud computing</span>
+            <span style={{color: '#b8c5d1'}}>AI cloud computing</span>
           </h2>
         </div>
         

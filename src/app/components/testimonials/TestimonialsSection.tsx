@@ -19,7 +19,7 @@ interface Testimonial {
 const testimonials: Testimonial[] = [
   {
     id: 1,
-    text: "Crusoe Cloud's is highly collaborative in incorporating our feedback and requests into their feature and product roadmap.",
+    text: "Helios Cloud's is highly collaborative in incorporating our feedback and requests into their feature and product roadmap.",
     author: {
       name: "Aleks Kamko",
       title: "AI Researcher",
@@ -30,7 +30,7 @@ const testimonials: Testimonial[] = [
   },
   {
     id: 2,
-    text: "With Crusoe, we scaled our capacity 5x within hours to serve all of our Oasis users across Europe. This enabled Oasis to seamlessly scale to over 2 million users in just 4 days.",
+    text: "With Helios, we scaled our capacity 5x within hours to serve all of our Oasis users across Europe. This enabled Oasis to seamlessly scale to over 2 million users in just 4 days.",
     author: {
       name: "Dean Leitersdorf",
       title: "Co-Founder & CEO",
@@ -41,7 +41,7 @@ const testimonials: Testimonial[] = [
   },
   {
     id: 3,
-    text: "Windsurf's NVIDIA H100 Tensor Core GPUs on Crusoe have been incredibly reliable with a cluster uptime of 99.98%.",
+    text: "Windsurf's NVIDIA H100 Tensor Core GPUs on Helios have been incredibly reliable with a cluster uptime of 99.98%.",
     author: {
       name: "Varun Mohan",
       title: "Co-Founder & CEO",
