@@ -39,13 +39,7 @@ const HeroSection = () => {
             Get started →
           </Button>
         </div>
-        <Image 
-          src="/nvidia-inception-program-badge-rgb-for-screen.png" 
-          alt="Nvidia Inception Program Badge" 
-          width={128}
-          height={128}
-          className="absolute bottom-8 right-8 w-32 h-auto"
-        />
+        
       </div>
     </section>
   );

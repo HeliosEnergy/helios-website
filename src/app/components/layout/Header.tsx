@@ -63,16 +63,16 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Data Centers', href: '#' },
+    // { name: 'Data Centers', href: '#' },
     { name: 'Energy', href: '/energy' },
-    { name: 'About', href: '#' },
+    // { name: 'About', href: '#' },
     { name: 'Partner with us', href: '/partner' }
   ];
 
   const cloudDropdownItems = [
     { name: 'GPU Pricing', href: '/gpu-pricing' },
-    { name: 'Cloud Services', href: 'https://console.heliosenergy.io/', target: '_blank' },
-    { name: 'Documentation', href: '#' }
+    // { name: 'Cloud Services', href: 'https://console.heliosenergy.io/', target: '_blank' },
+    // { name: 'Documentation', href: '#' }
   ];
 
   return (

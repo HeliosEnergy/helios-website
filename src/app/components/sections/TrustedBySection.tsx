@@ -1,32 +1,24 @@
+
+'use client';
+
 import React from 'react';
-
-// This is a simple functional component for displaying a styled logo placeholder.
-// In a real-world app, you'd have an SVG component or Next.js <Image /> component.
-const LogoPlaceholder = ({ name, className = '' }: { name: string; className?: string }) => {
-  return (
-    <div className={`text-2xl md:text-3xl font-bold text-gray-500 tracking-wider ${className}`}>
-      {name}
-    </div>
-  );
-};
-
+import Image from 'next/image';
 
 const TrustedBySection = () => {
   return (
-    <section className="bg-white py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Section Title */}
-        <p className="text-sm text-gray-600 mb-8 text-center md:text-left">Trusted by:</p>
-        
-        {/* Logo container */}
-        <div className="
-          flex flex-wrap justify-center md:justify-between items-center 
-          gap-x-8 gap-y-8
-        ">
-          <LogoPlaceholder name="CURSOR" />
-          <LogoPlaceholder name="together.ai" />
-          <LogoPlaceholder name="Windsurf" />
-          <LogoPlaceholder name="||| |" className="tracking-widest" /> {/* Simple representation of the MIT logo */}
+    <section className="relative bg-white py-12">
+      <div className="max-w-7xl mx-auto px-6 text-center">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+          Helios is an NVIDIA Preferred Partner
+        </h2>
+        <div className="flex justify-center">
+          <Image 
+            src="/nvidia-inception-program-badge-rgb-for-screen.png" 
+            alt="Nvidia Inception Program Badge" 
+            width={192}
+            height={192}
+            className="w-48 h-auto"
+          />
         </div>
       </div>
     </section>

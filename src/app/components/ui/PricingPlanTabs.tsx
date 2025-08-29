@@ -97,7 +97,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
       {/* Tab Container */}
       <div 
         ref={containerRef}
-        className="relative bg-gray-100 p-1 rounded-lg inline-flex flex-wrap sm:flex-nowrap"
+        className="relative bg-gray-100 p-1 rounded-lg inline-flex flex-wrap sm:flex-nowrap gap-1 sm:gap-0 max-w-full"
       >
         {/* Animated slider background */}
         <div 
@@ -111,7 +111,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
             key={plan.id}
             ref={el => { tabRefs.current[index] = el; }}
             onClick={() => onPlanChange(plan)}
-            className={`relative px-3 sm:px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md z-10 min-w-0 flex-1 sm:flex-none ${
+            className={`relative px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors duration-200 rounded-md z-10 min-w-0 flex-1 sm:flex-none ${
               selectedPlan.id === plan.id 
                 ? 'text-gray-900' 
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -120,9 +120,9 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
             aria-label={`Select ${plan.label} billing plan${plan.badge ? ` with ${plan.badge}` : ''}`}
           >
             <div className="flex flex-col items-center space-y-1">
-              <span className="text-center leading-tight">{plan.label}</span>
+              <span className="text-center leading-tight whitespace-nowrap">{plan.label}</span>
               {plan.badge && (
-                <span className="text-xs text-[#fbbf24] font-semibold">
+                <span className="text-xs text-[#fbbf24] font-semibold whitespace-nowrap">
                   {plan.badge}
                 </span>
               )}
@@ -132,7 +132,7 @@ const PricingPlanTabs: React.FC<PricingPlanTabsProps> = ({
       </div>
 
       {/* Plan Duration Description */}
-      <div className="text-center">
+      <div className="text-center px-4">
         <p className="text-sm text-gray-600">
           {selectedPlan.duration}
         </p>
