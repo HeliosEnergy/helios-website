@@ -7,6 +7,7 @@ import GPUPricingHero from '../components/gpu-pricing/GPUPricingHero';
 import PricingTable from '../components/ui/PricingTable';
 import { PRICING_PLANS } from '../components/ui/PricingPlanTabs';
 import GPUSelectionSection from '../components/gpu-selection/GPUSelectionSection';
+import GPURentalCalculator from '../components/gpu-pricing/GPURentalCalculator';
 
 export default function GPUPricingPage() {
   const [selectedPlan, setSelectedPlan] = useState(PRICING_PLANS[0]);
@@ -23,6 +24,9 @@ export default function GPUPricingPage() {
           selectedPlan={selectedPlan} 
           onPlanChange={setSelectedPlan}
         />
+        
+        {/* GPU Rental Calculator */}
+        <GPURentalCalculator />
         
         {/* GPU Selection Section */}
         <GPUSelectionSection />
