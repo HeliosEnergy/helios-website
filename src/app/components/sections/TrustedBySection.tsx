@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const TrustedBySection = () => {
   return (
-    <section className="relative bg-white py-12">
+    <section className="relative bg-white py-8 md:py-10">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6">
           Helios is an NVIDIA Preferred Partner

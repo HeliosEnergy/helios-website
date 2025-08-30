@@ -65,7 +65,7 @@ const Footer = () => {
       {/* Subtle gradient overlay for depth */}
       <div className="absolute inset-0 bg-gradient-to-r from-black via-black/95 to-black/85 pointer-events-none"></div>
       
-      <div className="max-w-7xl mx-auto px-4 py-16 relative z-20">
+      <div className="max-w-7xl mx-auto px-4 py-12 relative z-20">
         {/* Top Action Bar */}
         <div className="flex flex-col items-start md:flex-row md:justify-end mb-12">
           <div className="flex flex-col space-y-2 text-sm text-gray-400 md:flex-row md:space-x-6 md:space-y-0">

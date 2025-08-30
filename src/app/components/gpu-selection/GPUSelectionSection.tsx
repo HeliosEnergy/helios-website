@@ -83,7 +83,7 @@ const gpuData = [
     performance: '624 TFLOPS FP16',
     bandwidth: '2.0 TB/s',
     power: '400W',
-    image: 'nvidia-rack.jpg',
+    image: 'NVIDIA-A100.png',
     specs: [
       '80 GB memory',
       '624 TFLOPS FP16',
@@ -105,7 +105,7 @@ const GPUSelectionSection = () => {
   };
 
   return (
-    <section className="w-full bg-white py-16 md:py-24">
+    <section className="w-full bg-white py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-2 sm:px-3">
         {/* Section Headings */}
         <div className="mb-16 flex justify-between items-start">

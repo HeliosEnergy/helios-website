@@ -6,14 +6,14 @@ import EnhancedFeatureCard from './EnhancedFeatureCard';
 const EnhancedFeatureSection = () => {
   return (
     <div className="w-full bg-white">
-      <section className="w-full max-w-7xl mx-auto px-2 sm:px-3 py-16 md:py-24">
+      <section className="w-full max-w-7xl mx-auto px-2 sm:px-3 py-12 md:py-16">
       {/* Section Headings with responsive font size */}
       <div className="mb-16 flex justify-between items-start">
         <div>
           <h2 className="text-[48px] md:text-[64px] font-normal leading-tight">
-            <span className="text-black">From energy to</span>
+            <span className="text-black">Maximum Performance.</span>
             <br />
-            <span style={{color: '#b8c5d1'}}>AI cloud computing</span>
+            <span style={{color: '#b8c5d1'}}>Minimum Cost.</span>
           </h2>
         </div>
         
@@ -36,8 +36,8 @@ const EnhancedFeatureSection = () => {
         {/* Card Wrapper: Controls the size of the card at the tablet breakpoint */}
         <div className="md:w-[400px] md:flex-shrink-0 lg:w-auto">
           <EnhancedFeatureCard
-            title="Unparalleled performance"
-            description="Scale ambitiously and fearlessly knowing your AI workloads are backed by peerless infrastructure."
+            title="Performance Without the Price Tag"
+            description="Get the power of a premium cloud for your AI workloads, without the premium cost."
             iconType="sun"
             accordionItems={[
               {
@@ -58,8 +58,8 @@ const EnhancedFeatureSection = () => {
 
         <div className="md:w-[400px] md:flex-shrink-0 lg:w-auto">
           <EnhancedFeatureCard
-            title="Accelerated breakthroughs"
-            description="Focus on innovation not infrastructure with intuitive, AI-native systems designed to keep you building."
+            title="Build Faster, Spend Less"
+            description="Our streamlined tools help you innovate faster, reducing development time and saving on costs."
             iconType="starburst"
             accordionItems={[
               {
@@ -80,8 +80,8 @@ const EnhancedFeatureSection = () => {
         
         <div className="md:w-[400px] md:flex-shrink-0 lg:w-auto">
           <EnhancedFeatureCard
-            title="Abundant compute"
-            description="Achieve your AI potential with vast compute and energy resources."
+            title="Low-Cost, Scalable Compute"
+            description="Scale your AI workloads on demand with access to vast, budget-friendly compute resources."
             iconType="radial"
             accordionItems={[
               {

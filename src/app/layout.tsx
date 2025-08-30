@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Funnel_Display, Darker_Grotesque, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import LayoutTransition from "./components/ui/LayoutTransition";
 
 const funnelDisplay = Funnel_Display({
   variable: "--font-funnel-display",
@@ -38,7 +39,9 @@ export default function RootLayout({
       <body
         className={`${funnelDisplay.variable} ${darkerGrotesque.variable} ${playfairDisplay.variable} font-sans antialiased`}
       >
-        {children}
+        <LayoutTransition>
+          {children}
+        </LayoutTransition>
       </body>
     </html>
   );

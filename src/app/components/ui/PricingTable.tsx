@@ -7,6 +7,7 @@ import PricingPlanTabs from './PricingPlanTabs';
 
 interface PricingData {
   gpu: string;
+  vram: string;
   heliosCompute: string;
   aws: string;
   googleCloud: string;
@@ -22,6 +23,7 @@ interface PricingTableProps {
 const pricingData: PricingData[] = [
   {
     gpu: 'H100 NVL',
+    vram: '94GB',
     heliosCompute: '2.47',
     aws: '5.88',
     googleCloud: 'Not listed',
@@ -30,6 +32,7 @@ const pricingData: PricingData[] = [
   },
   {
     gpu: 'H100 SXM',
+    vram: '80GB',
     heliosCompute: '2.25',
     aws: '4.40',
     googleCloud: '11.06',
@@ -37,7 +40,8 @@ const pricingData: PricingData[] = [
     modal: '3.95'
   },
   {
-    gpu: 'RTX Pro 6000 ',
+    gpu: 'RTX Pro 6000',
+    vram: '48GB',
     heliosCompute: '1.19',
     aws: 'Not listed',
     googleCloud: 'Not listed',
@@ -46,6 +50,7 @@ const pricingData: PricingData[] = [
   },
   {
     gpu: 'L40S',
+    vram: '48GB',
     heliosCompute: '0.87',
     aws: '1.86-2.24',
     googleCloud: 'Not listed',
@@ -54,6 +59,7 @@ const pricingData: PricingData[] = [
   },
   {
     gpu: 'A100',
+    vram: '80GB',
     heliosCompute: '1.35',
     aws: '3.67-4.10',
     googleCloud: '3.67',
@@ -123,7 +129,11 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                         className="opacity-90"
                       />
                     </div>
-                    
+                    {selectedPlan && selectedPlan.discount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {selectedPlan.discount}% off
+                      </div>
+                    )}
                   </div>
                 </th>
                 <th className="text-left py-8 px-8 font-semibold text-gray-900 text-lg">
@@ -149,7 +159,12 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                   }`}
                 >
                   <td className="py-8 px-8 font-semibold text-gray-900 text-lg">
-                    {row.gpu}
+                    <div className="flex flex-col">
+                      <span className="mb-2">{row.gpu}</span>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+                        {row.vram} VRAM
+                      </span>
+                    </div>
                   </td>
                   <td className="py-8 px-8">
                     <div className="flex flex-col">
@@ -204,11 +219,19 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
               {/* GPU Header */}
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{row.gpu}</h3>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mb-2">
+                  {row.vram} VRAM
+                </span>
                 <div className="text-sm text-gray-500">Per Hour Pricing (USD)</div>
               </div>
               
               {/* Helios Pricing - Featured */}
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-[#fbbf24] rounded-lg p-4 mb-4 relative">
+                {selectedPlan && selectedPlan.discount > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    {selectedPlan.discount}% off
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="bg-[#fbbf24] text-black px-3 py-2 rounded-full flex items-center">
@@ -230,7 +253,6 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                       )}
                     </div>
                   </div>
-                  
                 </div>
               </div>
               

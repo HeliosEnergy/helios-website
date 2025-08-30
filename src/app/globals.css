@@ -37,6 +37,16 @@ body {
   }
 }
 
+/* Page transition optimization */
+.page-transition-wrapper * {
+  transition: none !important;
+}
+
+.page-transition-wrapper {
+  contain: layout style paint;
+  isolation: isolate;
+}
+
 /* Text Sheen effect for "Partner with us" */
 @keyframes text-sheen {
   0% {

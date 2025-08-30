@@ -54,25 +54,18 @@ const GPUCard = ({ gpu, isExpanded, onExpand }: GPUCardProps) => {
     >
       {/* Background Image with Vignette Effect */}
       {isExpanded && (
-        <div className="absolute inset-0">
-          <div 
-            className={`absolute inset-0 ${gpu.id === 'rtx-pro-6000' ? 'bg-center' : 'bg-cover bg-center'}`}
-            style={{
-              backgroundImage: `url(/gpus/${gpu.image})`,
-              transform: gpu.id === 'rtx-pro-6000' ? 'rotate(90deg)' : 'none',
-              backgroundSize: gpu.id === 'rtx-pro-6000' ? 'auto 100%' : 'cover'
-            }}
-          />
-          {/* Enhanced Vignette Effect */}
-          {/* <div 
-            className="absolute inset-0" 
-            style={{
-              background: `radial-gradient(ellipse at center, transparent 0%, transparent 30%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.8) 100%)`
-            }}
-          /> */}
-          {/* Additional dark overlay for text readability */}
-          {/* <div className="absolute inset-0 bg-black/30" /> */}
-        </div>
+        <div 
+            className={`absolute inset-0 ${gpu.id === 'rtx-pro-6000' || gpu.id === 'a100' ? 'bg-black' : ''}`}
+          >
+            <div 
+              className={`absolute inset-0 ${gpu.id === 'rtx-pro-6000' || gpu.id === 'a100' ? 'bg-center' : 'bg-cover bg-center'}`}
+              style={{
+                backgroundImage: `url(/gpus/${gpu.image})`,
+                transform: gpu.id === 'rtx-pro-6000' || gpu.id === 'a100' ? 'rotate(90deg)' : 'none',
+                backgroundSize: gpu.id === 'rtx-pro-6000' || gpu.id === 'a100' ? 'auto 100%' : 'cover'
+              }}
+            />
+          </div>
       )}
 
       {/* Content Container */}

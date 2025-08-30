@@ -21,44 +21,44 @@ const stackMarkers: StackMarker[] = [
     id: 'cloud-management',
     x: 75, // Top cloud/management layer
     y: 15,
-    title: 'AI Software Platform',
-    description: 'Managed platform as a service',
+    title: 'Efficient AI Platform',
+    description: 'A streamlined PaaS that reduces overhead.',
     details: [
-      'Model deployment & orchestration',
-      'Auto-scaling capabilities'
+      'Efficient model orchestration',
+      'Auto-scaling that saves costs'
     ]
   },
   {
     id: 'compute-infrastructure',
     x: 25, // Data center building
     y: 35,
-    title: 'Data Center Infrastructure',
-    description: 'Enterprise computing facilities',
+    title: 'Low-Cost Data Centers',
+    description: 'Facilities built to minimize expenses.',
     details: [
-      'Purpose-built AI facilities',
-      'Advanced cooling systems'
+      'Located at energy source to cut costs',
+      'Hyper-efficient cooling systems'
     ]
   },
   {
     id: 'gpu-clusters',
     x: 75, // GPU cluster area
     y: 55,
-    title: 'GPU Clusters',
-    description: 'High-performance AI hardware',
+    title: 'Affordable GPU Clusters',
+    description: 'Top-tier hardware at a lower price point.',
     details: [
       'NVIDIA H100 & A100 GPUs',
-      'Optimized for LLM training'
+      'Priced for cost-effective LLM training'
     ]
   },
   {
     id: 'energy-systems',
     x: 25, // Solar/energy infrastructure
     y: 75,
-    title: 'Energy Systems',
-    description: 'Sustainable power infrastructure',
+    title: 'Cost-Effective Energy',
+    description: 'The foundation of our low prices.',
     details: [
-      'Solar arrays with storage',
-      'Carbon-neutral operations'
+      'Direct access to renewable energy',
+      'Eliminates expensive grid fees'
     ]
   }
 ];
@@ -73,16 +73,15 @@ const StackSection: React.FC<StackSectionProps> = ({ className = '' }) => {
   const activeMarkerData = stackMarkers.find(marker => marker.id === activeMarker);
 
   return (
-    <section className={`py-16 md:py-24 bg-[#fcfcfc] ${className}`}>
+    <section className={`py-12 md:py-16 bg-[#fcfcfc] ${className}`}>
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center md:text-left mb-12">
           <h2 className="text-3xl md:text-4xl font-normal text-gray-900 mb-4">
-            The Complete AI Infrastructure Stack
+            The Stack That Lowers Your AI Costs
           </h2>
           <p className="text-lg text-gray-700 max-w-3xl md:mx-0 mx-auto">
-            We design, build, and operate the infrastructure powering the next generation of artificial intelligence.
-            Explore our integrated approach to AI computing.
+            Our vertically integrated stack is engineered to reduce costs at every layer. See how we pass those savings on to you.
           </p>
         </div>
 
