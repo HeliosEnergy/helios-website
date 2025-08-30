@@ -21,19 +21,16 @@ const EnergyHeroSection = () => {
       
       {/* Overlay for better text contrast */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
-      <div className="relative max-w-7xl mx-auto px-6 py-12 md:py-20 z-10">
-        <div className="flex items-center min-h-[80vh]">
-          <div className="space-y-8 max-w-4xl">
+      <div className="relative max-w-7xl mx-auto px-6 py-8 md:py-16 z-10">
+        <div className="flex items-center min-h-[75vh]">
+          <div className="space-y-6 max-w-4xl">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-normal leading-tight text-white drop-shadow-2xl">
-              An energy<br />
-              first approach<br />
-              to AI
+              Low-Cost Energy.<br />
+              High-Powered AI.
             </h1>
             
             <p className="text-lg md:text-xl text-white/90 max-w-lg leading-relaxed drop-shadow-lg">
-              We target sites with clean, available power sources to place
-              our AI workloads where the environment can efficiently
-              scale ambitious projects.
+              Our strategy is simple: go directly to the cheapest, cleanest energy sources. This allows us to power your AI workloads for a fraction of the cost of traditional data centers.
             </p>
             
             <div className="flex items-center gap-4">

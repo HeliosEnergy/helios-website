@@ -5,7 +5,7 @@ import Button from '../ui/Button';
 
 const EnergyCTASection = () => {
   return (
-    <section className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[500px] md:min-h-[550px] flex items-center justify-center overflow-hidden py-16">
       {/* Background Image Placeholder */}
       <div className="absolute inset-0">
         <div 
@@ -26,9 +26,8 @@ const EnergyCTASection = () => {
       
       {/* Content Overlay */}
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal text-white leading-tight mb-8">
-          Are you ready to build<br />
-          something amazing?
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal text-white leading-tight mb-6">
+          Build Something Amazing. For Less.
         </h2>
         
         <div className="flex justify-center">

@@ -63,7 +63,7 @@ const FeatureBlock = ({
   onAccordionToggle: (index: number) => void;
 }) => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start py-24">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start py-12">
       {/* Image */}
       <div className="relative">
         <div className="aspect-[4/3] rounded-sm overflow-hidden bg-gray-100 min-h-[400px]">
@@ -88,7 +88,7 @@ const FeatureBlock = ({
         <h3 className="text-3xl md:text-4xl font-normal text-gray-900 mb-8">
           {title}
         </h3>
-        <p className="text-xl text-gray-600 leading-relaxed mb-12">
+        <p className="text-xl text-gray-600 leading-relaxed mb-8">
           {description}
         </p>
         
@@ -124,8 +124,8 @@ const FeatureBlocks = () => {
 
   const featureBlocks = [
     {
-      title: "Energy-first site selection",
-      description: "We target sites with clean, available power sources to place our AI workloads where the environment can efficiently scale ambitious projects.",
+      title: "Site Selection That Cuts Costs",
+      description: "We build our data centers where power is cheapest. This simple principle is the foundation of our pricing advantage.",
       imageSrc: "/energy/solar-panels.jpg",
       imageAlt: "Solar Panel Installation",
       accordionItems: [
@@ -135,8 +135,8 @@ const FeatureBlocks = () => {
       ]
     },
     {
-      title: "All-of-the-above energy sourcing",
-      description: "We bring together diverse energy sources to deliver cost-effective, reliable power solutions for high-performance computing workloads.",
+      title: "Diverse Energy, Singularly Low Prices",
+      description: "By using a mix of the most affordable energy sources, we ensure you always get the best possible price for your compute.",
       imageSrc: "/energy/wind-turbines.jpg",
       imageAlt: "Industrial Turbine Equipment",
       accordionItems: [
@@ -146,8 +146,8 @@ const FeatureBlocks = () => {
       ]
     },
     {
-      title: "Power orchestration and optimization",
-      description: "We use power delivery in real-time to match the demands of your compute infrastructure with cost-effective, reliable power.",
+      title: "Optimization That Saves You Money",
+      description: "Our real-time power orchestration means not a single watt—or dollar—is wasted. We match demand to the lowest-cost power available.",
       imageSrc: "/energy/sustainable-power.jpg",
       imageAlt: "Electrical Transmission Infrastructure", 
       accordionItems: [
@@ -159,7 +159,7 @@ const FeatureBlocks = () => {
   ];
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
         {featureBlocks.map((block, blockIndex) => (
           <FeatureBlock

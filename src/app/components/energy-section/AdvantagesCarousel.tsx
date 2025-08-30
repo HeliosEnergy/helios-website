@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 // Simple icon components for each advantage
 const AdvantageIcon = ({ type }: { type: 'fast' | 'scale' | 'lowcost' | 'clean' }) => {
@@ -72,70 +74,87 @@ const AdvantageIcon = ({ type }: { type: 'fast' | 'scale' | 'lowcost' | 'clean' 
 const AdvantageCard = ({ 
   title, 
   description, 
-  iconType 
+  iconType,
+  isExpanded,
+  onClick
 }: {
   title: string;
   description: string;
   iconType: 'fast' | 'scale' | 'lowcost' | 'clean';
+  isExpanded: boolean;
+  onClick: () => void;
 }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 h-full flex flex-col">
+    <button
+      onClick={onClick}
+      className="bg-white border border-gray-200 rounded-lg p-6 text-left h-full flex flex-col transition-all duration-300 hover:border-gray-300 hover:shadow-sm"
+    >
       {/* Icon */}
       <AdvantageIcon type={iconType} />
       
       {/* Title */}
-      <h3 className="text-xl font-medium text-gray-900 mb-4">
+      <h3 className="text-xl font-medium text-gray-900 mb-2">
         {title}
       </h3>
       
       {/* Description */}
-      <p className="text-sm text-gray-600 leading-relaxed flex-grow">
-        {description}
-      </p>
-    </div>
+      {isExpanded && (
+        <p className="text-sm text-gray-600 leading-relaxed flex-grow">
+          {description}
+        </p>
+      )}
+    </button>
   );
 };
 
 const AdvantagesCarousel = () => {
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
+
+  const handleCardClick = (index: number) => {
+    setExpandedCard(expandedCard === index ? null : index);
+  };
+
   const advantages = [
     {
       title: "Fast",
-      description: "Deploy builds across and compute infrastructures to create and train advanced machine learning models while optimizing resource allocation.",
+      description: "Get to market faster. Our efficient infrastructure reduces deployment time, saving you valuable engineering hours and cost.",
       iconType: "fast" as const,
     },
     {
       title: "Scale",
-      description: "Create agility infrastructure capable of computing your ambitions through rapidly expanding specialized environments.",
+      description: "Scale your ambitions, not your budget. Expand your AI workloads on demand with our cost-effective infrastructure.",
       iconType: "scale" as const,
     },
     {
       title: "Low cost",
-      description: "Optimize deployment efficiency and cost by ensuring energy efficiency and performance while maintaining competitive pricing.",
+      description: "Our core advantage. By building on low-cost energy, we deliver unbeatable pricing for high-performance compute.",
       iconType: "lowcost" as const,
     },
     {
       title: "Clean",
-      description: "Helios developed our sustainable approach from energy priorities and climate-effective, reliable power solutions.",
+      description: "Sustainable and affordable are no longer mutually exclusive. Our clean energy approach is the secret to our low prices.",
       iconType: "clean" as const,
     },
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-10 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Title */}
-        <h2 className="text-4xl md:text-5xl font-normal text-gray-900 mb-12">
+        <h2 className="text-4xl md:text-5xl font-normal text-gray-900 mb-8">
           Our advantages
         </h2>
         
         {/* Cards Grid - 4 equal columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {advantages.map((advantage, index) => (
             <AdvantageCard
               key={index}
               title={advantage.title}
               description={advantage.description}
               iconType={advantage.iconType}
+              isExpanded={expandedCard === index}
+              onClick={() => handleCardClick(index)}
             />
           ))}
         </div>
