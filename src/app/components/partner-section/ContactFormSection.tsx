@@ -86,7 +86,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-sm text-base focus:outline-none focus:ring-1 transition-colors ${
+                  className={`w-full px-3 py-2 border rounded-sm text-base text-black focus:outline-none focus:ring-1 transition-colors ${
                     errors.name 
                       ? 'border-red-400 focus:ring-red-400' 
                       : 'border-gray-300 focus:ring-gray-400'
@@ -104,7 +104,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="Company name"
                   value={formData.company}
                   onChange={(e) => handleInputChange('company', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-sm text-base focus:outline-none focus:ring-1 transition-colors ${
+                  className={`w-full px-3 py-2 border rounded-sm text-base text-black focus:outline-none focus:ring-1 transition-colors ${
                     errors.company 
                       ? 'border-red-400 focus:ring-red-400' 
                       : 'border-gray-300 focus:ring-gray-400'
@@ -125,7 +125,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-sm text-base focus:outline-none focus:ring-1 transition-colors ${
+                  className={`w-full px-3 py-2 border rounded-sm text-base text-black focus:outline-none focus:ring-1 transition-colors ${
                     errors.email 
                       ? 'border-red-400 focus:ring-red-400' 
                       : 'border-gray-300 focus:ring-gray-400'
@@ -143,7 +143,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="Phone number"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base text-black focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="City, Country"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base text-black focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
                 />
               </div>
               
@@ -172,7 +172,7 @@ const ContactFormSection: React.FC = () => {
                   placeholder="e.g. 500 kW"
                   value={formData.availablePower}
                   onChange={(e) => handleInputChange('availablePower', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base text-black focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors"
                 />
               </div>
             </div>
@@ -187,7 +187,7 @@ const ContactFormSection: React.FC = () => {
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors resize-vertical"
+                className="w-full px-3 py-2 border border-gray-300 rounded-sm text-base text-black focus:outline-none focus:ring-1 focus:ring-gray-400 transition-colors resize-vertical"
               />
             </div>
 

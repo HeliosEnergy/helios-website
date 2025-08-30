@@ -3,7 +3,7 @@ import React from 'react';
 const HowItWorksSection: React.FC = () => {
   return (
     <div className="w-full bg-white">
-      <section className="max-w-4xl mx-auto px-6 py-16">
+      <section className="max-w-4xl mx-auto px-6 py-12">
         <h2 className="text-3xl md:text-4xl font-normal text-black mb-12 text-center">
           How it works
         </h2>
