@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
+import Image from 'next/image';
 
 interface StackMarker {
   id: string;
@@ -89,10 +90,13 @@ const StackSection: React.FC<StackSectionProps> = ({ className = '' }) => {
         <div className="relative max-w-5xl mx-auto">
           <div className="relative">
             {/* Main Stack Image */}
-            <img
+            <Image
               src="/landing/helios-stack-illustration.jpeg"
               alt="Helios AI Infrastructure Stack"
-              className="w-full h-auto rounded-sm"
+              fill
+              style={{ objectFit: 'contain' }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="rounded-sm"
             />
 
             {/* Interactive Markers */}

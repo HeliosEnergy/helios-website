@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Logo from './Logo';
 import { PricingPlan } from './PricingPlanTabs';
 import PricingPlanTabs from './PricingPlanTabs';
@@ -69,20 +69,47 @@ const pricingData: PricingData[] = [
 ];
 
 const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange }) => {
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
+
   // Calculate discounted price helper
-  const calculateDiscountedPrice = (originalPrice: string, discountPercent: number): string => {
+  const calculateDiscountedPrice = useCallback((originalPrice: string, discountPercent: number): string => {
     const price = parseFloat(originalPrice);
     if (isNaN(price)) return originalPrice;
     const discountedPrice = price * (1 - discountPercent / 100);
     return discountedPrice.toFixed(2);
-  };
-  
+  }, []);
+
   // Get display price for Helios column
-  const getHeliosPrice = (originalPrice: string): string => {
+  const getHeliosPrice = useCallback((originalPrice: string): string => {
     if (!selectedPlan || selectedPlan.discount === 0) {
       return originalPrice;
     }
     return calculateDiscountedPrice(originalPrice, selectedPlan.discount);
+  }, [selectedPlan, calculateDiscountedPrice]);
+
+  // Sort pricing data based on Helios prices
+  const sortedPricingData = useMemo(() => {
+    if (!sortDirection) return pricingData;
+
+    return [...pricingData].sort((a, b) => {
+      const priceA = parseFloat(getHeliosPrice(a.heliosCompute));
+      const priceB = parseFloat(getHeliosPrice(b.heliosCompute));
+
+      if (sortDirection === 'asc') {
+        return priceA - priceB;
+      } else {
+        return priceB - priceA;
+      }
+    });
+  }, [sortDirection, getHeliosPrice]);
+
+  // Handle sort toggle
+  const handleSort = () => {
+    setSortDirection(current => {
+      if (current === null) return 'asc';
+      if (current === 'asc') return 'desc';
+      return null;
+    });
   };
   return (
     <div className="w-full bg-white py-16 md:py-24">
@@ -121,14 +148,20 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                 </th>
                 <th className="text-left py-8 px-8">
                   <div className="relative flex items-center">
-                    <div className="bg-[#fbbf24] text-black px-4 py-2 rounded-full flex items-center">
-                      <Logo 
-                        shouldInvert={true} 
-                        height={20} 
+                    <button
+                      onClick={handleSort}
+                      className="bg-[#fbbf24] text-black px-4 py-2 rounded-full flex items-center hover:bg-[#f59e0b] transition-colors cursor-pointer"
+                    >
+                      <Logo
+                        shouldInvert={true}
+                        height={20}
                         linkToHome={false}
                         className="opacity-90"
                       />
-                    </div>
+                      <span className="ml-2 text-sm font-medium">
+                        {sortDirection === 'asc' ? '↑' : sortDirection === 'desc' ? '↓' : '↕'}
+                      </span>
+                    </button>
                     {selectedPlan && selectedPlan.discount > 0 && (
                       <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                         {selectedPlan.discount}% off
@@ -151,7 +184,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
               </tr>
             </thead>
             <tbody>
-              {pricingData.map((row, index) => (
+              {sortedPricingData.map((row, index) => (
                 <tr 
                   key={row.gpu} 
                   className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
@@ -214,7 +247,7 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
 
         {/* Mobile/Tablet Cards */}
         <div className="lg:hidden space-y-6">
-          {pricingData.map((row, index) => (
+          {sortedPricingData.map((row) => (
             <div key={row.gpu} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               {/* GPU Header */}
               <div className="text-center mb-6">

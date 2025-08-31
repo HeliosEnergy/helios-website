@@ -10,7 +10,14 @@ export const runCalculatorTests = () => {
   let totalTests = 0;
 
   // Helper function to run a test
-  const runTest = (testName: string, expected: any, actual: any) => {
+  interface PricingResult {
+    baseCost: number;
+    discountAmount: number;
+    totalCost: number;
+    effectiveRate: number;
+  }
+
+  const runTest = (testName: string, expected: PricingResult | number, actual: PricingResult | number) => {
     totalTests++;
     const passed = JSON.stringify(expected) === JSON.stringify(actual);
     if (passed) {
@@ -129,14 +136,14 @@ export const runCalculatorTests = () => {
   runTest('Proportional discount test (2x rate should equal 2x cost)', 2, Number(ratio.toFixed(2)));
 
   // Test 13: All GPU models pricing consistency
-  calculatorGPUModels.forEach((gpu, index) => {
+  calculatorGPUModels.forEach((gpu) => {
     const test = calculatePricing(gpu.pricePerHour, 1, 730, 0);
     const expectedCost = gpu.pricePerHour * 730;
     runTest(`GPU ${gpu.name} base calculation consistency`, expectedCost, test.baseCost);
   });
 
   // Test 14: All reservation periods discount consistency
-  reservationPeriods.forEach((period, index) => {
+  reservationPeriods.forEach((period) => {
     const test = calculatePricing(1.0, 1, 100, period.discount);
     const expectedEffectiveRate = 1.0 * (1 - period.discount / 100);
     runTest(`${period.label} discount rate consistency`, 
