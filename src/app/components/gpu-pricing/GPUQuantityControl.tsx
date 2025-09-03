@@ -13,7 +13,7 @@ const GPUQuantityControl: React.FC<GPUQuantityControlProps> = ({
   quantity,
   onQuantityChange,
   minQuantity = 1,
-  maxQuantity = 100
+  maxQuantity = 400
 }) => {
   const [inputValue, setInputValue] = useState(quantity.toString());
 

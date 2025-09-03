@@ -116,18 +116,6 @@ export const calculatorGPUModels: GPUModel[] = [
 // Reservation period options with discounts
 export const reservationPeriods: ReservationPeriod[] = [
   {
-    id: 'on-demand',
-    label: 'On-Demand',
-    duration: 'No discount',
-    discount: 0
-  },
-  {
-    id: '1-week',
-    label: '1 Week',
-    duration: '5% off',
-    discount: 5
-  },
-  {
     id: '1-month',
     label: '1 Month',
     duration: '10% off',
@@ -138,6 +126,18 @@ export const reservationPeriods: ReservationPeriod[] = [
     label: '3 Months',
     duration: '15% off',
     discount: 15
+  },
+  {
+    id: '6-months',
+    label: '6 Months',
+    duration: '20% off',
+    discount: 20
+  },
+  {
+    id: '12-months',
+    label: '12 Months',
+    duration: '25% off',
+    discount: 25
   }
 ];
 

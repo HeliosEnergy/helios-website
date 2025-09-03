@@ -47,7 +47,7 @@ const GPURentalCalculator: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-6 md:mb-12">
           <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-normal text-black mb-3 md:mb-4">
-            Infrastructure Cost Calculator
+            GPU Infrastructure Cost Calculator
           </h2>
           <p className="text-sm md:text-base lg:text-lg font-light text-gray-600 max-w-2xl mx-auto leading-relaxed">
             Configure enterprise GPU infrastructure and calculate precise monthly costs with volume discounts

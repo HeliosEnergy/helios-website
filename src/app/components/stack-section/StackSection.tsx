@@ -88,7 +88,7 @@ const StackSection: React.FC<StackSectionProps> = ({ className = '' }) => {
 
         {/* Interactive Stack Illustration */}
         <div className="relative max-w-5xl mx-auto">
-          <div className="relative">
+          <div className="relative w-full h-0 pb-[75%]"> {/* Added aspect ratio container */}
             {/* Main Stack Image */}
             <Image
               src="/landing/helios-stack-illustration.jpeg"

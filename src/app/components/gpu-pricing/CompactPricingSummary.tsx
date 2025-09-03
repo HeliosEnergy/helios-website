@@ -89,9 +89,9 @@ const CompactPricingSummary: React.FC<CompactPricingSummaryProps> = ({
       {/* CTA Button */}
       <button 
         className="w-full px-6 py-3 bg-black text-white text-sm font-medium border border-black hover:bg-white hover:text-black transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-black"
-        onClick={() => window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')}
+        onClick={() => window.open('https://calendly.com/jose-helios/30min', '_blank', 'noopener,noreferrer')}
       >
-        Deploy Infrastructure
+        Contact Sales
       </button>
 
       {/* Additional Info */}
