@@ -1,7 +1,6 @@
 # Helios Landing Page
 
 
-
 ![Helios Logo](public/logo-white.svg)
 
 [![Build Status](https://github.com/HeliosEnergySystems/helios-landing-page/workflows/CI/badge.svg)](https://github.com/HeliosEnergySystems/helios-landing-page/actions)
