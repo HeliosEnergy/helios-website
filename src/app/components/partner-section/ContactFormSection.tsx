@@ -25,6 +25,8 @@ const ContactFormSection: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ message: string; isSuccess: boolean } | null>(null);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -52,12 +54,81 @@ const ContactFormSection: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submitToCloudflareWorker = async (formData: FormData) => {
+    try {
+      // Create FormData object
+      const formPayload = new FormData();
+      formPayload.append("name", formData.name);
+      formPayload.append("company", formData.company);
+      formPayload.append("email", formData.email);
+      formPayload.append("phone", formData.phone);
+      formPayload.append("location", formData.location);
+      formPayload.append("availablePower", formData.availablePower);
+      formPayload.append("notes", formData.notes);
+      
+      // Send form data to Cloudflare Worker
+      const response = await fetch("https://helios-power-plant-contact-form.helios-energy.workers.dev/plant_contact_submission", {
+        method: "POST",
+        body: formPayload
+      });
+      
+      // Get the response text first for debugging
+      const responseText = await response.text();
+      
+      // Parse the JSON manually
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error("Error parsing JSON:", jsonError);
+        throw new Error("Invalid response from server. Please try again.");
+      }
+      
+      // Check if the result has the success property and it's true
+      if (result && result.success === true) {
+        return { success: true, message: "Thank you, we'll reach out shortly." };
+      } else {
+        // Show error message from the server or a default
+        throw new Error(result && result.message ? result.message : "An error occurred. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      throw new Error(error instanceof Error ? error.message : "Connection error. Please try again later.");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Hide any previous status message
+    setSubmitStatus(null);
+    
     if (validateForm()) {
-      console.log('Form submitted:', formData);
-      // In a real implementation, this would submit to a backend
-      alert('Thank you for your interest! We will contact you soon.');
+      setIsSubmitting(true);
+      try {
+        const result = await submitToCloudflareWorker(formData);
+        setSubmitStatus({ message: result.message, isSuccess: result.success });
+        
+        // Reset form on success
+        if (result.success) {
+          setFormData({
+            name: '',
+            company: '',
+            email: '',
+            phone: '',
+            location: '',
+            availablePower: '',
+            notes: ''
+          });
+        }
+      } catch (error) {
+        setSubmitStatus({ 
+          message: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.", 
+          isSuccess: false 
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -191,14 +262,31 @@ const ContactFormSection: React.FC = () => {
               />
             </div>
 
+            {/* Status Message */}
+            {submitStatus && (
+              <div 
+                className={`mb-6 p-4 rounded-sm text-center font-bold ${
+                  submitStatus.isSuccess 
+                    ? 'bg-green-100 text-green-800 border border-green-200' 
+                    : 'bg-red-100 text-red-800 border border-red-200'
+                }`}
+              >
+                <span className="mr-2 text-lg">
+                  {submitStatus.isSuccess ? '✓' : '✗'}
+                </span>
+                {submitStatus.message}
+              </div>
+            )}
+
             {/* Submit Button */}
             <div>
               <Button 
                 type="submit"
                 variant="primary"
+                disabled={isSubmitting}
                 className="px-8 py-3 rounded-sm"
               >
-                Send Inquiry
+                {isSubmitting ? 'Sending...' : 'Send Inquiry'}
               </Button>
             </div>
           </form>
