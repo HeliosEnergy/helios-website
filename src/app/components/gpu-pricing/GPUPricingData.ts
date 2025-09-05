@@ -2,6 +2,7 @@
 
 export interface GPUPricingData {
   gpu: string;
+  vram: string;
   heliosCompute: string;
   aws: string;
   googleCloud: string;
@@ -29,6 +30,7 @@ export interface ReservationPeriod {
 export const originalPricingData: GPUPricingData[] = [
   {
     gpu: 'H100 NVL',
+    vram: '94GB',
     heliosCompute: '2.47',
     aws: '5.88',
     googleCloud: 'Not listed',
@@ -37,6 +39,7 @@ export const originalPricingData: GPUPricingData[] = [
   },
   {
     gpu: 'H100 SXM',
+    vram: '80GB',
     heliosCompute: '2.25',
     aws: '4.40',
     googleCloud: '11.06',
@@ -45,6 +48,7 @@ export const originalPricingData: GPUPricingData[] = [
   },
   {
     gpu: 'RTX Pro 6000',
+    vram: '96GB',
     heliosCompute: '1.19',
     aws: 'Not listed',
     googleCloud: 'Not listed',
@@ -53,6 +57,7 @@ export const originalPricingData: GPUPricingData[] = [
   },
   {
     gpu: 'L40S',
+    vram: '48GB',
     heliosCompute: '0.87',
     aws: '1.86-2.24',
     googleCloud: 'Not listed',
@@ -61,6 +66,7 @@ export const originalPricingData: GPUPricingData[] = [
   },
   {
     gpu: 'A100',
+    vram: '80GB',
     heliosCompute: '1.35',
     aws: '3.67-4.10',
     googleCloud: '3.67',
@@ -76,16 +82,16 @@ export const calculatorGPUModels: GPUModel[] = [
     name: 'L40S (48GB NVIDIA)',
     pricePerHour: 0.87,
     memory: '48GB',
-    specs: '48GB NVIDIA Ada Lovelace',
+    specs: '48GB NVIDIA',
     vram: '48GB GDDR6'
   },
   {
     id: 'rtx-pro-6000',
-    name: 'RTX Pro 6000 (48GB)',
+    name: 'RTX Pro 6000 (96GB)',
     pricePerHour: 1.19,
-    memory: '48GB',
-    specs: '48GB GDDR6',
-    vram: '48GB GDDR6'
+    memory: '96GB',
+    specs: '96GB GDDR7 ECC, Blackwell Architecture',
+    vram: '96GB GDDR7 ECC'
   },
   {
     id: 'a100',

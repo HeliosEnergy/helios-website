@@ -121,9 +121,9 @@ const Footer = () => {
                   <Image 
                     src="/nvidia-inception-program-badge-rgb-for-screen.png" 
                     alt="Nvidia Inception Program Badge" 
-                    width={32}
+                    width={80}
                     height={32}
-                    className="h-8 w-auto ml-2"
+                    className="h-8 w-auto ml-2 object-contain"
                   />
                 </div>
               </div>
@@ -136,7 +136,7 @@ const Footer = () => {
               <Image 
                 src="/logo-black-1024x_refined(1)_light_lower_white.png" 
                 alt="Helios Logo" 
-                width={48}
+                width={120}
                 height={48}
                 className="h-12 w-auto object-contain"
               />

@@ -1,0 +1,7 @@
+name = "helios-contact-worker"
+main = "src/index.ts"
+compatibility_date = "2023-10-30"
+
+[vars]
+# This will be overridden by the secret you set in the Cloudflare dashboard
+SLACK_WEBHOOK_URL = "placeholder_url"

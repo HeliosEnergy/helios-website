@@ -5,6 +5,7 @@ import TrustedBySection from "./components/sections/TrustedBySection"; // Import
 import { StackSection } from "./components/stack-section";
 import EnhancedFeatureSection from "./components/feature-section/EnhancedFeatureSection";
 import { GPUSelectionSection } from "./components/gpu-selection";
+import { ContactSection } from "./components/contact-section";
 // import { TestimonialsSection } from "./components/testimonials";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
         <StackSection />
         <EnhancedFeatureSection />
         <GPUSelectionSection />
+        <ContactSection />
         {/* <TestimonialsSection /> */}
       </main>
       <Footer />
