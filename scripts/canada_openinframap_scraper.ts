@@ -201,30 +201,28 @@ async function scrapeOpenInfraMap(): Promise<void> {
         
         for (const plant of powerPlants) {
             try {
-                const outputMW = parseOutputMW(plant.output);
-                if (!outputMW || outputMW < 10) { // Skip very small plants
-                    skippedCount++;
-                    continue;
-                }
+                const outputMW = parseOutputMW(plant.output); // May be null; include all plants regardless of MW
                 
                 const province = determineProvince(plant.name, plant.operator);
                 const fuelType = normalizeFuelType(plant.source);
                 
-                // Get coordinates
-                let coordinates = null;
-                if (plant.wikidata) {
-                    coordinates = await getCoordinatesFromWikidata(plant.wikidata);
-                }
-                
+                // Get coordinates (require precise source like Wikidata; skip otherwise)
+                const coordinates = plant.wikidata
+                    ? await getCoordinatesFromWikidata(plant.wikidata)
+                    : null;
                 if (!coordinates) {
-                    coordinates = estimateCoordinates(plant.name, province);
+                    skippedCount++;
+                    continue; // skip plants without accurate coordinates
                 }
                 
-                // Create openinframap_id from name
-                const openinframapId = plant.name.toLowerCase()
+                // Create openinframap_id from name + province to reduce collisions
+                const nameSlug = plant.name.toLowerCase()
                     .replace(/[^a-z0-9\s]/g, '')
-                    .replace(/\s+/g, '-')
-                    .substring(0, 100);
+                    .replace(/\s+/g, '-');
+                const provinceSlug = (province || 'unknown').toLowerCase()
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .replace(/\s+/g, '-');
+                const openinframapId = `${nameSlug}--${provinceSlug}`.substring(0, 100);
                 
                 // Create metadata
                 const metadata = {
