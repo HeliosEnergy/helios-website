@@ -1,5 +1,10 @@
 import puppeteer from 'puppeteer';
 import postgres from 'postgres';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+
+// Load env from the project root .env (one level up from scripts/)
+dotenv.config({ path: resolve(__dirname, '..', '.env') });
 
 interface FiberInfrastructureData {
     name: string;
