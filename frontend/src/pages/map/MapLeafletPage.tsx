@@ -34,6 +34,44 @@ export interface PowerPlant {
 	capacity_factor: number | null;
 }
 
+// Define Canada infrastructure interfaces
+export interface CanadaPowerPlant {
+	id: number;
+	openinframap_id: string;
+	name: string;
+	operator: string | null;
+	output_mw: number | null;
+	fuel_type: string;
+	province: string | null;
+	latitude: number;
+	longitude: number;
+	metadata: any;
+}
+
+export interface FiberInfrastructure {
+	id: number;
+	itu_id: string;
+	name: string;
+	cable_type: string | null;
+	capacity_gbps: number | null;
+	operator: string | null;
+	status: string | null;
+	geometry: any;
+	metadata: any;
+}
+
+export interface GasInfrastructure {
+	id: number;
+	cer_id: string;
+	name: string;
+	pipeline_type: string | null;
+	capacity_mmcfd: number | null;
+	operator: string | null;
+	status: string | null;
+	geometry: any;
+	metadata: any;
+}
+
 // Define colors for different fuel types based on energy source code
  
 
@@ -118,6 +156,35 @@ async function fetchPlantDetails(plantId: number) {
 	return data.data;
 }
 
+// Function to fetch Canada infrastructure data
+async function fetchCanadaData() {
+	const API_SERVER_URL = import.meta.env.VITE_API_SERVER_URL;
+	if (!API_SERVER_URL) {
+		throw new Error('API_SERVER_URL is not defined');
+	}
+
+	try {
+		const [powerPlantsRes, fiberRes, gasRes] = await Promise.all([
+			fetch(`${API_SERVER_URL}/api/map_data/canada_power_plants`),
+			fetch(`${API_SERVER_URL}/api/map_data/canada_fiber_infrastructure`),
+			fetch(`${API_SERVER_URL}/api/map_data/canada_gas_infrastructure`)
+		]);
+
+		const powerPlantsData = await powerPlantsRes.json();
+		const fiberData = await fiberRes.json();
+		const gasData = await gasRes.json();
+
+		return {
+			powerPlants: powerPlantsData.success ? powerPlantsData.data : [],
+			fiber: fiberData.success ? fiberData.data : [],
+			gas: gasData.success ? gasData.data : []
+		};
+	} catch (error) {
+		console.error('Error fetching Canada data:', error);
+		return { powerPlants: [], fiber: [], gas: [] };
+	}
+}
+
 // Define the array format type
 type PowerPlantArray = [
 	number,      // id
@@ -154,6 +221,11 @@ export function MapLeafletPage() {
 	const [powerPlants, setPowerPlants] = useState<PowerPlant[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	
+	// Add states for Canada infrastructure data
+	const [canadaPowerPlants, setCanadaPowerPlants] = useState<CanadaPowerPlant[]>([]);
+	const [fiberInfrastructure, setFiberInfrastructure] = useState<FiberInfrastructure[]>([]);
+	const [gasInfrastructure, setGasInfrastructure] = useState<GasInfrastructure[]>([]);
 	
 	// Configuration state for visual parameters
 	const [visualParams, setVisualParams] = useState({
@@ -326,6 +398,23 @@ export function MapLeafletPage() {
 		
 		fetchData();
 	}, [debouncedFilters]);
+	
+	// Fetch Canada infrastructure data when component mounts
+	useEffect(() => {
+		const fetchCanadaInfrastructure = async () => {
+			try {
+				const canadaData = await fetchCanadaData();
+				setCanadaPowerPlants(canadaData.powerPlants);
+				setFiberInfrastructure(canadaData.fiber);
+				setGasInfrastructure(canadaData.gas);
+				console.log(`Loaded ${canadaData.powerPlants.length} Canada power plants, ${canadaData.fiber.length} fiber routes, ${canadaData.gas.length} gas pipelines`);
+			} catch (err) {
+				console.error('Error fetching Canada infrastructure data:', err);
+			}
+		};
+		
+		fetchCanadaInfrastructure();
+	}, []); // Empty dependency array - fetch once on mount
 	
 	// Initialize map
 	useEffect(() => {
@@ -507,6 +596,196 @@ export function MapLeafletPage() {
 			processNextBatch();
 		}
 	}, [powerPlants, isLoading, visualParams, getPlantColor]);
+	
+	// Update Canada infrastructure markers when data changes
+	useEffect(() => {
+		if (!mapInstanceRef.current || !markersLayerRef.current) return;
+		
+		const map = mapInstanceRef.current;
+		const markersLayer = markersLayerRef.current;
+		const zoomLevel = map.getZoom();
+		
+		// Add Canada power plants
+		canadaPowerPlants.forEach(plant => {
+			if (!plant.latitude || !plant.longitude) return;
+			
+			// Determine color based on fuel type (matching US data colors)
+			let fillColor = '#ff6b6b'; // Default red for unknown
+			if (plant.fuel_type) {
+				const fuelType = plant.fuel_type.toLowerCase();
+				if (fuelType.includes('hydro') || fuelType.includes('water')) {
+					fillColor = '#001fff'; // Dodger Blue for hydro (matching US data)
+				} else if (fuelType.includes('nuclear')) {
+					fillColor = '#4eff33'; // Lime Green for nuclear (matching US data)
+				} else if (fuelType.includes('coal')) {
+					fillColor = '#A9A9A9'; // Dark Gray for coal (matching US data)
+				} else if (fuelType.includes('gas') || fuelType.includes('natural')) {
+					fillColor = '#d9ff33'; // Steel Blue for gas (matching US data)
+				} else if (fuelType.includes('wind')) {
+					fillColor = '#87CEEB'; // Sky Blue for wind (matching US data)
+				} else if (fuelType.includes('solar')) {
+					fillColor = '#FFD700'; // Gold for solar (matching US data)
+				} else if (fuelType.includes('biomass') || fuelType.includes('waste')) {
+					fillColor = '#228B22'; // Forest Green for biomass/waste (matching US data)
+				} else if (fuelType.includes('oil') || fuelType.includes('diesel')) {
+					fillColor = '#000000'; // Black for oil/diesel (matching US data)
+				} else if (fuelType.includes('battery')) {
+					fillColor = '#9933cc'; // Purple for battery (keeping this unique)
+				}
+			}
+			
+			// Calculate dynamic radius using EXACT same logic as US power plants
+			const capacity = plant.output_mw || 0;
+			
+			// Use the exact same getRadiusByCapacity function with same parameters as US data
+			const dynamicRadius = getRadiusByCapacity(
+				capacity, 
+				zoomLevel, 
+				DEFAULT_SIZE_MULTIPLIER, // 15 (same as US)
+				DEFAULT_CAPACITY_WEIGHT  // 0.2 (same as US)
+			);
+			
+			// Debug logging
+			console.log(`Plant: ${plant.name}, Capacity: ${capacity} MW, Zoom: ${zoomLevel}, Radius: ${dynamicRadius.toFixed(1)}`);
+			
+			// Create marker for Canada power plant with categorized color and uniform sizing
+			const marker = L.circleMarker([plant.latitude, plant.longitude], {
+				radius: Math.max(1, Math.min(25, dynamicRadius)), // Same clamping as US data
+				fillColor: fillColor,
+				color: '#000',
+				weight: getOutlineWeightByZoom(zoomLevel), // Dynamic outline weight
+				opacity: 1,
+				fillOpacity: 0.8
+			});
+			
+			// Add popup for Canada power plant
+			marker.bindPopup(`
+				<div style="min-width: 200px;">
+					<h4>${plant.name}</h4>
+					<p><strong>Province:</strong> ${plant.province || 'N/A'}</p>
+					<p><strong>Fuel Type:</strong> ${plant.fuel_type || 'N/A'}</p>
+					<p><strong>Capacity:</strong> ${plant.output_mw ? `${plant.output_mw} MW` : 'N/A'}</p>
+					<p><strong>Operator:</strong> ${plant.operator || 'N/A'}</p>
+					<p><em>💡 Dot size represents capacity - larger dots = higher capacity</em></p>
+				</div>
+			`);
+			
+			markersLayer.addLayer(marker);
+		});
+		
+		// Add fiber infrastructure - translucent by default, brighten on hover
+		fiberInfrastructure.forEach(fiber => {
+			if (!fiber.geometry) return;
+			
+			try {
+				const geoJson = JSON.parse(fiber.geometry);
+				const isSubmarine = fiber.cable_type === 'submarine';
+				const baseColor = isSubmarine ? '#1e90ff' : '#32cd32';
+				const cableWidth = isSubmarine ? 4 : 3;
+				
+				const defaultStyle = {
+					color: baseColor,
+					weight: cableWidth,
+					opacity: 0.25,
+					lineCap: 'round' as const,
+					lineJoin: 'round' as const
+				};
+				const hoverStyle = {
+					color: baseColor,
+					weight: cableWidth + 2,
+					opacity: 1.0,
+					lineCap: 'round' as const,
+					lineJoin: 'round' as const
+				};
+				
+				const fiberPath = L.geoJSON(geoJson, {
+					style: defaultStyle,
+					onEachFeature: function(_feature, layer) {
+						layer.on('mouseover', () => {
+							(layer as any).setStyle(hoverStyle);
+							(layer as any).bringToFront();
+						});
+						layer.on('mouseout', () => {
+							(layer as any).setStyle(defaultStyle);
+						});
+						(layer as any).bindTooltip(`Fiber: ${isSubmarine ? 'Submarine' : 'Terrestrial'}`, { sticky: true });
+					}
+				});
+				
+				const popupContent = `
+					<div style="min-width: 200px;">
+						<h4>🌐 ${fiber.name}</h4>
+						<p><strong>Type:</strong> ${fiber.cable_type || 'N/A'}</p>
+						<p><strong>Capacity:</strong> ${fiber.capacity_gbps ? `${fiber.capacity_gbps} Gbps` : 'N/A'}</p>
+						<p><strong>Status:</strong> ${fiber.status || 'N/A'}</p>
+						<p><strong>Operator:</strong> ${fiber.operator || 'N/A'}</p>
+						<p><em>💡 Fiber optic cable</em></p>
+					</div>
+				`;
+				fiberPath.bindPopup(popupContent);
+				markersLayer.addLayer(fiberPath);
+			} catch (error) {
+				console.error('Error parsing fiber geometry:', error);
+			}
+		});
+		
+		// Add gas infrastructure - translucent by default, brighten on hover
+		gasInfrastructure.forEach(gas => {
+			if (!gas.geometry) return;
+			
+			try {
+				const geoJson = JSON.parse(gas.geometry);
+				const isTransmission = gas.pipeline_type === 'transmission';
+				const baseColor = isTransmission ? '#ff6b35' : '#ff4757';
+				const pipelineWidth = isTransmission ? 4 : 3;
+				
+				const defaultStyle = {
+					color: baseColor,
+					weight: pipelineWidth,
+					opacity: 0.25,
+					lineCap: 'round' as const,
+					lineJoin: 'round' as const
+				};
+				const hoverStyle = {
+					color: baseColor,
+					weight: pipelineWidth + 2,
+					opacity: 1.0,
+					lineCap: 'round' as const,
+					lineJoin: 'round' as const
+				};
+				
+				const pipelinePath = L.geoJSON(geoJson, {
+					style: defaultStyle,
+					onEachFeature: function(_feature, layer) {
+						layer.on('mouseover', () => {
+							(layer as any).setStyle(hoverStyle);
+							(layer as any).bringToFront();
+						});
+						layer.on('mouseout', () => {
+							(layer as any).setStyle(defaultStyle);
+						});
+						(layer as any).bindTooltip(`Gas: ${isTransmission ? 'Transmission' : 'Distribution'}`, { sticky: true });
+					}
+				});
+				
+				const popupContent = `
+					<div style="min-width: 200px;">
+						<h4>⛽ ${gas.name}</h4>
+						<p><strong>Type:</strong> ${gas.pipeline_type || 'N/A'}</p>
+						<p><strong>Capacity:</strong> ${gas.capacity_mmcfd ? `${gas.capacity_mmcfd} MMcf/d` : 'N/A'}</p>
+						<p><strong>Status:</strong> ${gas.status || 'N/A'}</p>
+						<p><strong>Operator:</strong> ${gas.operator || 'N/A'}</p>
+						<p><em>💡 Natural gas pipeline</em></p>
+					</div>
+				`;
+				pipelinePath.bindPopup(popupContent);
+				markersLayer.addLayer(pipelinePath);
+			} catch (error) {
+				console.error('Error parsing gas geometry:', error);
+			}
+		});
+		
+	}, [canadaPowerPlants, fiberInfrastructure, gasInfrastructure]);
 	
 	// Update marker sizes when visual parameters change
 	useEffect(() => {

@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response, Express } from "express";
 import dotenv from "dotenv";
 import postgres from "postgres";
 import cors from "cors";
-import { httpGetMinimalPowerPlantData, httpGetPowerPlantData, httpGetPowerPlantDataById } from "./routes/map_data.js";
+import { httpGetMinimalPowerPlantData, httpGetPowerPlantData, httpGetPowerPlantDataById, httpGetCanadaPowerPlants, httpGetCanadaFiberInfrastructure, httpGetCanadaGasInfrastructure } from "./routes/map_data.js";
 import { resolve, join } from 'path';
 import { existsSync } from 'fs';
 import https from 'https';
@@ -88,6 +88,11 @@ export function externalRoutes(external: Express, sql: postgres.Sql) {
 			map_data.get("/power_plants", httpGetPowerPlantData(sql));
 			map_data.get("/power_plants_minimal", httpGetMinimalPowerPlantData(sql));
 			map_data.get("/power_plant/:id", httpGetPowerPlantDataById(sql));
+			
+			// Canada infrastructure endpoints
+			map_data.get("/canada_power_plants", httpGetCanadaPowerPlants(sql));
+			map_data.get("/canada_fiber_infrastructure", httpGetCanadaFiberInfrastructure(sql));
+			map_data.get("/canada_gas_infrastructure", httpGetCanadaGasInfrastructure(sql));
 		}
 		api.use("/map_data", map_data);
 

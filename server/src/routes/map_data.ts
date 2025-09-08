@@ -600,3 +600,109 @@ export function httpGetPowerPlantDataById(sql: postgres.Sql<{}>): (request: Requ
 		}
 	}
 }
+
+/**
+ * Get Canada power plant data
+ */
+export function httpGetCanadaPowerPlants(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
+	return async function (request: Request, response: Response) {
+		try {
+			const result = await sql`
+				SELECT 
+					id,
+					openinframap_id,
+					name,
+					operator,
+					output_mw,
+					fuel_type,
+					province,
+					latitude,
+					longitude,
+					metadata
+				FROM canada_power_plants
+				ORDER BY name
+			`;
+
+			return response.json({
+				success: true,
+				data: result
+			});
+		} catch (error) {
+			console.error("Error fetching Canada power plants:", error);
+			return response.status(500).json({
+				success: false,
+				error: "Failed to fetch Canada power plant data"
+			});
+		}
+	}
+}
+
+/**
+ * Get Canada fiber infrastructure data
+ */
+export function httpGetCanadaFiberInfrastructure(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
+	return async function (request: Request, response: Response) {
+		try {
+			const result = await sql`
+				SELECT 
+					id,
+					itu_id,
+					name,
+					cable_type,
+					capacity_gbps,
+					operator,
+					status,
+					geometry,
+					metadata
+				FROM fiber_infrastructure
+				ORDER BY name
+			`;
+
+			return response.json({
+				success: true,
+				data: result
+			});
+		} catch (error) {
+			console.error("Error fetching Canada fiber infrastructure:", error);
+			return response.status(500).json({
+				success: false,
+				error: "Failed to fetch Canada fiber infrastructure data"
+			});
+		}
+	}
+}
+
+/**
+ * Get Canada gas infrastructure data
+ */
+export function httpGetCanadaGasInfrastructure(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
+	return async function (request: Request, response: Response) {
+		try {
+			const result = await sql`
+				SELECT 
+					id,
+					cer_id,
+					name,
+					pipeline_type,
+					capacity_mmcfd,
+					operator,
+					status,
+					geometry,
+					metadata
+				FROM gas_infrastructure
+				ORDER BY name
+			`;
+
+			return response.json({
+				success: true,
+				data: result
+			});
+		} catch (error) {
+			console.error("Error fetching Canada gas infrastructure:", error);
+			return response.status(500).json({
+				success: false,
+				error: "Failed to fetch Canada gas infrastructure data"
+			});
+		}
+	}
+}
