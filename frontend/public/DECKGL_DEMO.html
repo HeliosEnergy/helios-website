@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deck.gl North America Infrastructure Map - Implementation Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .code-block {
+            background-color: #f4f4f4;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .tech-item {
+            background-color: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .implementation-steps {
+            counter-reset: step-counter;
+        }
+        .implementation-steps li {
+            counter-increment: step-counter;
+            margin-bottom: 20px;
+        }
+        .implementation-steps li:before {
+            content: counter(step-counter);
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+        }
+        .map-container {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Deck.gl North America Infrastructure Map</h1>
+        <p>Implementation Demo and Technical Overview</p>
+    </div>
+
+    <div class="section">
+        <h2>Project Overview</h2>
+        <p>This implementation provides an interactive web-based map visualization using Deck.gl to display critical infrastructure in North America, with a focus on Canadian power plants, submarine cables, and terrestrial communication links.</p>
+        
+        <h3>Technology Stack</h3>
+        <div class="tech-stack">
+            <span class="tech-item">React</span>
+            <span class="tech-item">Deck.gl</span>
+            <span class="tech-item">Mapbox GL JS</span>
+            <span class="tech-item">Papa Parse</span>
+            <span class="tech-item">Tailwind CSS</span>
+            <span class="tech-item">TypeScript</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Key Features</h2>
+        <ul class="feature-list">
+            <li>Interactive visualization of Canadian power plants with capacity and source information</li>
+            <li>Submarine cable routes with landing point markers</li>
+            <li>Terrestrial communication links</li>
+            <li>Layer controls for toggling different infrastructure types</li>
+            <li>Filtering by power plant source type and capacity</li>
+            <li>Information panels for detailed data on selected features</li>
+            <li>Statistics dashboard showing infrastructure metrics</li>
+            <li>Responsive design for desktop and mobile devices</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Implementation Details</h2>
+        
+        <h3>Data Processing Pipeline</h3>
+        <div class="code-block">
+// PowerPlantProcessor.js
+class PowerPlantProcessor {
+  static parseOutput(outputString) {
+    // Convert "6,232 MW" to 6232
+  }
+  
+  static categorizeSource(source, method) {
+    // Standardize energy source categories
+  }
+  
+  static validateCoordinates(lat, lng) {
+    // Validate North America bounds
+  }
+  
+  static processCSV(csvData) {
+    // Parse CSV, clean data, validate entries
+  }
+}
+        </div>
+        
+        <h3>Deck.gl Layer Implementation</h3>
+        <div class="code-block">
+// Power Plants Layer
+const powerPlantLayer = new ScatterplotLayer({
+  id: 'power-plants',
+  data: powerPlants,
+  pickable: true,
+  opacity: 0.8,
+  stroked: true,
+  filled: true,
+  radiusScale: 6,
+  radiusMinPixels: 8,
+  radiusMaxPixels: 100,
+  lineWidthMinPixels: 1,
+  getPosition: d => d.coordinates,
+  getRadius: d => Math.sqrt(d.output) * 2,
+  getFillColor: d => getSourceColor(d.source),
+  getLineColor: [255, 255, 255]
+});
+
+// Submarine Cables Layer
+const submarineCableLayer = new PathLayer({
+  id: 'submarine-cables',
+  data: submarineCables,
+  pickable: true,
+  widthScale: 20,
+  widthMinPixels: 2,
+  getPath: d => d.coordinates,
+  getColor: [0, 150, 255, 200],
+  getWidth: 3
+});
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Implementation Steps</h2>
+        <ol class="implementation-steps">
+            <li><strong>Project Setup</strong> - Configured React + Deck.gl project structure with proper component organization</li>
+            <li><strong>Data Processing</strong> - Implemented processors for power plants, submarine cables, and terrestrial links</li>
+            <li><strong>Visualization</strong> - Created Deck.gl layers for each infrastructure type with appropriate styling</li>
+            <li><strong>Interactivity</strong> - Added hover/click interactions, layer controls, and filtering functionality</li>
+            <li><strong>UI Components</strong> - Built Legend, FilterPanel, StatsDashboard, and InfoPanel components</li>
+            <li><strong>Optimization</strong> - Implemented performance optimizations and responsive design</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>Access the Implementation</h2>
+        <p>The Deck.gl map implementation can be accessed at: <a href="/map-deckgl">/map-deckgl</a></p>
+        <p>Source code is organized in the following structure:</p>
+        <div class="code-block">
+src/
+├── components/
+│   ├── Map/
+│   │   ├── DeckGLMap.jsx
+│   │   ├── LayerControls.jsx
+│   │   └── InfoPanel.jsx
+│   ├── DataProcessing/
+│   │   ├── PowerPlantProcessor.js
+│   │   ├── CableProcessor.js
+│   │   └── TerrestrialProcessor.js
+│   └── UI/
+│       ├── Legend.jsx
+│       ├── FilterPanel.jsx
+│       └── StatsDashboard.jsx
+├── data/
+│   ├── powerplants.csv
+│   ├── submarine-cables.gpkg
+│   └── processed/
+├── utils/
+│   ├── dataUtils.js
+│   ├── colorUtils.js
+│   └── geoUtils.js
+└── styles/
+    └── map.css
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Deck.gl North America Infrastructure Map Implementation</p>
+        <p>For technical questions, please refer to the source code documentation</p>
+    </div>
+</body>
+</html>

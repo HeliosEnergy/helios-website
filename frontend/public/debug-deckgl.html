@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeckGL Debug</title>
+    <meta charset="utf-8">
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+        #header { padding: 10px; background-color: #f0f0f0; border-bottom: 1px solid #ccc; }
+        #map { flex: 1; }
+        #console { height: 200px; background-color: #000; color: #0f0; padding: 10px; overflow-y: auto; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>DeckGL Debug Page</h1>
+            <p>This page helps debug the "process is not defined" error</p>
+        </div>
+        <div id="map"></div>
+        <div id="console">
+            <p>Debug Console:</p>
+        </div>
+    </div>
+
+    <script>
+        // Log to our debug console
+        function log(message) {
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<div>${new Date().toISOString()}: ${message}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        // Check for process object
+        log(`Process defined: ${typeof process !== 'undefined'}`);
+        if (typeof process !== 'undefined') {
+            log(`Process env defined: ${typeof process.env !== 'undefined'}`);
+            if (typeof process.env !== 'undefined') {
+                log(`Process env keys: ${Object.keys(process.env).join(', ')}`);
+            }
+        } else {
+            log('Process is not defined (this is expected in browser environments)');
+        }
+
+        // Check for import.meta.env
+        log(`import.meta.env defined: ${typeof import.meta.env !== 'undefined'}`);
+        if (typeof import.meta.env !== 'undefined') {
+            log(`import.meta.env keys: ${Object.keys(import.meta.env).join(', ')}`);
+        }
+
+        // Try to load DeckGL
+        log('Attempting to load DeckGL...');
+        
+        // Create a simple map container
+        const mapContainer = document.getElementById('map');
+        mapContainer.innerHTML = '<div style="padding: 20px; text-align: center;">Map loading...</div>';
+        
+        // Log that we've reached this point
+        log('Debug page loaded successfully');
+    </script>
+</body>
+</html>

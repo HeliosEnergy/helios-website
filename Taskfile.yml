@@ -105,15 +105,33 @@ tasks:
 
 
   seed:
-    desc: Seed the database with static data
-    cmds:
-      - cd database && npm run seed-static
+     desc: Seed the database with static data
+     cmds:
+       - cd database && npm run seed-static
 
 
   init-volumes:
-    desc: Initialize n8n
-    cmds:
-      - docker volume create n8n_data
-      - docker volume create timescaledb_data
-      - docker volume create grafana_data
-  
+     desc: Initialize n8n
+     cmds:
+       - docker volume create n8n_data
+       - docker volume create timescaledb_data
+       - docker volume create grafana_data
+
+  dev-full:
+     desc: Run full development setup with migrations, scripts, server and frontend
+     cmds:
+       - task: goose-up
+       - echo "--- Installing Host Dependencies ---"
+       - (cd scripts && npm install)
+       - (cd scripts/eia && npm install)
+       - (cd scripts/scraping && npm install)
+       - (cd scripts/vast && npm install)
+       - (cd server && npm install)
+       - (cd frontend && npm install)
+       - echo "--- Running Development Servers & Scripts ---"
+       - cd scripts && npm run scrape-all
+       - cd scripts/eia && npm run bulk
+       - cd scripts/scraping && npm run start
+       - cd scripts/vast && npm run api-scrape
+       - cd server && npm run start-dev &
+       - cd frontend && npm run dev &

@@ -1,0 +1,129 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+  up:
+    desc: Start all containers
+    cmds:
+      - docker compose up 
+
+  up-build:
+    desc: Start all containers and rebuild if needed
+    cmds:
+      - docker compose up --build 
+
+  up-background:
+    desc: Start all containers in background
+    cmds:
+      - docker compose up  -d
+
+  down:
+    desc: Stop and remove all containers
+    cmds:
+      - docker compose down
+
+  rebuild:
+    desc: Rebuild and restart all containers
+    cmds:
+      - docker compose down
+      - docker compose build --no-cache
+      - docker compose up -d 
+
+  clean:
+    desc: Full cleanup (including volumes)
+    cmds:
+      - docker compose down -v
+      - docker system prune -f
+
+  logs:
+    desc: View logs from all containers
+    cmds:
+      - docker compose logs -f
+
+  logs-app:
+    desc: View logs from app container only
+    cmds:
+      - docker compose logs -f app
+
+  logs-db:
+    desc: View logs from database container only
+    cmds:
+      - docker compose logs -f timescaledb
+
+  logs-grafana:
+    desc: View logs from grafana container only
+    cmds:
+      - docker compose logs -f grafana
+
+  shell:
+    desc: Open a shell in the app container
+    cmds:
+      - docker compose exec app bash
+
+  restart:
+    desc: Restart all containers
+    cmds:
+      - docker compose restart
+
+  status:
+    desc: Show status of all containers
+    cmds:
+      - docker compose ps
+
+  pull:
+    desc: Pull latest versions of all images
+    cmds:
+      - docker compose pull
+
+  prune:
+    desc: Remove unused Docker resources
+    cmds:
+      - docker system prune --volumes -f
+
+  # Database migration tasks - run from host - with explicit dir
+  goose-up:
+    desc: Run database migrations (up)
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" up
+      - cd database/schema && sqlc generate
+
+  goose-down:
+    desc: Revert all database migrations (down)
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" down
+
+  goose-status:
+    desc: Check database migration status
+    cmds:
+      - cd database/schema && goose -dir migrations postgres "user=${DB_USER} password=${DB_PASSWORD} dbname=${DB_NAME} host=${DB_HOST} port=${DB_PORT} sslmode=disable" status
+
+  goose-create:
+     desc: Create a new migration file
+     cmds:
+       - cd database/schema && goose -dir migrations create {{.CLI_ARGS}} sql
+
+
+  seed:
+     desc: Seed the database with static data
+     cmds:
+       - cd database && npm run seed-static
+
+
+  init-volumes:
+     desc: Initialize n8n
+     cmds:
+       - docker volume create n8n_data
+       - docker volume create timescaledb_data
+       - docker volume create grafana_data
+
+  dev-full:
+     desc: Run full development setup with migrations, scripts, server and frontend
+     cmds:
+       - task goose-up
+       - cd scripts && npm run scrape-all
+       - cd scripts/eia && npm run bulk
+       - cd scripts/scraping && npm run start
+       - cd scripts/vast && npm run api-scrape
+       - cd server && npm run start-dev &
+       - cd frontend && npm run dev &

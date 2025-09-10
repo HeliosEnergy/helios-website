@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fuelTypeColors, fuelTypeDisplayNames, operatingStatusDisplayNames, MapColorings, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, operatingStatusColors, DEFAULT_SIZE_BY_OPTION } from './MapValueMappings';

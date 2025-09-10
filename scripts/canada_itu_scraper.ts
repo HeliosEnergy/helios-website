@@ -224,6 +224,19 @@ async function scrapeITUBBMaps(): Promise<void> {
         
         for (const fiber of fiberData) {
             try {
+                // Log coordinates for debugging
+                try {
+                    const geometry = JSON.parse(fiber.geometry);
+                    if (geometry.coordinates && geometry.coordinates.length > 0) {
+                        console.log(`📍 ${fiber.name}: ${geometry.coordinates.length} points`);
+                        // Log first and last coordinates
+                        console.log(`   Start: ${geometry.coordinates[0][1]}, ${geometry.coordinates[0][0]}`);
+                        console.log(`   End: ${geometry.coordinates[geometry.coordinates.length - 1][1]}, ${geometry.coordinates[geometry.coordinates.length - 1][0]}`);
+                    }
+                } catch (e) {
+                    console.log(`📍 ${fiber.name}: Could not parse coordinates`);
+                }
+                
                 // Create itu_id from name
                 const ituId = fiber.name.toLowerCase()
                     .replace(/[^a-z0-9\s]/g, '')
@@ -373,6 +386,19 @@ async function insertSampleGasData(): Promise<void> {
     
     for (const gas of gasData) {
         try {
+            // Log coordinates for debugging
+            try {
+                const geometry = JSON.parse(gas.geometry);
+                if (geometry.coordinates && geometry.coordinates.length > 0) {
+                    console.log(`📍 ${gas.name}: ${geometry.coordinates.length} points`);
+                    // Log first and last coordinates
+                    console.log(`   Start: ${geometry.coordinates[0][1]}, ${geometry.coordinates[0][0]}`);
+                    console.log(`   End: ${geometry.coordinates[geometry.coordinates.length - 1][1]}, ${geometry.coordinates[geometry.coordinates.length - 1][0]}`);
+                }
+            } catch (e) {
+                console.log(`📍 ${gas.name}: Could not parse coordinates`);
+            }
+            
             // Create cer_id from name
             const cerId = gas.name.toLowerCase()
                 .replace(/[^a-z0-9\s]/g, '')

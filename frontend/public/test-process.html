@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Process Test</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Process Test</h1>
+    <div id="result"></div>
+
+    <script>
+        const resultEl = document.getElementById('result');
+        
+        // Test for process object
+        if (typeof process !== 'undefined') {
+            resultEl.innerHTML = '<p style="color: red;">ERROR: process is defined!</p>';
+            resultEl.innerHTML += '<p>process type: ' + typeof process + '</p>';
+            if (typeof process.env !== 'undefined') {
+                resultEl.innerHTML += '<p>process.env keys: ' + Object.keys(process.env).join(', ') + '</p>';
+            }
+        } else {
+            resultEl.innerHTML = '<p style="color: green;">SUCCESS: process is not defined (expected in browser)</p>';
+        }
+        
+        // Test for import.meta.env
+        if (typeof import.meta.env !== 'undefined') {
+            resultEl.innerHTML += '<p style="color: green;">SUCCESS: import.meta.env is defined</p>';
+            resultEl.innerHTML += '<p>import.meta.env keys: ' + Object.keys(import.meta.env).join(', ') + '</p>';
+        } else {
+            resultEl.innerHTML += '<p style="color: red;">ERROR: import.meta.env is not defined</p>';
+        }
+    </script>
+</body>
+</html>

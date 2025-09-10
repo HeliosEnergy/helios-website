@@ -7,5 +7,13 @@ export default defineConfig({
 	server: {
 		port: 9725,
 		host: true,
+		proxy: {
+			'/itu-proxy': {
+				target: 'https://bbmaps.itu.int',
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/itu-proxy/, ''),
+				secure: false
+			}
+		}
 	},
 })

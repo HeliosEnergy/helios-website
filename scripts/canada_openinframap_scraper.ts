@@ -72,10 +72,19 @@ function estimateCoordinates(plantName: string, province: string | null): { lati
     const baseCoords = provinceCoordinates[province as keyof typeof provinceCoordinates] || 
                       { latitude: 60.0, longitude: -100.0 }; // Default to center of Canada
     
-    // Add some random offset to avoid exact duplicates
+    // Generate a unique hash-based offset for each plant to ensure better distribution
+    const plantHash = plantName.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+    }, 0);
+    
+    // Use the hash to create deterministic but distributed offsets
+    const offsetLat = (plantHash % 1000) / 1000 * 4 - 2; // Range: -2 to 2
+    const offsetLon = ((plantHash * 7) % 1000) / 1000 * 8 - 4; // Range: -4 to 4
+    
     return {
-        latitude: baseCoords.latitude + (Math.random() - 0.5) * 2,
-        longitude: baseCoords.longitude + (Math.random() - 0.5) * 4
+        latitude: baseCoords.latitude + offsetLat,
+        longitude: baseCoords.longitude + offsetLon
     };
 }
 
@@ -206,13 +215,22 @@ async function scrapeOpenInfraMap(): Promise<void> {
                 const province = determineProvince(plant.name, plant.operator);
                 const fuelType = normalizeFuelType(plant.source);
                 
-                // Get coordinates (require precise source like Wikidata; skip otherwise)
-                const coordinates = plant.wikidata
+                // Get coordinates (require precise source like Wikidata; use estimate as fallback)
+                let coordinates = plant.wikidata
                     ? await getCoordinatesFromWikidata(plant.wikidata)
                     : null;
+                
+                if (!coordinates) {
+                    coordinates = estimateCoordinates(plant.name, province);
+                }
+                
+                // Log coordinates for debugging
+                console.log(`📍 ${plant.name}: ${coordinates.latitude}, ${coordinates.longitude} (${province || 'Unknown Province'})`);
+                
+                // If still no coordinates, skip
                 if (!coordinates) {
                     skippedCount++;
-                    continue; // skip plants without accurate coordinates
+                    continue;
                 }
                 
                 // Create openinframap_id from name + province to reduce collisions
@@ -281,4 +299,4 @@ if (require.main === module) {
     scrapeOpenInfraMap().catch(console.error);
 }
 
-export { scrapeOpenInfraMap };
+export { scrapeOpenInfraMap, estimateCoordinates };

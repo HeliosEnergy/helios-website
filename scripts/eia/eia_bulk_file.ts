@@ -13,19 +13,40 @@ import { createEIAElectricityData } from '@helios/analysis_db/schema/analysis_db
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+console.log("[DEBUG] Imports completed.");
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+console.log("[DEBUG] Path variables defined.");
 
 // Load environment variables from root .env file
-dotenv.config({ path: resolve(__dirname, '../../.env') });
+try {
+    dotenv.config({ path: resolve(__dirname, '../../.env') });
+    console.log("[DEBUG] dotenv configuration loaded.");
+} catch(e) {
+    console.error("[FATAL] dotenv configuration failed.");
+    console.error(e);
+    process.exit(1);
+}
 
-const sql = postgres({
-	host: process.env.DB_HOST,
-	database: process.env.DB_NAME,
-	username: process.env.DB_USER,
-	password: process.env.DB_PASSWORD,
-	port: parseInt(process.env.DB_PORT || "5432"),
-});
+let sql;
+try {
+  console.log(`Attempting to connect to database with user ${process.env.DB_USER} at ${process.env.DB_HOST}:${process.env.DB_PORT}...`);
+  sql = postgres({
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT || "5432"),
+    onnotice: () => {}, // Suppress notices
+  });
+  console.log('Database connection configured successfully.');
+} catch (e) {
+  console.error("FATAL: Failed to initialize database connection object.");
+  console.error("Please check your .env file and ensure DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, and DB_PORT are correct.");
+  console.error("Error details:", e);
+  process.exit(1);
+}
 
 export let EIA_DATA: {
 	manifest: EIAManifestData[];
@@ -254,3 +275,15 @@ export async function scrapeEIAData() {
 }
 
 scrapeEIAData()
+  .then(() => {
+    console.log('EIA scraping process completed successfully.');
+  })
+  .catch((err) => {
+    console.error('A critical error occurred during the EIA scraping process:');
+    console.error(err);
+    process.exit(1); // Exit with an error code
+  })
+  .finally(async () => {
+    console.log('Closing database connection.');
+    await sql.end();
+  });

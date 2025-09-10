@@ -638,6 +638,110 @@ export function httpGetCanadaPowerPlants(sql: postgres.Sql<{}>): (request: Reque
 }
 
 /**
+ * Get minimal Canada power plant data with only essential fields
+ */
+export function httpGetMinimalCanadaPowerPlantData(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
+	return async function (request: Request, response: Response) {
+		try {
+			// Extract query parameters for filtering
+			const { 
+				fuel_type, 
+				province, 
+				min_capacity, 
+				max_capacity
+			} = request.query;
+
+			// Handle province as either a single value or an array
+			let provincesArray: string[] | null = null;
+			if (province) {
+				// If province is an array, map it to strings
+				if (Array.isArray(province)) {
+					provincesArray = province.map(s => String(s));
+				} else {
+					// If it's a single value, make it a one-item array
+					provincesArray = [String(province)];
+				}
+				// If the array is empty or contains only empty strings, set to null
+				if (provincesArray.length === 0 || (provincesArray.length === 1 && !provincesArray[0])) {
+					provincesArray = null;
+				}
+			}
+
+			// Handle fuel_type as either a single value, array, or comma-separated list
+			let fuelTypesArray: string[] | null = null;
+			if (fuel_type) {
+				const fuelTypeStr = String(fuel_type);
+				// Check if it's a comma-separated list
+				if (fuelTypeStr.includes(',')) {
+					fuelTypesArray = fuelTypeStr.split(',').filter(f => f.trim());
+				} else {
+					fuelTypesArray = [fuelTypeStr];
+				}
+				// If the array is empty, set to null
+				if (fuelTypesArray.length === 0) {
+					fuelTypesArray = null;
+				}
+			}
+
+			const params = {
+				fuelTypes: fuelTypesArray,
+				provinces: provincesArray,
+				minCapacity: min_capacity ? parseFloat(String(min_capacity)) : null,
+				maxCapacity: max_capacity ? parseFloat(String(max_capacity)) : null
+			};
+
+			// Simplified SQL query with only essential fields
+			const queryString = `
+			SELECT 
+				id,
+				fuel_type,
+				'OP' as operating_status,
+				latitude,
+				longitude,
+				output_mw as nameplate_capacity_mw,
+				NULL as generation,
+				NULL as capacity_factor
+			FROM canada_power_plants
+			WHERE 
+				($1::text[] IS NULL OR fuel_type = ANY($1))
+				AND ($2::text[] IS NULL OR $2::text[] = '{}'::text[] OR province = ANY($2::text[]))
+				AND ($3::float IS NULL OR (output_mw IS NOT NULL AND output_mw >= $3))
+				AND ($4::float IS NULL OR (output_mw IS NOT NULL AND output_mw <= $4))`;
+
+			const powerPlantsResult = await sql.unsafe(queryString, [
+				params.fuelTypes, 
+				params.provinces, 
+				params.minCapacity, 
+				params.maxCapacity
+			]);
+
+			// Transform to array format
+			const formattedPowerPlants = [...powerPlantsResult].map((plant: any) => [
+				plant.id,
+				plant.fuel_type,
+				plant.operating_status,
+				parseFloat(plant.latitude),
+				parseFloat(plant.longitude),
+				plant.nameplate_capacity_mw ? parseFloat(String(plant.nameplate_capacity_mw)) : null,
+				plant.generation ? parseFloat(String(plant.generation)) : null,
+				plant.capacity_factor ? parseFloat(String(plant.capacity_factor)) : null
+			]);
+
+			return response.json({
+				success: true,
+				data: formattedPowerPlants
+			});
+		} catch (error) {
+			console.error("Error fetching minimal Canada power plant data:", error);
+			return response.status(500).json({
+				success: false,
+				error: "Failed to fetch Canada power plant data"
+			});
+		}
+	}
+}
+
+/**
  * Get Canada fiber infrastructure data
  */
 export function httpGetCanadaFiberInfrastructure(sql: postgres.Sql<{}>): (request: Request, response: Response) => Promise<any> {
