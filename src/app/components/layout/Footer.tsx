@@ -117,20 +117,25 @@ const Footer = () => {
                 <span>•</span>
                 <div className="flex items-center space-x-2">
                   <span>Helios is an NVIDIA Preferred Partner</span>
-                  
-                  <Image 
-                    src="/nvidia-inception-program-badge-rgb-for-screen.png" 
-                    alt="Nvidia Inception Program Badge" 
-                    width={80}
-                    height={32}
-                    className="h-8 w-auto ml-2 object-contain"
-                  />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Side - Logo */}
+          {/* Center - NVIDIA Logo */}
+          <div className="md:text-center">
+            <div className="flex items-center justify-start md:justify-center">
+              <Image 
+                src="/nvidia-inception-program-badge-rgb-for-screen.png" 
+                alt="Nvidia Inception Program Badge" 
+                width={100}
+                height={40}
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Right Side - Helios Logo (Primary) */}
           <div className="md:text-right">
             <div className="flex items-center justify-start md:justify-end">
               <Image 
