@@ -155,7 +155,7 @@ const Header = () => {
           </a>
           <Button 
             variant="primary"
-            onClick={() => window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')}
+            onClick={() => window.open('https://console.heliosenergy.io/login?tab=signup', '_blank', 'noopener,noreferrer')}
           >
             Sign up
           </Button>
@@ -178,8 +178,8 @@ const Header = () => {
 
     {/* Mobile Menu Overlay (visible only on mobile, with animation) */}
     <div
-      className={`fixed inset-0 bg-black bg-opacity-95 z-50 flex flex-col items-center justify-center lg:hidden
-        transform transition-all duration-200 ease-in-out
+      className={`fixed inset-0 bg-black bg-opacity-95 z-50 flex flex-col items-center lg:hidden
+        transform transition-all duration-200 ease-in-out pt-16
         ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'}`}
     >
       <button
@@ -262,7 +262,7 @@ const Header = () => {
           <Button
             variant="primary"
             onClick={() => {
-              window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer');
+              window.open('https://console.heliosenergy.io/login?tab=signup', '_blank', 'noopener,noreferrer');
               setIsMobileMenuOpen(false); // Close mobile menu on button click
             }}
           >

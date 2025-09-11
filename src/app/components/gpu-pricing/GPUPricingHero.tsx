@@ -39,8 +39,8 @@ const GPUPricingHero = () => {
             </div>
           </div>
 
-          {/* Right Image Placeholder */}
-          <div className="relative">
+          {/* Right Image Placeholder - Hidden on mobile */}
+          <div className="hidden md:block relative">
             <div className="aspect-[4/3] bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg overflow-hidden border border-gray-700">
               {/* Grid Pattern Background */}
               <div className="absolute inset-0 opacity-20">

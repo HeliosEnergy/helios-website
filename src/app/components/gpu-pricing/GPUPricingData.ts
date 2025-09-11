@@ -75,31 +75,15 @@ export const originalPricingData: GPUPricingData[] = [
   }
 ];
 
-// Transformed data for calculator with additional specs
+// Transformed data for calculator with additional specs - aligned with pricing table
 export const calculatorGPUModels: GPUModel[] = [
   {
-    id: 'l40s',
-    name: 'L40S (48GB NVIDIA)',
-    pricePerHour: 0.87,
-    memory: '48GB',
-    specs: '48GB NVIDIA',
-    vram: '48GB GDDR6'
-  },
-  {
-    id: 'rtx-pro-6000',
-    name: 'RTX Pro 6000 (96GB)',
-    pricePerHour: 1.19,
-    memory: '96GB',
-    specs: '96GB GDDR7 ECC, Blackwell Architecture',
-    vram: '96GB GDDR7 ECC'
-  },
-  {
-    id: 'a100',
-    name: 'A100 (80GB)',
-    pricePerHour: 1.35,
-    memory: '80GB',
-    specs: '80GB HBM2e',
-    vram: '80GB HBM2e'
+    id: 'h100-nvl',
+    name: 'H100 NVL (94GB)',
+    pricePerHour: 2.47,
+    memory: '94GB',
+    specs: '94GB HBM3',
+    vram: '94GB HBM3'
   },
   {
     id: 'h100-sxm',
@@ -110,12 +94,28 @@ export const calculatorGPUModels: GPUModel[] = [
     vram: '80GB HBM3'
   },
   {
-    id: 'h100-nvl',
-    name: 'H100 NVL (94GB)',
-    pricePerHour: 2.47,
-    memory: '94GB',
-    specs: '94GB HBM3',
-    vram: '94GB HBM3'
+    id: 'rtx-pro-6000',
+    name: 'RTX Pro 6000 (96GB)',
+    pricePerHour: 1.19,
+    memory: '96GB',
+    specs: '96GB GDDR7 ECC, Blackwell Architecture',
+    vram: '96GB GDDR7 ECC'
+  },
+  {
+    id: 'l40s',
+    name: 'L40S (48GB)',
+    pricePerHour: 0.87,
+    memory: '48GB',
+    specs: '48GB GDDR6',
+    vram: '48GB GDDR6'
+  },
+  {
+    id: 'a100',
+    name: 'A100 (80GB)',
+    pricePerHour: 1.35,
+    memory: '80GB',
+    specs: '80GB HBM2e',
+    vram: '80GB HBM2e'
   }
 ];
 

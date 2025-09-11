@@ -13,7 +13,6 @@ import ReservationPeriodTabs from './ReservationPeriodTabs';
 import GPUQuantityControl from './GPUQuantityControl';
 import ProfessionalUsageSlider from './ProfessionalUsageSlider';
 import PricingSummary from './PricingSummary';
-import MobileCalculatorTabs from './MobileCalculatorTabs';
 import CompactConfigPanel from './CompactConfigPanel';
 import CompactPricingSummary from './CompactPricingSummary';
 
@@ -54,83 +53,90 @@ const GPURentalCalculator: React.FC = () => {
           </p>
         </div>
 
-        {/* Mobile Tabbed Interface */}
-        <div className="max-w-6xl mx-auto">
-          <MobileCalculatorTabs
-            configurationContent={
-              <CompactConfigPanel
-                gpuModels={calculatorGPUModels}
-                reservationPeriods={reservationPeriods}
-                selectedGPU={calculatorState.selectedGPU}
-                selectedPeriod={calculatorState.reservationPeriod}
-                quantity={calculatorState.quantity}
-                hoursPerMonth={calculatorState.hoursPerMonth}
-                onGPUChange={(gpu) => setCalculatorState(prev => ({ ...prev, selectedGPU: gpu }))}
-                onPeriodChange={(period) => setCalculatorState(prev => ({ ...prev, reservationPeriod: period }))}
-                onQuantityChange={(quantity) => setCalculatorState(prev => ({ ...prev, quantity }))}
-                onHoursChange={(hours) => setCalculatorState(prev => ({ ...prev, hoursPerMonth: hours }))}
-              />
-            }
-            pricingContent={
-              <CompactPricingSummary
-                selectedGPU={calculatorState.selectedGPU}
-                reservationPeriod={calculatorState.reservationPeriod}
-                quantity={calculatorState.quantity}
-                hoursPerMonth={calculatorState.hoursPerMonth}
-                pricing={pricing}
-              />
-            }
-          />
+        {/* Mobile Layout - Configuration followed by Pricing */}
+        <div className="block md:hidden max-w-6xl mx-auto space-y-8">
+          {/* Configuration Section */}
+          <div>
+            <h3 className="text-xl font-medium text-black mb-6 pb-3 border-b border-gray-100">
+              Configuration
+            </h3>
+            <CompactConfigPanel
+              gpuModels={calculatorGPUModels}
+              reservationPeriods={reservationPeriods}
+              selectedGPU={calculatorState.selectedGPU}
+              selectedPeriod={calculatorState.reservationPeriod}
+              quantity={calculatorState.quantity}
+              hoursPerMonth={calculatorState.hoursPerMonth}
+              onGPUChange={(gpu) => setCalculatorState(prev => ({ ...prev, selectedGPU: gpu }))}
+              onPeriodChange={(period) => setCalculatorState(prev => ({ ...prev, reservationPeriod: period }))}
+              onQuantityChange={(quantity) => setCalculatorState(prev => ({ ...prev, quantity }))}
+              onHoursChange={(hours) => setCalculatorState(prev => ({ ...prev, hoursPerMonth: hours }))}
+            />
+          </div>
 
-          {/* Desktop Layout - Hidden on Mobile */}
-          <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            
-            {/* Pricing Summary - Right Side on Desktop */}
-            <div className="order-1 lg:order-2">
-              <PricingSummary
-                selectedGPU={calculatorState.selectedGPU}
-                reservationPeriod={calculatorState.reservationPeriod}
-                quantity={calculatorState.quantity}
-                hoursPerMonth={calculatorState.hoursPerMonth}
-                pricing={pricing}
-              />
-            </div>
+          {/* Pricing Summary Section */}
+          <div>
+            <h3 className="text-xl font-medium text-black mb-6 pb-3 border-b border-gray-100">
+              Pricing Summary
+            </h3>
+            <CompactPricingSummary
+              selectedGPU={calculatorState.selectedGPU}
+              reservationPeriod={calculatorState.reservationPeriod}
+              quantity={calculatorState.quantity}
+              hoursPerMonth={calculatorState.hoursPerMonth}
+              pricing={pricing}
+            />
+          </div>
+        </div>
 
-            {/* Configuration Panel - Left Side on Desktop */}
-            <div className="order-2 lg:order-1">
-              <div className="space-y-10">
-                <div>
-                  <h3 className="text-xl md:text-2xl font-medium text-black mb-6 pb-3 border-b border-gray-100">
-                    Configuration
-                  </h3>
-                  
-                  {/* GPU Selection */}
-                  <div className="space-y-6">
-                    <GPUDropdown
-                      gpuModels={calculatorGPUModels}
-                      selectedGPU={calculatorState.selectedGPU}
-                      onGPUChange={(gpu) => setCalculatorState(prev => ({ ...prev, selectedGPU: gpu }))}
-                    />
+        {/* Desktop Layout - Hidden on Mobile */}
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          
+          {/* Pricing Summary - Right Side on Desktop */}
+          <div className="order-1 lg:order-2">
+            <PricingSummary
+              selectedGPU={calculatorState.selectedGPU}
+              reservationPeriod={calculatorState.reservationPeriod}
+              quantity={calculatorState.quantity}
+              hoursPerMonth={calculatorState.hoursPerMonth}
+              pricing={pricing}
+            />
+          </div>
 
-                    {/* Reservation Period Selection */}
-                    <ReservationPeriodTabs
-                      periods={reservationPeriods}
-                      selectedPeriod={calculatorState.reservationPeriod}
-                      onPeriodChange={(period) => setCalculatorState(prev => ({ ...prev, reservationPeriod: period }))}
-                    />
+          {/* Configuration Panel - Left Side on Desktop */}
+          <div className="order-2 lg:order-1">
+            <div className="space-y-10">
+              <div>
+                <h3 className="text-xl md:text-2xl font-medium text-black mb-6 pb-3 border-b border-gray-100">
+                  Configuration
+                </h3>
+                
+                {/* GPU Selection */}
+                <div className="space-y-6">
+                  <GPUDropdown
+                    gpuModels={calculatorGPUModels}
+                    selectedGPU={calculatorState.selectedGPU}
+                    onGPUChange={(gpu) => setCalculatorState(prev => ({ ...prev, selectedGPU: gpu }))}
+                  />
 
-                    {/* GPU Quantity Control */}
-                    <GPUQuantityControl
-                      quantity={calculatorState.quantity}
-                      onQuantityChange={(quantity) => setCalculatorState(prev => ({ ...prev, quantity }))}
-                    />
+                  {/* Reservation Period Selection */}
+                  <ReservationPeriodTabs
+                    periods={reservationPeriods}
+                    selectedPeriod={calculatorState.reservationPeriod}
+                    onPeriodChange={(period) => setCalculatorState(prev => ({ ...prev, reservationPeriod: period }))}
+                  />
 
-                    {/* Professional Usage Hours Slider */}
-                    <ProfessionalUsageSlider
-                      hours={calculatorState.hoursPerMonth}
-                      onHoursChange={(hours) => setCalculatorState(prev => ({ ...prev, hoursPerMonth: hours }))}
-                    />
-                  </div>
+                  {/* GPU Quantity Control */}
+                  <GPUQuantityControl
+                    quantity={calculatorState.quantity}
+                    onQuantityChange={(quantity) => setCalculatorState(prev => ({ ...prev, quantity }))}
+                  />
+
+                  {/* Professional Usage Hours Slider */}
+                  <ProfessionalUsageSlider
+                    hours={calculatorState.hoursPerMonth}
+                    onHoursChange={(hours) => setCalculatorState(prev => ({ ...prev, hoursPerMonth: hours }))}
+                  />
                 </div>
               </div>
             </div>

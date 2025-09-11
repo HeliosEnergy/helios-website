@@ -70,6 +70,7 @@ const pricingData: PricingData[] = [
 
 const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange }) => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(null);
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
   // Calculate discounted price helper
   const calculateDiscountedPrice = useCallback((originalPrice: string, discountPercent: number): string => {
@@ -247,35 +248,33 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
 
         {/* Mobile/Tablet Cards */}
         <div className="lg:hidden space-y-6">
-          {sortedPricingData.map((row) => (
-            <div key={row.gpu} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              {/* GPU Header */}
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{row.gpu}</h3>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mb-2">
-                  {row.vram} VRAM
-                </span>
-                <div className="text-sm text-gray-500">Per Hour Pricing (USD)</div>
-              </div>
-              
-              {/* Helios Pricing - Featured */}
-              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-[#fbbf24] rounded-lg p-4 mb-4 relative">
-                {selectedPlan && selectedPlan.discount > 0 && (
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    {selectedPlan.discount}% off
+          {sortedPricingData.map((row, index) => (
+            <div key={row.gpu} className="bg-white rounded-lg shadow-sm border border-gray-200">
+              {/* GPU Header - Always Visible */}
+              <div 
+                className="p-6 cursor-pointer min-h-[100px] flex items-center"
+                onClick={() => setExpandedCard(expandedCard === row.gpu ? null : row.gpu)}
+                aria-expanded={expandedCard === row.gpu}
+                aria-controls={`gpu-details-${index}`}
+                id={`gpu-header-${index}`}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setExpandedCard(expandedCard === row.gpu ? null : row.gpu);
+                  }
+                }}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{row.gpu}</h3>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      {row.vram} VRAM
+                    </span>
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-[#fbbf24] text-black px-3 py-2 rounded-full flex items-center">
-                      <Logo 
-                        shouldInvert={true} 
-                        height={24} 
-                        linkToHome={false}
-                        className="opacity-90"
-                      />
-                    </div>
-                    <div>
+                  <div className="flex flex-col items-end">
+                    <div className="text-right">
                       <div className="text-lg font-bold text-black">
                         ${getHeliosPrice(row.heliosCompute)}
                       </div>
@@ -285,54 +284,110 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                         </div>
                       )}
                     </div>
+                    <div className="mt-2">
+                      <svg 
+                        className={`w-5 h-5 transform transition-transform duration-200 ${
+                          expandedCard === row.gpu ? 'rotate-180' : ''
+                        }`}
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              {/* Other Providers */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="font-medium text-gray-700">AWS</span>
-                  <span className="text-gray-600">
-                    {row.aws === 'Not listed' ? (
-                      <span className="text-gray-400 italic">{row.aws}</span>
-                    ) : (
-                      `$${row.aws}`
+              {/* Collapsible Details */}
+              <div 
+                id={`gpu-details-${index}`}
+                role="region"
+                aria-labelledby={`gpu-header-${index}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  expandedCard === row.gpu ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="px-4 pb-4 pt-2">
+                  {/* Helios Pricing - Featured */}
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-[#fbbf24] rounded-lg p-3 mb-3 mt-2 relative">
+                    {selectedPlan && selectedPlan.discount > 0 && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {selectedPlan.discount}% off
+                      </div>
                     )}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="font-medium text-gray-700">Google Cloud</span>
-                  <span className="text-gray-600">
-                    {row.googleCloud === 'Not listed' ? (
-                      <span className="text-gray-400 italic">{row.googleCloud}</span>
-                    ) : (
-                      `$${row.googleCloud}`
-                    )}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="font-medium text-gray-700">Lambda</span>
-                  <span className="text-gray-600">
-                    {row.lambda === 'Not Available' || row.lambda === 'Not listed' ? (
-                      <span className="text-gray-400 italic">{row.lambda}</span>
-                    ) : (
-                      `$${row.lambda}`
-                    )}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center py-2">
-                  <span className="font-medium text-gray-700">Modal</span>
-                  <span className="text-gray-600">
-                    {row.modal === 'Not listed' ? (
-                      <span className="text-gray-400 italic">{row.modal}</span>
-                    ) : (
-                      `$${row.modal}`
-                    )}
-                  </span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className="bg-[#fbbf24] text-black px-2 py-1 rounded-full flex items-center">
+                          <Logo 
+                            shouldInvert={true} 
+                            height={20} 
+                            linkToHome={false}
+                            className="opacity-90"
+                          />
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-black">
+                            ${getHeliosPrice(row.heliosCompute)}
+                          </div>
+                          {selectedPlan && selectedPlan.discount > 0 && (
+                            <div className="text-sm text-gray-500 line-through">
+                              ${row.heliosCompute}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Other Providers */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-1 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">AWS</span>
+                      <span className="text-gray-600">
+                        {row.aws === 'Not listed' ? (
+                          <span className="text-gray-400 italic">{row.aws}</span>
+                        ) : (
+                          `$${row.aws}`
+                        )}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-1 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Google Cloud</span>
+                      <span className="text-gray-600">
+                        {row.googleCloud === 'Not listed' ? (
+                          <span className="text-gray-400 italic">{row.googleCloud}</span>
+                        ) : (
+                          `$${row.googleCloud}`
+                        )}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-1 border-b border-gray-100">
+                      <span className="font-medium text-gray-700">Lambda</span>
+                      <span className="text-gray-600">
+                        {row.lambda === 'Not Available' || row.lambda === 'Not listed' ? (
+                          <span className="text-gray-400 italic">{row.lambda}</span>
+                        ) : (
+                          `$${row.lambda}`
+                        )}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-1">
+                      <span className="font-medium text-gray-700">Modal</span>
+                      <span className="text-gray-600">
+                        {row.modal === 'Not listed' ? (
+                          <span className="text-gray-400 italic">{row.modal}</span>
+                        ) : (
+                          `$${row.modal}`
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
