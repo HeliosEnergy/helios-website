@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GPUModel, ReservationPeriod } from './GPUPricingData';
+
+// Cloudflare Worker URL
+const CLOUDFLARE_WORKER_URL = "https://helios-contact-worker.helios-energy.workers.dev/";
 
 interface PricingSummaryProps {
   selectedGPU: GPUModel;
@@ -23,6 +26,83 @@ const PricingSummary: React.FC<PricingSummaryProps> = ({
   hoursPerMonth,
   pricing
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleContactSales = async () => {
+    setIsSubmitting(true);
+    
+    // Construct the message with all GPU configuration details
+    const message = `
+GPU Rental Inquiry Details:
+---------------------------
+GPU Model: ${selectedGPU.name}
+VRAM: ${selectedGPU.vram}
+Memory: ${selectedGPU.memory}
+Specifications: ${selectedGPU.specs}
+
+Configuration:
+- Quantity: ${quantity} unit${quantity !== 1 ? 's' : ''}
+- Monthly Runtime: ${hoursPerMonth} hours
+- Contract Term: ${reservationPeriod.label} (${reservationPeriod.duration})
+
+Pricing Summary:
+- Base Cost: $${pricing.baseCost.toFixed(2)}
+- Discount: $${pricing.discountAmount.toFixed(2)} (${reservationPeriod.discount}%)
+- Total Monthly Cost: $${pricing.totalCost.toFixed(2)}
+- Effective Rate: $${pricing.effectiveRate.toFixed(2)}/hour
+
+${quantity > 1 ? `Per Unit Cost: $${(pricing.totalCost / quantity).toFixed(2)}/month` : ''}
+`;
+
+    // Construct the payload with all GPU configuration details
+    const payload = {
+      name: 'GPU Calculator User', // Default name for calculator submissions
+      company: 'Not provided', // Default company for calculator submissions
+      email: 'not-provided@example.com', // Default email for calculator submissions
+      message: message,
+      inquiryType: 'GPU Rental Calculator',
+      gpuDetails: {
+        model: selectedGPU.name,
+        count: quantity,
+        memory: selectedGPU.memory,
+        specs: selectedGPU.specs,
+        vram: selectedGPU.vram,
+        hoursPerMonth: hoursPerMonth,
+        reservationPeriod: reservationPeriod.label,
+        discount: reservationPeriod.discount,
+        totalCost: pricing.totalCost,
+        baseCost: pricing.baseCost,
+        discountAmount: pricing.discountAmount,
+        effectiveRate: pricing.effectiveRate
+      }
+    };
+
+    try {
+      const response = await fetch(CLOUDFLARE_WORKER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        // If the server responds with an error, handle it
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'An unknown network error occurred.');
+      }
+
+      // If the request is successful, open Calendly
+      window.open('https://calendly.com/jose-helios/30min', '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Submission error:', error);
+      // Even if submission fails, still open Calendly so user can contact sales
+      window.open('https://calendly.com/jose-helios/30min', '_blank', 'noopener,noreferrer');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="lg:sticky lg:top-8">
       <div className="bg-gray-50 p-6 md:p-8 rounded-sm">
@@ -126,9 +206,10 @@ const PricingSummary: React.FC<PricingSummaryProps> = ({
         {/* CTA Button */}
         <button 
           className="w-full px-8 py-4 bg-black text-white text-base font-medium border border-black hover:bg-white hover:text-black transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-black"
-          onClick={() => window.open('https://calendly.com/jose-helios/30min', '_blank', 'noopener,noreferrer')}
+          onClick={handleContactSales}
+          disabled={isSubmitting}
         >
-          Contact Sales
+          {isSubmitting ? 'Processing...' : 'Contact Sales'}
         </button>
 
         {/* Additional Info */}
@@ -137,7 +218,7 @@ const PricingSummary: React.FC<PricingSummaryProps> = ({
             Instant provisioning • Enterprise SLA • Scalable infrastructure
           </div>
           <button 
-            onClick={() => window.open('https://calendly.com/jose-helios/30min', '_blank', 'noopener,noreferrer')}
+            onClick={handleContactSales}
             className="text-xs font-light text-gray-600 hover:text-black underline transition-colors mt-2"
           >
             Enterprise pricing inquiry
