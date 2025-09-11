@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import GPUCard from './GPUCard';
+import { track } from '@vercel/analytics';
 
 // GPU data with real specifications from Helios
 const gpuData = [
@@ -98,6 +99,13 @@ const GPUSelectionSection = () => {
   const [expandedIndex, setExpandedIndex] = useState<number>(0); // Default to H100 NVL expanded (never null)
 
   const handleCardExpand = (index: number) => {
+    // Track GPU selection event
+    track('GPU Selected', {
+      gpuModel: gpuData[index].model,
+      gpuId: gpuData[index].id,
+      page: 'gpu-pricing'
+    });
+    
     // Exclusive expansion pattern - only switch if clicking different card
     if (expandedIndex !== index) {
       setExpandedIndex(index);

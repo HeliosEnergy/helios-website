@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import { track } from '@vercel/analytics';
 
 // IMPORTANT: Replace this with your actual Cloudflare Worker URL after deployment
 const CLOUDFLARE_WORKER_URL = "https://helios-contact-worker.helios-energy.workers.dev/";
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 type UseCase = 'Baremetal GPU' | 'Media Generation' | 'Inference' | '';
-type AnimationType = 'baremetal' | 'media' | 'inference';
 
 // --- USE CASE DATA ---
 const useCaseData = [
@@ -87,11 +87,72 @@ const UseCaseCard = ({
   );
 };
 
+// --- INPUT FIELD COMPONENT ---
+const InputField = ({ 
+  label, 
+  name, 
+  type = 'text', 
+  value, 
+  onChange, 
+  required = false 
+}: {
+  label: string;
+  name: string;
+  type?: 'text' | 'email' | 'textarea';
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  required?: boolean;
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const hasValue = value.length > 0;
+
+  return (
+    <div className="relative">
+      <label
+        htmlFor={name}
+        className={`absolute transition-all duration-200 ease-in-out pointer-events-none ${
+          isFocused || hasValue
+            ? 'top-[-10px] left-2 text-sm text-orange-600 bg-white px-1'
+            : 'top-3 left-4 text-gray-500'
+        }`}
+      >
+        {label}
+      </label>
+      {type === 'textarea' ? (
+        <textarea
+          id={name}
+          name={name}
+          value={value}
+          onChange={onChange}
+          required={required}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          rows={4}
+          className="w-full px-4 py-3 bg-transparent border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
+          style={{ fontFamily: 'var(--font-darker-grotesque)' }}
+        />
+      ) : (
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          required={required}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="w-full px-4 py-3 bg-transparent border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
+          style={{ fontFamily: 'var(--font-darker-grotesque)' }}
+        />
+      )}
+    </div>
+  );
+};
+
 // --- MAIN CONTACT COMPONENT ---
 const Contact = () => {
   const [formData, setFormData] = useState({ name: '', company: '', email: '', message: '', gpuCount: 500 });
   const [selectedUseCase, setSelectedUseCase] = useState<UseCase>('');
-  const [hoveredUseCase, setHoveredUseCase] = useState<UseCase>('');
   const [formState, setFormState] = useState<FormState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -115,6 +176,13 @@ const Contact = () => {
       setFormState('error');
       return;
     }
+
+    // Track form submission event
+    track('Contact Form Submitted', {
+      useCase: selectedUseCase || 'General Inquiry',
+      hasCompany: !!formData.company,
+      hasMessage: !!formData.message
+    });
 
     // Construct the message to include GPU count when Baremetal GPU is selected
     let message = formData.message;
@@ -160,10 +228,10 @@ const Contact = () => {
       setFormData({ name: '', company: '', email: '', message: '', gpuCount: 500 });
       setSelectedUseCase('');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If the fetch itself fails or an error is thrown, handle it
       setFormState('error');
-      setErrorMessage(error.message || 'Failed to send message. Please try again.');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
       console.error('Submission error:', error);
     }
   };
@@ -175,7 +243,7 @@ const Contact = () => {
         <div className="max-w-4xl mx-auto px-4">
           <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.7}}>
             <h1 className="text-5xl md:text-6xl font-normal text-center mb-4" style={{ fontFamily: 'var(--font-funnel-display)' }}>
-              Let's Build Together
+              Let&#39;s Build Together
             </h1>
             <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto mb-12">
               Select an area of interest to begin, or fill out the form for general inquiries. Our team is ready to connect.
@@ -189,8 +257,14 @@ const Contact = () => {
                 key={useCase.id}
                 useCase={useCase}
                 isActive={selectedUseCase === useCase.name}
-                isHovered={hoveredUseCase === useCase.name}
-                onClick={() => setSelectedUseCase(selectedUseCase === useCase.name ? '' : useCase.name as UseCase)}
+                isHovered={false}
+                onClick={() => {
+                  // Track use case selection
+                  track('Use Case Selected', {
+                    useCase: useCase.name
+                  });
+                  setSelectedUseCase(selectedUseCase === useCase.name ? '' : useCase.name as UseCase);
+                }}
               />
             ))}
           </div>
@@ -200,7 +274,7 @@ const Contact = () => {
             {formState === 'success' ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <h2 className="text-3xl font-bold mb-4">Connection Established</h2>
-                <p className="text-lg text-gray-700">Thank you. We've received your message and will be in touch at lightspeed.</p>
+                <p className="text-lg text-gray-700">Thank you. We&#39;ve received your message and will be in touch at lightspeed.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-8">
@@ -297,54 +371,6 @@ const Contact = () => {
         }
       `}</style>
     </>
-  );
-};
-
-// --- REUSABLE INPUT FIELD COMPONENT ---
-const InputField = ({ label, name, type = 'text', value, onChange, required = false }) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const hasValue = value.length > 0;
-
-  return (
-    <div className="relative">
-      <label
-        htmlFor={name}
-        className={`absolute transition-all duration-200 ease-in-out pointer-events-none ${
-          isFocused || hasValue
-            ? 'top-[-10px] left-2 text-sm text-orange-600 bg-white px-1'
-            : 'top-3 left-4 text-gray-500'
-        }`}
-      >
-        {label}
-      </label>
-      {type === 'textarea' ? (
-        <textarea
-          id={name}
-          name={name}
-          value={value}
-          onChange={onChange}
-          required={required}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          rows={4}
-          className="w-full px-4 py-3 bg-transparent border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-          style={{ fontFamily: 'var(--font-darker-grotesque)' }}
-        />
-      ) : (
-        <input
-          id={name}
-          name={name}
-          type={type}
-          value={value}
-          onChange={onChange}
-          required={required}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          className="w-full px-4 py-3 bg-transparent border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-colors"
-          style={{ fontFamily: 'var(--font-darker-grotesque)' }}
-        />
-      )}
-    </div>
   );
 };
 

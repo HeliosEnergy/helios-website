@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Funnel_Display, Darker_Grotesque, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import LayoutTransition from "./components/ui/LayoutTransition";
+import { Analytics } from '@vercel/analytics/next';
 
 const funnelDisplay = Funnel_Display({
   variable: "--font-funnel-display",
@@ -42,6 +43,7 @@ export default function RootLayout({
         <LayoutTransition>
           {children}
         </LayoutTransition>
+        <Analytics />
       </body>
     </html>
   );

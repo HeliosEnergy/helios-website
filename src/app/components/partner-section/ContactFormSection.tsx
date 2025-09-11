@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Button from '../ui/Button';
+import { track } from '@vercel/analytics';
 
 interface FormData {
   name: string;
@@ -104,6 +105,14 @@ const ContactFormSection: React.FC = () => {
     setSubmitStatus(null);
     
     if (validateForm()) {
+      // Track partner form submission
+      track('Partner Form Submitted', {
+        hasPhone: !!formData.phone,
+        hasLocation: !!formData.location,
+        hasAvailablePower: !!formData.availablePower,
+        hasNotes: !!formData.notes
+      });
+      
       setIsSubmitting(true);
       try {
         const result = await submitToCloudflareWorker(formData);
