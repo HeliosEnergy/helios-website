@@ -30,7 +30,7 @@ const SimpleDeckGLMap = () => {
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/dark-v10',
+      style: 'mapbox://styles/mapbox/light-v10',
       center: [viewState.longitude, viewState.latitude],
       zoom: viewState.zoom,
       pitch: viewState.pitch,
@@ -69,7 +69,7 @@ const SimpleDeckGLMap = () => {
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.output) * 2,
     getFillColor: [255, 140, 0],
-    getLineColor: [255, 255, 255]
+    getLineColor: [0, 0, 0, 200]
   });
 
   // Handle view state changes

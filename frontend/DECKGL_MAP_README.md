@@ -155,8 +155,9 @@ The implementation uses a consistent color scheme for different infrastructure t
 ## Running the Application
 
 1. Install dependencies: `npm install`
-2. Start development server: `npm run dev`
-3. Access the application at `http://localhost:9729`
+2. Configure Mapbox access token (see [MAPBOX_CONFIGURATION.md](MAPBOX_CONFIGURATION.md))
+3. Start development server: `npm run dev`
+4. Access the application at `http://localhost:9729`
 
 ## Accessing the Deck.gl Map
 

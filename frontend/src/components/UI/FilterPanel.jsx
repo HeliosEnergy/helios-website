@@ -1,126 +1,148 @@
 // FilterPanel.jsx
 import React, { useState, useEffect } from 'react';
-import { getSourceColor } from '../../utils/colorUtils';
 
 const FilterPanel = ({ filters, onFilterChange, powerPlants }) => {
-  // Extract unique sources from power plants
-  const [sources, setSources] = useState([]);
+  // Get unique sources from power plants
+  const uniqueSources = [...new Set(powerPlants.map(plant => plant.source))].filter(Boolean);
   
+  // Local state for capacity range
+  const [minCapacity, setMinCapacity] = useState(filters.powerPlants.minCapacity);
+  const [maxCapacity, setMaxCapacity] = useState(filters.powerPlants.maxCapacity);
+  
+  // Validation states
+  const [minCapacityError, setMinCapacityError] = useState('');
+  const [maxCapacityError, setMaxCapacityError] = useState('');
+  
+  // Debounce capacity changes
   useEffect(() => {
-    const uniqueSources = [...new Set(powerPlants.map(plant => plant.source))];
-    setSources(uniqueSources);
-  }, [powerPlants]);
-
+    // Validate inputs
+    let hasError = false;
+    
+    if (minCapacity < 0) {
+      setMinCapacityError('Minimum capacity cannot be negative');
+      hasError = true;
+    } else if (minCapacity > maxCapacity) {
+      setMinCapacityError('Minimum capacity cannot exceed maximum capacity');
+      hasError = true;
+    } else {
+      setMinCapacityError('');
+    }
+    
+    if (maxCapacity < 0) {
+      setMaxCapacityError('Maximum capacity cannot be negative');
+      hasError = true;
+    } else if (maxCapacity < minCapacity) {
+      setMaxCapacityError('Maximum capacity cannot be less than minimum capacity');
+      hasError = true;
+    } else {
+      setMaxCapacityError('');
+    }
+    
+    // Only apply filters if no errors
+    if (!hasError) {
+      const timer = setTimeout(() => {
+        onFilterChange('powerPlants', 'minCapacity', minCapacity);
+        onFilterChange('powerPlants', 'maxCapacity', maxCapacity);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [minCapacity, maxCapacity]);
+  
   const handleSourceToggle = (source) => {
     const currentSources = filters.powerPlants.source;
-    let newSources;
-    
-    if (currentSources.includes(source)) {
-      newSources = currentSources.filter(s => s !== source);
-    } else {
-      newSources = [...currentSources, source];
-    }
+    const newSources = currentSources.includes(source)
+      ? currentSources.filter(s => s !== source)
+      : [...currentSources, source];
     
     onFilterChange('powerPlants', 'source', newSources);
   };
-
-  const handleCapacityChange = (type, value) => {
-    onFilterChange('powerPlants', type, parseFloat(value) || 0);
-  };
-
-  const handleCableTypeToggle = (type) => {
-    const currentTypes = filters.cables.type;
-    let newTypes;
-    
-    if (currentTypes.includes(type)) {
-      newTypes = currentTypes.filter(t => t !== type);
-    } else {
-      newTypes = [...currentTypes, type];
-    }
-    
-    onFilterChange('cables', 'type', newTypes);
-  };
-
+  
   return (
-    <div className="filter-panel">
-      <h3 className="text-lg font-bold mb-3">Filters</h3>
+    <div className="bg-white/95 p-3 rounded-lg shadow-lg backdrop-blur-sm w-72 max-h-80 overflow-y-auto">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-sm font-bold">Filters</h3>
+        <button
+          onClick={() => {
+            setMinCapacity(0);
+            setMaxCapacity(10000);
+            onFilterChange('powerPlants', 'source', []);
+          }}
+          className="text-xs text-blue-600 hover:text-blue-800 focus:outline-none focus:underline"
+        >
+          Clear All
+        </button>
+      </div>
       
-      <div className="space-y-4">
-        {/* Power Plant Filters */}
-        <div>
-          <h4 className="font-semibold mb-2">Power Plants</h4>
-          
-          {/* Source Filters */}
-          <div className="mb-3">
-            <h5 className="text-sm font-medium mb-1">By Source</h5>
-            <div className="grid grid-cols-2 gap-1">
-              {sources.map(source => (
-                <div key={source} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`source-${source}`}
-                    checked={filters.powerPlants.source.includes(source)}
-                    onChange={() => handleSourceToggle(source)}
-                    className="mr-2 h-4 w-4 text-blue-600 rounded"
-                  />
-                  <label 
-                    htmlFor={`source-${source}`} 
-                    className="text-sm flex items-center"
-                  >
-                    <span 
-                      className="w-3 h-3 rounded-full mr-1" 
-                      style={{ backgroundColor: `rgb(${getSourceColor(source).join(',')})` }}
-                    ></span>
-                    <span className="capitalize">{source}</span>
-                  </label>
-                </div>
-              ))}
-            </div>
+      {/* Capacity Filter */}
+      <div className="mb-4">
+        <h4 className="font-semibold text-xs mb-2 text-gray-700">Capacity Range (MW)</h4>
+        <div className="space-y-3">
+          <div>
+            <label htmlFor="min-capacity" className="block text-xs font-medium text-gray-700 mb-1">
+              Minimum Capacity
+            </label>
+            <input
+              id="min-capacity"
+              type="number"
+              value={minCapacity}
+              onChange={(e) => setMinCapacity(Number(e.target.value))}
+              className={`w-full px-2 py-1 text-xs border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                minCapacityError 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-300 focus:border-blue-500'
+              }`}
+              min="0"
+            />
+            {minCapacityError && (
+              <p className="mt-1 text-xs text-red-600">{minCapacityError}</p>
+            )}
           </div>
           
-          {/* Capacity Filters */}
           <div>
-            <h5 className="text-sm font-medium mb-1">By Capacity (MW)</h5>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="text-xs block mb-1">Min</label>
-                <input
-                  type="number"
-                  value={filters.powerPlants.minCapacity}
-                  onChange={(e) => handleCapacityChange('minCapacity', e.target.value)}
-                  className="w-full p-1 border rounded text-sm"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="text-xs block mb-1">Max</label>
-                <input
-                  type="number"
-                  value={filters.powerPlants.maxCapacity}
-                  onChange={(e) => handleCapacityChange('maxCapacity', e.target.value)}
-                  className="w-full p-1 border rounded text-sm"
-                  min="0"
-                />
-              </div>
-            </div>
+            <label htmlFor="max-capacity" className="block text-xs font-medium text-gray-700 mb-1">
+              Maximum Capacity
+            </label>
+            <input
+              id="max-capacity"
+              type="number"
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(Number(e.target.value))}
+              className={`w-full px-2 py-1 text-xs border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                maxCapacityError 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-300 focus:border-blue-500'
+              }`}
+              min="0"
+            />
+            {maxCapacityError && (
+              <p className="mt-1 text-xs text-red-600">{maxCapacityError}</p>
+            )}
           </div>
         </div>
-        
-        {/* Cable Filters */}
-        <div>
-          <h4 className="font-semibold mb-2">Cables</h4>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="submarine-filter"
-              checked={filters.cables.type.includes('submarine')}
-              onChange={() => handleCableTypeToggle('submarine')}
-              className="mr-2 h-4 w-4 text-blue-600 rounded"
-            />
-            <label htmlFor="submarine-filter" className="text-sm">
-              Submarine Cables
-            </label>
-          </div>
+      </div>
+      
+      {/* Source Filter */}
+      <div>
+        <h4 className="font-semibold text-xs mb-2 text-gray-700">Energy Sources</h4>
+        <div className="space-y-2 max-h-32 overflow-y-auto">
+          {uniqueSources.map(source => (
+            <div key={source} className="flex items-center">
+              <input
+                id={`source-${source}`}
+                type="checkbox"
+                checked={filters.powerPlants.source.includes(source)}
+                onChange={() => handleSourceToggle(source)}
+                className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+              />
+              <label 
+                htmlFor={`source-${source}`} 
+                className="ml-2 text-xs text-gray-700 capitalize"
+              >
+                {source}
+              </label>
+            </div>
+          ))}
         </div>
       </div>
     </div>

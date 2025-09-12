@@ -28,21 +28,21 @@ const Legend = () => {
   };
 
   return (
-    <div className="legend">
-      <h3 className="text-lg font-bold mb-2">Map Legend</h3>
+    <div className="bg-white/95 p-3 rounded-lg shadow-lg backdrop-blur-sm max-w-xs">
+      <h3 className="text-sm font-bold mb-2 text-gray-900">Map Legend</h3>
       
       <div className="space-y-3">
         {/* Power Sources */}
         <div>
-          <h4 className="font-semibold text-sm mb-1">Power Plants</h4>
+          <h4 className="font-semibold text-xs mb-1 text-gray-800">Power Plants</h4>
           <div className="space-y-1">
             {powerSources.map(source => (
-              <div key={source.type} className="flex items-center text-xs">
+              <div key={source.type} className="flex items-center group">
                 <span 
-                  className="w-3 h-3 rounded-full mr-2" 
+                  className="w-3 h-3 rounded-full mr-2 border border-gray-700" 
                   style={{ backgroundColor: rgbToCss(getSourceColor(source.type)) }}
                 ></span>
-                <span>{source.label}</span>
+                <span className="text-xs text-gray-900">{source.label}</span>
               </div>
             ))}
           </div>
@@ -50,15 +50,15 @@ const Legend = () => {
         
         {/* Infrastructure */}
         <div>
-          <h4 className="font-semibold text-sm mb-1">Infrastructure</h4>
+          <h4 className="font-semibold text-xs mb-1 text-gray-800">Infrastructure</h4>
           <div className="space-y-1">
             {infrastructureTypes.map(type => (
-              <div key={type.type} className="flex items-center text-xs">
+              <div key={type.type} className="flex items-center group">
                 <span 
-                  className="w-3 h-3 rounded-full mr-2" 
+                  className="w-3 h-3 rounded-full mr-2 border border-gray-700" 
                   style={{ backgroundColor: rgbToCss(getInfrastructureColor(type.type)) }}
                 ></span>
-                <span>{type.label}</span>
+                <span className="text-xs text-gray-900">{type.label}</span>
               </div>
             ))}
           </div>
@@ -66,28 +66,28 @@ const Legend = () => {
         
         {/* Size Legend */}
         <div>
-          <h4 className="font-semibold text-sm mb-1">Plant Capacity</h4>
+          <h4 className="font-semibold text-xs mb-1 text-gray-800">Plant Capacity</h4>
           <div className="flex items-center justify-between text-xs">
             <div className="text-center">
               <div 
-                className="rounded-full mx-auto bg-blue-500"
+                className="rounded-full mx-auto bg-blue-500 border border-gray-700"
                 style={{ width: '8px', height: '8px' }}
               ></div>
-              <div>Small</div>
+              <div className="mt-1 text-gray-900">Small</div>
             </div>
             <div className="text-center">
               <div 
-                className="rounded-full mx-auto bg-blue-500"
+                className="rounded-full mx-auto bg-blue-500 border border-gray-700"
                 style={{ width: '16px', height: '16px' }}
               ></div>
-              <div>Medium</div>
+              <div className="mt-1 text-gray-900">Medium</div>
             </div>
             <div className="text-center">
               <div 
-                className="rounded-full mx-auto bg-blue-500"
+                className="rounded-full mx-auto bg-blue-500 border border-gray-700"
                 style={{ width: '24px', height: '24px' }}
               ></div>
-              <div>Large</div>
+              <div className="mt-1 text-gray-900">Large</div>
             </div>
           </div>
         </div>

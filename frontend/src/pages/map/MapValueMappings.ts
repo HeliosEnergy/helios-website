@@ -28,7 +28,7 @@ export const fuelTypeColors: {[key: string]: string} = {
 	'SGC': '#ffc000',   // Solar Thermal - Forest Green
 	'RFO': '#000000',   // Residual Fuel Oil - Forest Green
 	'PC': '#000000',   // Petroleum Coke - Forest Green
-	'OTHER': '#FFFFFF', // Other - Gray
+	'OTHER': '#333333', // Other - Dark Gray (was white)
 };
 
 export const fuelTypeDisplayNames = {

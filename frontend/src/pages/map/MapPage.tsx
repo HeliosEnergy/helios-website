@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import './Map.scss';
 import { MdArrowForwardIos } from "react-icons/md";
 import { DEFAULT_CAPACITY_WEIGHT, DEFAULT_COLORING_MODE, DEFAULT_SHOW_SUMMER_CAPACITY, DEFAULT_SIZE_MULTIPLIER, MapColorings, operatingStatusColors, operatingStatusDisplayNames, DEFAULT_SIZE_BY_OPTION, SizeByOption } from "./MapValueMappings";
 import { fuelTypeColors, fuelTypeDisplayNames } from "./MapValueMappings";
