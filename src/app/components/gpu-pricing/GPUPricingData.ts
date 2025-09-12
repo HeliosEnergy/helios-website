@@ -124,26 +124,26 @@ export const reservationPeriods: ReservationPeriod[] = [
   {
     id: '1-month',
     label: '1 Month',
-    duration: '10% off',
-    discount: 10
+    duration: '5% off',
+    discount: 5
   },
   {
     id: '3-months',
     label: '3 Months',
-    duration: '15% off',
-    discount: 15
+    duration: '10% off',
+    discount: 10
   },
   {
     id: '6-months',
     label: '6 Months',
-    duration: '20% off',
-    discount: 20
+    duration: '15% off',
+    discount: 15
   },
   {
     id: '12-months',
     label: '12 Months',
-    duration: '25% off',
-    discount: 25
+    duration: '20% off',
+    discount: 20
   }
 ];
 

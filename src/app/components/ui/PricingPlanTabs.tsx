@@ -25,21 +25,27 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     id: 'quarterly',
-    label: '3 months',
-    duration: '3-month commitment',
+    label: '1 month',
+    duration: '1-month commitment',
     discount: 5,
   },
   {
     id: 'semi-annually',
-    label: '6 months',
-    duration: '6-month commitment',
+    label: '3 months',
+    duration: '3-month commitment',
     discount: 10,
   },
   {
     id: 'annually',
-    label: '1 year',
-    duration: '12-month commitment',
+    label: '6 months',
+    duration: '6-month commitment',
     discount: 15,
+  },
+  {
+    id: 'two-years',
+    label: '12 months',
+    duration: '12-month commitment',
+    discount: 20,
   }
 ];
 
