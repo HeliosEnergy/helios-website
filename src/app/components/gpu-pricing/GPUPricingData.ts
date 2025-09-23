@@ -49,7 +49,7 @@ export const originalPricingData: GPUPricingData[] = [
   {
     gpu: 'RTX Pro 6000',
     vram: '96GB',
-    heliosCompute: '1.19',
+    heliosCompute: '1.70',
     aws: 'Not listed',
     googleCloud: 'Not listed',
     lambda: 'Not listed',
@@ -96,7 +96,7 @@ export const calculatorGPUModels: GPUModel[] = [
   {
     id: 'rtx-pro-6000',
     name: 'RTX Pro 6000 (96GB)',
-    pricePerHour: 1.19,
+    pricePerHour: 1.70,
     memory: '96GB',
     specs: '96GB GDDR7 ECC, Blackwell Architecture',
     vram: '96GB GDDR7 ECC'
