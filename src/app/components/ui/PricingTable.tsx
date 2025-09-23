@@ -42,7 +42,7 @@ const pricingData: PricingData[] = [
   {
     gpu: 'RTX Pro 6000',
     vram: '96GB',
-    heliosCompute: '1.19',
+    heliosCompute: '1.70',
     aws: 'Not listed',
     googleCloud: 'Not listed',
     lambda: 'Not listed',
