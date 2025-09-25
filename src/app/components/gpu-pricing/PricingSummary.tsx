@@ -28,6 +28,22 @@ const PricingSummary: React.FC<PricingSummaryProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Calculate total cost for the entire reservation period
+  const calculateTotalReservationCost = () => {
+    // Map period IDs to months
+    const periodMonths: Record<string, number> = {
+      '1-month': 1,
+      '3-months': 3,
+      '6-months': 6,
+      '12-months': 12
+    };
+    
+    const months = periodMonths[reservationPeriod.id] || 1;
+    return pricing.totalCost * months;
+  };
+
+  const totalReservationCost = calculateTotalReservationCost();
+
   const handleContactSales = async () => {
     setIsSubmitting(true);
     
@@ -111,7 +127,7 @@ ${quantity > 1 ? `Per Unit Cost: $${(pricing.totalCost / quantity).toFixed(2)}/m
         </h3>
         
         {/* Total Cost Display - Hero Section */}
-        <div className="text-center mb-8 p-6 bg-white border border-gray-100">
+        <div className="text-center mb-6 p-6 bg-white border border-gray-100">
           <div className="text-5xl md:text-6xl font-bold text-black mb-2">
             ${pricing.totalCost.toFixed(2)}
           </div>
@@ -125,6 +141,14 @@ ${quantity > 1 ? `Per Unit Cost: $${(pricing.totalCost / quantity).toFixed(2)}/m
               </div>
             </div>
           )}
+        </div>
+
+        {/* Total Reservation Cost - Compact One-liner */}
+        <div className="text-center mb-8 py-3 bg-gray-100 rounded-sm">
+          <div className="text-sm">
+            <span className="font-medium text-gray-700">Total for {reservationPeriod.label}:</span>
+            <span className="font-bold text-black ml-2">${totalReservationCost.toFixed(2)}</span>
+          </div>
         </div>
 
         {/* Configuration Summary */}

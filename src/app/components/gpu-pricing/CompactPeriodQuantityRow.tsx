@@ -19,7 +19,7 @@ const CompactPeriodQuantityRow: React.FC<CompactPeriodQuantityRowProps> = ({
   onQuantityChange
 }) => {
   const handleIncrement = () => {
-    const newQuantity = Math.min(100, quantity + 1);
+    const newQuantity = Math.min(1296, quantity + 1);
     onQuantityChange(newQuantity);
   };
 
@@ -79,9 +79,9 @@ const CompactPeriodQuantityRow: React.FC<CompactPeriodQuantityRowProps> = ({
           
           <button
             onClick={handleIncrement}
-            disabled={quantity >= 100}
+            disabled={quantity >= 1296}
             className={`px-3 py-3 text-sm transition-colors duration-200 ${
-              quantity >= 100
+              quantity >= 1296
                 ? 'text-gray-300 cursor-not-allowed'
                 : 'text-gray-700 hover:text-black hover:bg-gray-50'
             }`}

@@ -112,6 +112,15 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
       return null;
     });
   };
+
+  // Calculate total cost for monthly infrastructure
+  const calculateTotalCost = useCallback((price: string): string => {
+    const hourlyPrice = parseFloat(price);
+    if (isNaN(hourlyPrice)) return price;
+    const totalCost = hourlyPrice * 730; // 730 hours in a month (30 days * 24 hours)
+    return totalCost.toFixed(2);
+  }, []);
+
   return (
     <div className="w-full bg-white py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -210,6 +219,15 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                           ${row.heliosCompute}
                         </span>
                       )}
+                      {/* Total cost display */}
+                      {selectedPlan && selectedPlan.id !== 'on-demand' && (
+                        <div className="mt-1">
+                         
+                          <span className="text-xs text-gray-500">
+                            Total: ${calculateTotalCost(getHeliosPrice(row.heliosCompute))}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </td>
                   <td className="py-8 px-8 text-gray-600 text-base">
@@ -283,6 +301,15 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                           ${row.heliosCompute}
                         </div>
                       )}
+                      {/* Total cost display */}
+                      {selectedPlan && selectedPlan.id !== 'on-demand' && (
+                        <div className="mt-1">
+                         
+                          <span className="text-xs text-gray-500">
+                            Total: ${calculateTotalCost(getHeliosPrice(row.heliosCompute))}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="mt-2">
                       <svg 
@@ -335,6 +362,15 @@ const PricingTable: React.FC<PricingTableProps> = ({ selectedPlan, onPlanChange 
                           {selectedPlan && selectedPlan.discount > 0 && (
                             <div className="text-sm text-gray-500 line-through">
                               ${row.heliosCompute}
+                            </div>
+                          )}
+                          {/* Total cost display */}
+                          {selectedPlan && selectedPlan.id !== 'on-demand' && (
+                            <div className="mt-1">
+                            
+                              <span className="text-xs text-gray-500">
+                                Total: ${calculateTotalCost(getHeliosPrice(row.heliosCompute))}
+                              </span>
                             </div>
                           )}
                         </div>

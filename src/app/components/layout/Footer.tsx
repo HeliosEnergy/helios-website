@@ -31,7 +31,7 @@ const Footer = () => {
       title: 'Other',
       titleColor: 'text-gray-300',
       links: [
-
+        { name: 'Terms & Conditions', href: '/tnc' },
       ]
     }
   };

@@ -33,6 +33,22 @@ const CompactPricingSummary: React.FC<CompactPricingSummaryProps> = ({
     return name.split('(')[0].trim();
   };
 
+  // Calculate total cost for the entire reservation period
+  const calculateTotalReservationCost = () => {
+    // Map period IDs to months
+    const periodMonths: Record<string, number> = {
+      '1-month': 1,
+      '3-months': 3,
+      '6-months': 6,
+      '12-months': 12
+    };
+    
+    const months = periodMonths[reservationPeriod.id] || 1;
+    return pricing.totalCost * months;
+  };
+
+  const totalReservationCost = calculateTotalReservationCost();
+
   const handleContactSales = async () => {
     setIsSubmitting(true);
     
@@ -125,6 +141,14 @@ ${quantity > 1 ? `Per Unit Cost: $${(pricing.totalCost / quantity).toFixed(2)}/m
             </div>
           </div>
         )}
+      </div>
+
+      {/* Total Reservation Cost - Compact One-liner */}
+      <div className="text-center mb-4 py-2 bg-gray-100 rounded-sm">
+        <div className="text-xs">
+          <span className="font-medium text-gray-700">Total for {reservationPeriod.label}:</span>
+          <span className="font-bold text-black ml-1">${totalReservationCost.toFixed(2)}</span>
+        </div>
       </div>
 
       {/* Compact Configuration Summary */}
