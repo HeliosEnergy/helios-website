@@ -23,7 +23,7 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">1. Acceptance of Terms</h2>
                 <p className="text-gray-700 mb-4">
-                  By accessing or using the services provided by Helios Energy Systems LLC ("Helios", "we", "us", or "our"), you agree to be bound by these Terms and Conditions ("Terms"). These Terms constitute a legally binding agreement between you, an individual user or entity, and Helios regarding your use of our website, services, and any related applications or platforms.
+                  By accessing or using the services provided by Helios Energy Systems LLC (&quot;Helios&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms and Conditions (&quot;Terms&quot;). These Terms constitute a legally binding agreement between you, an individual user or entity, and Helios regarding your use of our website, services, and any related applications or platforms.
                 </p>
                 <p className="text-gray-700">
                   If you do not agree to these Terms, you must not access or use our services. These Terms apply to all visitors, users, and others who access or use our services. By accessing or using our services, you represent and warrant that you have the right, authority, and capacity to enter into these Terms and to abide by all of the terms and conditions herein.
@@ -60,7 +60,7 @@ const TermsAndConditions = () => {
                   <li>Notify Helios immediately of any unauthorized use of your account or any other breach of security</li>
                   <li>Ensure that you exit from your account at the end of each session</li>
                   <li>Not share your account credentials with any third party</li>
-                  <li>Not use another user's account at any time without the express permission and authority of that user</li>
+                  <li>Not use another user&apos;s account at any time without the express permission and authority of that user</li>
                 </ul>
                 <p className="text-gray-700">
                   Helios will not be liable for any loss or damage arising from your failure to comply with this section.
@@ -88,7 +88,7 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">5. Intellectual Property Rights</h2>
                 <p className="text-gray-700 mb-4">
-                  All content, trademarks, service marks, logos, trade names, graphics, designs, and other intellectual property displayed on our services are the property of Helios or its licensors and are protected by United States and international intellectual property laws. Nothing in these Terms grants you a right to use any of Helios's trademarks, logos, domain names, or other distinctive brand features.
+                  All content, trademarks, service marks, logos, trade names, graphics, designs, and other intellectual property displayed on our services are the property of Helios or its licensors and are protected by United States and international intellectual property laws. Nothing in these Terms grants you a right to use any of Helios&apos;s trademarks, logos, domain names, or other distinctive brand features.
                 </p>
                 <p className="text-gray-700 mb-4">
                   You retain all rights to any content you submit, post, or display on or through our services. By submitting, posting, or displaying content on or through our services, you grant Helios a worldwide, non-exclusive, royalty-free license to use, reproduce, adapt, publish, translate, and distribute such content in any existing or future media.
@@ -114,7 +114,7 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">7. Disclaimer of Warranties</h2>
                 <p className="text-gray-700 mb-4">
-                  Our services are provided on an "as is" and "as available" basis. Helios expressly disclaims all warranties of any kind, whether express or implied, including, but not limited to, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+                  Our services are provided on an &quot;as is&quot; and &quot;as available&quot; basis. Helios expressly disclaims all warranties of any kind, whether express or implied, including, but not limited to, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
                 </p>
                 <p className="text-gray-700">
                   Helios makes no warranty that our services will be uninterrupted, timely, secure, or error-free, or that defects will be corrected. Helios does not warrant or make any representations regarding the use or the results of the use of our services in terms of their correctness, accuracy, reliability, or otherwise.
@@ -133,14 +133,14 @@ const TermsAndConditions = () => {
                   <li>Unauthorized access, use, or alteration of your transmissions or content</li>
                 </ul>
                 <p className="text-gray-700">
-                  In no event shall Helios's total liability to you for all damages exceed the amount paid by you, if any, for accessing the services during the twelve months immediately preceding the event giving rise to the claim.
+                  In no event shall Helios&apos;s total liability to you for all damages exceed the amount paid by you, if any, for accessing the services during the twelve months immediately preceding the event giving rise to the claim.
                 </p>
               </section>
               
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">9. Indemnification</h2>
                 <p className="text-gray-700">
-                  You agree to indemnify, defend, and hold harmless Helios, its affiliates, officers, directors, employees, agents, licensors, and suppliers from and against all losses, expenses, damages, and costs, including reasonable attorneys' fees, resulting from any violation of these Terms or any activity related to your account (including negligent or wrongful conduct).
+                  You agree to indemnify, defend, and hold harmless Helios, its affiliates, officers, directors, employees, agents, licensors, and suppliers from and against all losses, expenses, damages, and costs, including reasonable attorneys&apos; fees, resulting from any violation of these Terms or any activity related to your account (including negligent or wrongful conduct).
                 </p>
               </section>
               
@@ -164,7 +164,7 @@ const TermsAndConditions = () => {
               <section>
                 <h2 className="text-2xl font-semibold mb-4 text-gray-800">12. Changes to Terms</h2>
                 <p className="text-gray-700">
-                  Helios reserves the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on our website and updating the "Last updated" date. Your continued use of our services after such changes constitutes your acceptance of the new Terms. We recommend that you review these Terms periodically for any changes.
+                  Helios reserves the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on our website and updating the &quot;Last updated&quot; date. Your continued use of our services after such changes constitutes your acceptance of the new Terms. We recommend that you review these Terms periodically for any changes.
                 </p>
               </section>
               
