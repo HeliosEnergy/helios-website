@@ -34,7 +34,7 @@ const ContactSection = () => {
               onClick={handleCTAClick}
               className="px-8 py-4 bg-black text-[#fbbf24] font-semibold hover:bg-gray-900 hover:text-white transition-colors duration-300"
             >
-              Contact Us →
+              Waitlist →
             </button>
           </div>
         </div>
