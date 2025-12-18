@@ -13,7 +13,7 @@ const logos = [
 
 export const LogoBar = () => {
   return (
-    <section className="py-12 border-y border-border bg-card/30">
+    <section className="py-10 border-y border-border bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden">
           {/* Gradient Masks */}
@@ -27,7 +27,7 @@ export const LogoBar = () => {
                 key={i}
                 className="flex-shrink-0 px-8 flex items-center justify-center"
               >
-                <span className="text-muted-foreground/50 font-semibold text-lg tracking-wide uppercase whitespace-nowrap">
+                <span className="text-muted-foreground/60 font-semibold text-sm tracking-wide uppercase whitespace-nowrap">
                   {logo}
                 </span>
               </div>
