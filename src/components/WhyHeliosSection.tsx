@@ -19,20 +19,20 @@ const audiences = [
   },
 ];
 
-export const WhyFireworksSection = () => {
+export const WhyHeliosSection = () => {
   return (
     <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-14">
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-            Why Fireworks
+            Why Helios
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
             Startup velocity. Enterprise-grade stability.
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl">
-            From AI Natives to Enterprises, Fireworks powers everything from rapid prototyping to mission-critical workloads
+            From AI Natives to Enterprises, Helios powers everything from rapid prototyping to mission-critical workloads
           </p>
         </div>
 

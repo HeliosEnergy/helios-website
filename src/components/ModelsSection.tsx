@@ -104,7 +104,7 @@ export const ModelsSection = () => {
               Run the latest open models with a single line of code
             </h2>
             <p className="mt-4 text-muted-foreground max-w-2xl">
-              Fireworks gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud
+              Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud
             </p>
           </div>
           <a href="#" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
@@ -121,12 +121,12 @@ export const ModelsSection = () => {
           
           <div 
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+            className="flex overflow-x-auto pb-4 scrollbar-hide"
           >
             {models.map((model, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-64 bg-card border border-border p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                className="flex-shrink-0 w-64 bg-card border border-border border-l-0 first:border-l p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
               >
                 <div className="flex items-start gap-3 mb-4">
                   <div className={`w-10 h-10 ${model.color} flex items-center justify-center text-white font-semibold text-sm`}>

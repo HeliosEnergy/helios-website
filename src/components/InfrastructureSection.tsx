@@ -26,7 +26,7 @@ export const InfrastructureSection = () => {
         {/* Header */}
         <div className="text-center mb-14">
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-            Building with Fireworks
+            Building with Helios
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground max-w-2xl mx-auto">
             Run and tune your models on our highly scalable, optimized virtual cloud infrastructure

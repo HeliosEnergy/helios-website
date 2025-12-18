@@ -12,7 +12,7 @@ export const HeroSection = () => {
               Build. Tune. Scale.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Open-source AI models at blazing speed, optimized for your use case, scaled globally with the Fireworks Inference Cloud
+              Open-source AI models at blazing speed, optimized for your use case, scaled globally with the Helios Inference Cloud
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button variant="hero" size="lg" className="gap-2">

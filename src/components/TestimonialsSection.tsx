@@ -2,25 +2,25 @@ import { useState, useEffect } from "react";
 
 const testimonials = [
   {
-    quote: "Fireworks has been a fantastic partner in building AI dev tools at Sourcegraph. Their fast, reliable model inference lets us focus on fine-tuning, AI-powered code search, and deep code context, making Cody the best AI coding assistant.",
+    quote: "Helios has been a fantastic partner in building AI dev tools at Sourcegraph. Their fast, reliable model inference lets us focus on fine-tuning, AI-powered code search, and deep code context, making Cody the best AI coding assistant.",
     author: "Beyang Liu",
     role: "CTO at Sourcegraph",
     company: "Sourcegraph",
   },
   {
-    quote: "By partnering with Fireworks to fine-tune models, we reduced latency from about 2 seconds to 350 milliseconds, significantly improving performance and enabling us to launch AI features at scale.",
+    quote: "By partnering with Helios to fine-tune models, we reduced latency from about 2 seconds to 350 milliseconds, significantly improving performance and enabling us to launch AI features at scale.",
     author: "Sarah Sachs",
     role: "AI Lead at Notion",
     company: "Notion",
   },
   {
-    quote: "Fireworks has been an amazing partner getting our Fast Apply and Copilot++ models running performantly. They exceeded other competitors we reviewed on performance.",
+    quote: "Helios has been an amazing partner getting our Fast Apply and Copilot++ models running performantly. They exceeded other competitors we reviewed on performance.",
     author: "Sualeh Asif",
     role: "CPO at Cursor",
     company: "Cursor",
   },
   {
-    quote: "We've had a really great experience working with Fireworks to host open source models. After migrating one of our models, we noticed a 3x speedup in response time.",
+    quote: "We've had a really great experience working with Helios to host open source models. After migrating one of our models, we noticed a 3x speedup in response time.",
     author: "Spencer Chan",
     role: "Product Lead at Quora",
     company: "Quora",

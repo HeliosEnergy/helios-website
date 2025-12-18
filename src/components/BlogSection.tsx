@@ -3,17 +3,17 @@ import { ArrowRight } from "lucide-react";
 const posts = [
   {
     date: "10/20/2025",
-    title: "Fireworks and AMD partner to power the next gen of AI infrastructure",
+    title: "Helios and AMD partner to power the next gen of AI infrastructure",
     image: "from-orange-400 to-red-500",
   },
   {
     date: "10/15/2025",
-    title: "LLM on the edge: Model picking with Fireworks Eval Protocol + Ollama",
+    title: "LLM on the edge: Model picking with Helios Eval Protocol + Ollama",
     image: "from-blue-400 to-cyan-500",
   },
   {
     date: "10/9/2025",
-    title: "Announcing Embeddings and Reranking On Fireworks AI",
+    title: "Announcing Embeddings and Reranking On Helios AI",
     image: "from-purple-400 to-pink-500",
   },
 ];

@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 const features = [
   {
     title: "Build",
-    description: "Go from idea to output in seconds—with just a prompt. Run the latest open models on Fireworks serverless, with no GPU setup or cold starts. Move to production with on-demand GPUs that auto-scale as you grow",
+    description: "Go from idea to output in seconds—with just a prompt. Run the latest open models on Helios serverless, with no GPU setup or cold starts. Move to production with on-demand GPUs that auto-scale as you grow",
   },
   {
     title: "Tune",
@@ -11,7 +11,7 @@ const features = [
   },
   {
     title: "Scale",
-    description: "Scale production workloads seamlessly, anywhere, without managing infrastructure. Fireworks automatically provisions AI infrastructure across any deployment type, so you can focus on building",
+    description: "Scale production workloads seamlessly, anywhere, without managing infrastructure. Helios automatically provisions AI infrastructure across any deployment type, so you can focus on building",
   },
 ];
 
