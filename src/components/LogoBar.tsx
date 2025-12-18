@@ -1,0 +1,40 @@
+const logos = [
+  "Uber",
+  "DoorDash",
+  "Notion",
+  "GitLab",
+  "Upwork",
+  "HubSpot",
+  "Cursor",
+  "Samsung",
+  "Verizon",
+  "Quora",
+];
+
+export const LogoBar = () => {
+  return (
+    <section className="py-12 border-y border-border bg-card/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden">
+          {/* Gradient Masks */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10" />
+          
+          {/* Scrolling Container */}
+          <div className="flex animate-scroll">
+            {[...logos, ...logos].map((logo, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 px-8 flex items-center justify-center"
+              >
+                <span className="text-muted-foreground/50 font-semibold text-lg tracking-wide uppercase whitespace-nowrap">
+                  {logo}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
