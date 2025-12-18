@@ -28,7 +28,7 @@ export const InfrastructureSection = () => {
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
             Building with Fireworks
           </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground max-w-2xl mx-auto">
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground max-w-2xl mx-auto">
             Run and tune your models on our highly scalable, optimized virtual cloud infrastructure
           </h2>
         </div>
@@ -41,7 +41,7 @@ export const InfrastructureSection = () => {
               className="flex flex-col items-center text-center p-6"
             >
               {/* Illustration placeholder */}
-              <div className="w-48 h-36 mb-6 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
+              <div className="w-48 h-36 mb-6 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
                 <feature.icon className="w-16 h-16 text-primary/40" />
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">

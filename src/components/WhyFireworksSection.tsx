@@ -28,7 +28,7 @@ export const WhyFireworksSection = () => {
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
             Why Fireworks
           </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground">
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
             Startup velocity. Enterprise-grade stability.
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl">
@@ -41,7 +41,7 @@ export const WhyFireworksSection = () => {
           {audiences.map((audience) => (
             <div
               key={audience.title}
-              className="bg-card border border-border rounded-xl p-6 hover:border-primary/40 transition-all duration-300"
+              className="bg-card border border-border p-6 hover:border-primary/40 transition-all duration-300"
             >
               <h3 className="text-xl font-semibold text-foreground mb-5">
                 {audience.title}

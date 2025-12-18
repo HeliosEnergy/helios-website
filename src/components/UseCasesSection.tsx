@@ -42,7 +42,7 @@ export const UseCasesSection = () => {
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
             Fireworks AI Cloud
           </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground">
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
             What Can You Build on Fireworks
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
@@ -55,10 +55,10 @@ export const UseCasesSection = () => {
           {useCases.map((useCase, i) => (
             <div
               key={useCase.title}
-              className="group relative bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
+              className="group relative bg-card border border-border p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer"
             >
               <div className="flex flex-col h-full">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
+                <div className="w-10 h-10 bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/15 transition-colors">
                   <useCase.icon className="w-5 h-5 text-primary" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">

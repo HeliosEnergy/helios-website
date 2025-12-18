@@ -45,7 +45,7 @@ export const TestimonialsSection = () => {
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
             Customer Love
           </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground">
+          <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
             What our customers are saying
           </h2>
         </div>
@@ -65,7 +65,7 @@ export const TestimonialsSection = () => {
                     "{testimonial.quote}"
                   </p>
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-violet-light flex items-center justify-center text-white font-semibold">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-yellow-light flex items-center justify-center text-primary-foreground font-semibold">
                       {testimonial.author.split(" ").map((n) => n[0]).join("")}
                     </div>
                     <div>
