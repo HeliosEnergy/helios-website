@@ -23,7 +23,7 @@ export const BlogSection = () => {
     <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-10">
+        <h2 className="text-3xl sm:text-4xl font-heading font-bold text-foreground mb-10">
           What's new in our blog
         </h2>
 
@@ -36,7 +36,7 @@ export const BlogSection = () => {
               className="group block"
             >
               {/* Image */}
-              <div className={`h-44 rounded-xl bg-gradient-to-br ${post.image} relative overflow-hidden mb-4`}>
+              <div className={`h-44 bg-gradient-to-br ${post.image} relative overflow-hidden mb-4`}>
                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors" />
               </div>
               

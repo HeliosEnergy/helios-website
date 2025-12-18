@@ -25,7 +25,7 @@ export const LifecycleSection = () => {
             <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
               Model Lifecycle Management
             </span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground">
+            <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
               Complete AI model lifecycle management
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">

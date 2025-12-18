@@ -11,7 +11,7 @@ export const CaseStudySection = () => {
             <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
               Case Study
             </span>
-            <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-foreground leading-tight">
+            <h2 className="mt-3 text-2xl sm:text-3xl font-heading font-bold text-foreground leading-tight">
               Sentient Achieved 50% Higher GPU Throughput with Sub-2s Latency
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
@@ -24,7 +24,7 @@ export const CaseStudySection = () => {
           </div>
 
           {/* Stats Card */}
-          <div className="bg-gradient-to-br from-primary to-violet-dark rounded-2xl p-8 text-white">
+          <div className="bg-gradient-to-br from-primary to-yellow-dark p-8 text-primary-foreground">
             <div className="flex items-center gap-3 mb-8">
               <span className="text-2xl font-bold">✦ sentient</span>
             </div>

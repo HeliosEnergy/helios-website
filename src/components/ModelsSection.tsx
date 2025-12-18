@@ -1,5 +1,6 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
+import { useRef, useState, useEffect } from "react";
 
 const models = [
   {
@@ -59,36 +60,76 @@ const models = [
 ];
 
 export const ModelsSection = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const ref = scrollRef.current;
+    if (ref) {
+      ref.addEventListener("scroll", checkScroll);
+      return () => ref.removeEventListener("scroll", checkScroll);
+    }
+  }, []);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = 280;
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <section className="py-20 bg-surface border-y border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-            Model Library
-          </span>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-bold text-foreground">
-            Run the latest open models with a single line of code
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            Fireworks gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud
-          </p>
+        <div className="flex items-start justify-between mb-12">
+          <div>
+            <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
+              Model Library
+            </span>
+            <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
+              Run the latest open models with a single line of code
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-2xl">
+              Fireworks gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud
+            </p>
+          </div>
+          <a href="#" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
+            View all models
+            <ArrowRight className="w-4 h-4" />
+          </a>
         </div>
 
         {/* Scrolling Cards */}
         <div className="relative">
           {/* Gradient Masks */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-surface to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-surface to-transparent z-10" />
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
           
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div 
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide"
+          >
             {models.map((model, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-64 bg-card border border-border rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
+                className="flex-shrink-0 w-64 bg-card border border-border p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className={`w-10 h-10 rounded-lg ${model.color} flex items-center justify-center text-white font-semibold text-sm`}>
+                  <div className={`w-10 h-10 ${model.color} flex items-center justify-center text-white font-semibold text-sm`}>
                     {model.initial}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -106,7 +147,7 @@ export const ModelsSection = () => {
                       {parseInt(model.context).toLocaleString()} Context
                     </p>
                   )}
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-secondary rounded text-muted-foreground">
+                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-secondary text-muted-foreground">
                     {model.type}
                   </span>
                 </div>
@@ -115,10 +156,24 @@ export const ModelsSection = () => {
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-8">
-          <Button variant="outline" className="gap-2">
-            View all models
+        {/* Arrows below carousel */}
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => scroll("left")}
+            disabled={!canScrollLeft}
+            className="h-10 w-10 border-border"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => scroll("right")}
+            disabled={!canScrollRight}
+            className="h-10 w-10 border-border"
+          >
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>

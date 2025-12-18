@@ -8,7 +8,7 @@ export const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
           <div className="animate-fade-in-up">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-foreground tracking-tight leading-[1.1]">
               Build. Tune. Scale.
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -51,9 +51,9 @@ const GeometricPattern = () => {
             {row.map((opacity, colIndex) => (
               <div
                 key={colIndex}
-                className="w-16 h-16 rounded-lg transition-all duration-300 hover:scale-105"
+                className="w-16 h-16 transition-all duration-300 hover:scale-105"
                 style={{
-                  backgroundColor: `hsl(262 83% 58% / ${opacity})`,
+                  backgroundColor: `hsl(48 96% 53% / ${opacity})`,
                 }}
               />
             ))}
@@ -61,8 +61,8 @@ const GeometricPattern = () => {
         ))}
       </div>
       {/* Floating tiles */}
-      <div className="absolute -top-4 left-12 w-12 h-12 rounded-lg bg-primary/20 transform rotate-12" />
-      <div className="absolute bottom-8 -left-4 w-14 h-14 rounded-lg bg-primary/30 transform -rotate-6" />
+      <div className="absolute -top-4 left-12 w-12 h-12 bg-primary/20 transform rotate-12" />
+      <div className="absolute bottom-8 -left-4 w-14 h-14 bg-primary/30 transform -rotate-6" />
     </div>
   );
 };
