@@ -15,7 +15,7 @@ export const CaseStudySection = () => {
               Sentient Achieved 50% Higher GPU Throughput with Sub-2s Latency
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Sentient waitlisted 1.8M users in 24 hours, delivering sub-2s latency across 15-agent workflows with 50% higher throughput per GPU and zero infra sprawl, all powered by Fireworks
+              Sentient waitlisted 1.8M users in 24 hours, delivering sub-2s latency across 15-agent workflows with 50% higher throughput per GPU and zero infra sprawl, all powered by Helios
             </p>
             <Button variant="hero" className="mt-6 gap-2">
               Read the Case Study
