@@ -1,19 +1,48 @@
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { PlatformDropdown } from "./nav/PlatformDropdown";
+import { ModelsDropdown } from "./nav/ModelsDropdown";
+import { DevelopersDropdown } from "./nav/DevelopersDropdown";
+import { PartnersDropdown } from "./nav/PartnersDropdown";
+import { ResourcesDropdown } from "./nav/ResourcesDropdown";
 
 const navItems = [
-  { label: "Platform", hasDropdown: true },
-  { label: "Models", hasDropdown: true },
-  { label: "Developers", hasDropdown: true },
+  { label: "Platform", hasDropdown: true, dropdown: PlatformDropdown },
+  { label: "Models", hasDropdown: true, dropdown: ModelsDropdown },
+  { label: "Developers", hasDropdown: true, dropdown: DevelopersDropdown },
   { label: "Pricing", hasDropdown: false },
-  { label: "Partners", hasDropdown: true },
-  { label: "Resources", hasDropdown: true },
+  { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown },
+  { label: "Resources", hasDropdown: true, dropdown: ResourcesDropdown },
   { label: "Company", hasDropdown: true },
 ];
 
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseEnter = (label: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setOpenDropdown(label);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+    }, 150);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -30,15 +59,42 @@ export const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1" ref={navRef}>
             {navItems.map((item) => (
-              <button
+              <div
                 key={item.label}
-                className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="relative"
+                onMouseEnter={() => item.hasDropdown && handleMouseEnter(item.label)}
+                onMouseLeave={handleMouseLeave}
               >
-                {item.label}
-                {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
-              </button>
+                <button
+                  className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors ${
+                    openDropdown === item.label 
+                      ? "text-primary" 
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {item.label}
+                  {item.hasDropdown && (
+                    openDropdown === item.label 
+                      ? <ChevronUp className="w-4 h-4" />
+                      : <ChevronDown className="w-4 h-4" />
+                  )}
+                </button>
+                
+                {/* Dropdown */}
+                {item.hasDropdown && item.dropdown && openDropdown === item.label && (
+                  <div 
+                    className="absolute top-full left-0 pt-2 z-50"
+                    onMouseEnter={() => handleMouseEnter(item.label)}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="shadow-xl animate-fade-in">
+                      <item.dropdown />
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
