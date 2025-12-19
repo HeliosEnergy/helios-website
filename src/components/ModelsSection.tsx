@@ -10,6 +10,7 @@ const defaultModels = [
     pricing: "$1.35/M Input • $5.4/M Output",
     context: "163840",
     type: "LLM",
+    icon: "deepseek-color.png",
     color: "bg-blue-500",
     initial: "D",
   },
@@ -19,6 +20,7 @@ const defaultModels = [
     pricing: "$0.9/M Tokens",
     context: "8192",
     type: "LLM",
+    icon: "llamaindex.png",
     color: "bg-blue-600",
     initial: "M",
   },
@@ -28,6 +30,7 @@ const defaultModels = [
     pricing: "$0.9/M Tokens",
     context: "131072",
     type: "LLM",
+    icon: "gemini-color.png",
     color: "bg-red-500",
     initial: "G",
   },
@@ -37,6 +40,7 @@ const defaultModels = [
     pricing: "$0.04/Image",
     context: null,
     type: "Image",
+    icon: "flux.png",
     color: "bg-gray-800",
     initial: "F",
   },
@@ -46,6 +50,7 @@ const defaultModels = [
     pricing: "$0/M Tokens",
     context: null,
     type: "Audio",
+    icon: "openai (1).png",
     color: "bg-emerald-600",
     initial: "O",
   },
@@ -55,6 +60,7 @@ const defaultModels = [
     pricing: "$0.6/M Input • $2.5/M Output",
     context: "131072",
     type: "LLM",
+    icon: "kimi-color.png",
     color: "bg-purple-500",
     initial: "M",
   },
@@ -133,9 +139,11 @@ export const ModelsSection = () => {
                 className="flex-shrink-0 w-64 bg-card border border-border border-l-0 first:border-l p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className={`w-10 h-10 ${model.color} flex items-center justify-center text-white font-semibold text-sm`}>
-                    {model.initial}
-                  </div>
+                  <img
+                    src={`/model-lib/${model.icon}`}
+                    alt={`${model.provider} logo`}
+                    className="w-10 h-10 object-contain shrink-0"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground text-sm truncate">
                       {model.name}
