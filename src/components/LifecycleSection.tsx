@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
+import { useSanityQuery } from "@/hooks/useSanityData";
 
-const features = [
+const defaultFeatures = [
   {
     title: "Build",
     description: "Go from idea to output in seconds—with just a prompt. Run the latest open models on Helios serverless, with no GPU setup or cold starts. Move to production with on-demand GPUs that auto-scale as you grow",
@@ -16,6 +17,9 @@ const features = [
 ];
 
 export const LifecycleSection = () => {
+  const { data: sectionData } = useSanityQuery<any>('lifecycle-section', `*[_type == "lifecycleSection"][0]`);
+  const features = sectionData?.features || defaultFeatures;
+
   return (
     <section className="py-20 bg-surface border-y border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,13 +27,13 @@ export const LifecycleSection = () => {
           {/* Left side - Header */}
           <div>
             <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-              Model Lifecycle Management
+              {sectionData?.sectionLabel || 'Model Lifecycle Management'}
             </span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
-              Complete AI model lifecycle management
+              {sectionData?.heading || 'Complete AI model lifecycle management'}
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Run the fastest inference, tune with ease, and scale globally, all without managing infrastructure
+              {sectionData?.description || 'Run the fastest inference, tune with ease, and scale globally, all without managing infrastructure'}
             </p>
           </div>
 

@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { PlatformDropdown } from "./nav/PlatformDropdown";
 import { ModelsDropdown } from "./nav/ModelsDropdown";
 import { DevelopersDropdown } from "./nav/DevelopersDropdown";
@@ -49,14 +50,14 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
               <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary" fill="currentColor">
                 <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4z" />
               </svg>
               <span className="text-xl font-semibold text-foreground">Helios AI</span>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1" ref={navRef}>

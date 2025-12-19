@@ -125,6 +125,75 @@ const landingPageContent = {
         heading: 'Latest insights and updates',
         label: 'Blog'
     },
+    logoBar: {
+        _id: 'logo-bar-default',
+        _type: 'logoBar',
+        title: 'Customer Logos',
+        logos: ["Uber", "DoorDash", "Notion", "GitLab", "Upwork", "HubSpot", "Cursor", "Samsung", "Verizon", "Quora"]
+    },
+    models: {
+        _id: 'models-section-default',
+        _type: 'modelsSection',
+        sectionLabel: 'Model Library',
+        heading: 'Run the latest open models with a single line of code',
+        description: 'Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud',
+        viewAllLink: '#',
+        models: [
+            { _key: uuidv4(), name: "Deepseek R1", provider: "DeepSeek", pricing: "$1.35/M Input • $5.4/M Output", context: "163840", type: "LLM", color: "bg-blue-500", initial: "D" },
+            { _key: uuidv4(), name: "Llama 3 70B Instruct", provider: "Meta", pricing: "$0.9/M Tokens", context: "8192", type: "LLM", color: "bg-blue-600", initial: "M" },
+            { _key: uuidv4(), name: "Gemma 3 27B Instruct", provider: "Google", pricing: "$0.9/M Tokens", context: "131072", type: "LLM", color: "bg-red-500", initial: "G" },
+            { _key: uuidv4(), name: "FLUX.1 Kontext Pro", provider: "Flux", pricing: "$0.04/Image", context: null, type: "Image", color: "bg-gray-800", initial: "F" },
+            { _key: uuidv4(), name: "Whisper V3 Large", provider: "OpenAI", pricing: "$0/M Tokens", context: null, type: "Audio", color: "bg-emerald-600", initial: "O" },
+            { _key: uuidv4(), name: "Kimi K2 Instruct", provider: "Moonshot", pricing: "$0.6/M Input • $2.5/M Output", context: "131072", type: "LLM", color: "bg-purple-500", initial: "M" }
+        ]
+    },
+    infrastructure: {
+        _id: 'infrastructure-section-default',
+        _type: 'infrastructureSection',
+        sectionLabel: 'Building with Helios',
+        features: [
+            { _key: uuidv4(), id: "global", icon: "Globe", title: "Globally distributed", description: "Virtual cloud infrastructure running on the latest hardware across multiple regions worldwide, ensuring low latency and high availability for your AI workloads." },
+            { _key: uuidv4(), id: "enterprise", icon: "Shield", title: "Enterprise ready", description: "Enterprise-grade security and reliability across mission-critical workloads with 99.98% uptime and resilient infrastructure, backed by 24/7 support." },
+            { _key: uuidv4(), id: "fast", icon: "Zap", title: "Fast inference", description: "Industry-leading throughput and latency with our optimized inference engine, delivering responses in milliseconds for real-time AI applications." }
+        ]
+    },
+    lifecycle: {
+        _id: 'lifecycle-section-default',
+        _type: 'lifecycleSection',
+        sectionLabel: 'Model Lifecycle Management',
+        heading: 'Complete AI model lifecycle management',
+        description: 'Run the fastest inference, tune with ease, and scale globally, all without managing infrastructure',
+        features: [
+            { _key: uuidv4(), title: "Build", description: "Go from idea to output in seconds—with just a prompt. Run the latest open models on Helios serverless, with no GPU setup or cold starts. Move to production with on-demand GPUs that auto-scale as you grow" },
+            { _key: uuidv4(), title: "Tune", description: "Fine-tune to meet your use case without the complexity. Get the highest-quality results from any open model using advanced tuning techniques like reinforcement learning, quantization-aware tuning, and adaptive speculation" },
+            { _key: uuidv4(), title: "Scale", description: "Scale production workloads seamlessly, anywhere, without managing infrastructure. Helios automatically provisions AI infrastructure across any deployment type, so you can focus on building" }
+        ]
+    },
+    whyHelios: {
+        _id: 'why-helios-section-default',
+        _type: 'whyHeliosSection',
+        sectionLabel: 'Why Helios',
+        heading: 'Startup velocity. Enterprise-grade stability.',
+        description: 'From AI Natives to Enterprises, Helios powers everything from rapid prototyping to mission-critical workloads',
+        audiences: [
+            { _key: uuidv4(), title: "AI Natives", points: ["Day 0 support for latest models", "Highest quality and performance, lowest cost", "Complete set of developer features no matter where you are on the journey"] },
+            { _key: uuidv4(), title: "Enterprise", points: ["SOC2, HIPAA, and GDPR compliant", "Bring your own cloud or run on ours", "Zero data retention and complete data sovereignty"] }
+        ]
+    },
+    caseStudy: {
+        _id: 'case-study-section-default',
+        _type: 'caseStudySection',
+        sectionLabel: 'Case Study',
+        heading: 'Sentient Achieved 50% Higher GPU Throughput with Sub-2s Latency',
+        description: 'Sentient waitlisted 1.8M users in 24 hours, delivering sub-2s latency across 15-agent workflows with 50% higher throughput per GPU and zero infra sprawl, all powered by Helios',
+        ctaText: 'Read the Case Study',
+        ctaLink: '#',
+        companyName: 'sentient',
+        statValue: '50%',
+        statLabel: 'Higher throughput per GPU',
+        gradientStart: 'primary',
+        gradientEnd: 'yellow-dark'
+    },
     homePage: {
         _id: 'home-page',
         _type: 'page',
@@ -132,8 +201,14 @@ const landingPageContent = {
         slug: { _type: 'slug', current: 'home' },
         sections: [
             { _type: 'reference', _ref: 'hero-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'logo-bar-default', _key: uuidv4() },
             { _type: 'reference', _ref: 'use-cases-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'models-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'infrastructure-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'lifecycle-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'why-helios-section-default', _key: uuidv4() },
             { _type: 'reference', _ref: 'testimonials-section-default', _key: uuidv4() },
+            { _type: 'reference', _ref: 'case-study-section-default', _key: uuidv4() },
             { _type: 'reference', _ref: 'blog-section-default', _key: uuidv4() },
             { _type: 'reference', _ref: 'cta-section-default', _key: uuidv4() }
         ]
@@ -165,24 +240,9 @@ const blogData = {
             excerpt: 'We are excited to launch Helios RFT, a new way to fine-tune open models that outperform frontier models on specialized tasks.',
             categories: [{ _type: 'reference', _ref: 'category-announcement', _key: uuidv4() }],
             body: [
-                {
-                    _type: 'block',
-                    _key: uuidv4(),
-                    style: 'normal',
-                    children: [{ _type: 'span', _key: uuidv4(), text: 'Today we are announcing the general availability of Helios RFT (Re-Fine Tuning)...' }]
-                },
-                {
-                    _type: 'block',
-                    _key: uuidv4(),
-                    style: 'h2',
-                    children: [{ _type: 'span', _key: uuidv4(), text: 'Why Fine-Tuning Matters' }]
-                },
-                {
-                    _type: 'block',
-                    _key: uuidv4(),
-                    style: 'normal',
-                    children: [{ _type: 'span', _key: uuidv4(), text: 'General purpose models are great, but for specific business logic, fine-tuned smaller models often perform better and are much cheaper.' }]
-                }
+                { _type: 'block', _key: uuidv4(), style: 'normal', children: [{ _type: 'span', _key: uuidv4(), text: 'Today we are announcing the general availability of Helios RFT (Re-Fine Tuning)...' }] },
+                { _type: 'block', _key: uuidv4(), style: 'h2', children: [{ _type: 'span', _key: uuidv4(), text: 'Why Fine-Tuning Matters' }] },
+                { _type: 'block', _key: uuidv4(), style: 'normal', children: [{ _type: 'span', _key: uuidv4(), text: 'General purpose models are great, but for specific business logic, fine-tuned smaller models often perform better and are much cheaper.' }] }
             ]
         },
         {
@@ -195,12 +255,33 @@ const blogData = {
             excerpt: 'Learn how we achieved 3x speedup on Llama 3 70B inference using our custom vLLM kernels and quantization techniques.',
             categories: [],
             body: [
-                {
-                    _type: 'block',
-                    _key: uuidv4(),
-                    style: 'normal',
-                    children: [{ _type: 'span', _key: uuidv4(), text: 'Speed is the most critical factor for real-time AI agents. In this post, we dive into the technical details...' }]
-                }
+                { _type: 'block', _key: uuidv4(), style: 'normal', children: [{ _type: 'span', _key: uuidv4(), text: 'Speed is the most critical factor for real-time AI agents. In this post, we dive into the technical details...' }] }
+            ]
+        },
+        {
+            _id: 'post-3',
+            _type: 'blogPost',
+            title: 'The Future of Agentic Workflows',
+            slug: { _type: 'slug', current: 'future-of-agentic-workflows' },
+            author: { _type: 'reference', _ref: 'author-amol' },
+            publishedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+            excerpt: 'Agents are more than just chatbots. They are reasoning engines capable of planning and executing complex tasks.',
+            categories: [{ _type: 'reference', _ref: 'category-announcement', _key: uuidv4() }],
+            body: [
+                { _type: 'block', _key: uuidv4(), style: 'normal', children: [{ _type: 'span', _key: uuidv4(), text: 'We believe the next phase of AI is agentic. Instead of simple query-response, agents will perform multi-step planning...' }] }
+            ]
+        },
+        {
+            _id: 'post-4',
+            _type: 'blogPost',
+            title: 'Serverless GPUs: Scaling without the Headaches',
+            slug: { _type: 'slug', current: 'serverless-gpus-scaling' },
+            author: { _type: 'reference', _ref: 'author-amol' },
+            publishedAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+            excerpt: 'Don\'t pay for idle GPUs. Learn how Helios handles auto-scaling and zero-cold-start inference.',
+            categories: [],
+            body: [
+                { _type: 'block', _key: uuidv4(), style: 'normal', children: [{ _type: 'span', _key: uuidv4(), text: 'Provisioning GPUs used to take weeks. With Helios, it takes milliseconds...' }] }
             ]
         }
     ]
@@ -220,6 +301,12 @@ async function migrate() {
         transaction.createOrReplace(landingPageContent.testimonials)
         transaction.createOrReplace(landingPageContent.cta)
         transaction.createOrReplace(landingPageContent.blogSection)
+        transaction.createOrReplace(landingPageContent.logoBar)
+        transaction.createOrReplace(landingPageContent.models)
+        transaction.createOrReplace(landingPageContent.infrastructure)
+        transaction.createOrReplace(landingPageContent.lifecycle)
+        transaction.createOrReplace(landingPageContent.whyHelios)
+        transaction.createOrReplace(landingPageContent.caseStudy)
         transaction.createOrReplace(landingPageContent.homePage)
 
         // 2. Blog Data

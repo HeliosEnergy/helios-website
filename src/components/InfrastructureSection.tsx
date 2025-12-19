@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Globe, Shield, Zap, ArrowDown, ArrowUp } from "lucide-react";
+import { useSanityQuery } from "@/hooks/useSanityData";
 
-const features = [
+const iconMap: Record<string, any> = {
+  Globe,
+  Shield,
+  Zap,
+};
+
+const defaultFeatures = [
   {
     id: "global",
     icon: Globe,
@@ -23,14 +30,20 @@ const features = [
 ];
 
 export const InfrastructureSection = () => {
+  const { data: sectionData } = useSanityQuery<any>('infrastructure-section', `*[_type == "infrastructureSection"][0]`);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const features = sectionData?.features?.map((f: any) => ({
+    ...f,
+    icon: iconMap[f.icon] || Globe
+  })) || defaultFeatures;
 
   return (
     <section className="bg-background py-20">
       {/* Centered header */}
       <div className="text-center mb-12">
         <span className="text-sm font-mono uppercase tracking-widest text-primary">
-          Building with Helios
+          {sectionData?.sectionLabel || 'Building with Helios'}
         </span>
       </div>
 
@@ -44,9 +57,8 @@ export const InfrastructureSection = () => {
               {features.map((feature, index) => (
                 <div
                   key={feature.id}
-                  className={`absolute inset-0 transition-opacity duration-500 ${
-                    activeIndex === index ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={`absolute inset-0 transition-opacity duration-500 ${activeIndex === index ? "opacity-100" : "opacity-0"
+                    }`}
                 >
                   <svg viewBox="0 0 200 200" className="w-full h-full">
                     {index === 0 && (
@@ -81,12 +93,11 @@ export const InfrastructureSection = () => {
                   </svg>
                 </div>
               ))}
-              
+
               {/* Default state illustration */}
               <div
-                className={`transition-opacity duration-500 ${
-                  activeIndex === null ? "opacity-100" : "opacity-0"
-                }`}
+                className={`transition-opacity duration-500 ${activeIndex === null ? "opacity-100" : "opacity-0"
+                  }`}
               >
                 <svg viewBox="0 0 200 200" className="w-full h-full">
                   {/* Cloud + server isometric */}
@@ -106,11 +117,10 @@ export const InfrastructureSection = () => {
             {features.map((feature, index) => (
               <div
                 key={feature.id}
-                className={`border-b border-border last:border-b-0 transition-all duration-300 cursor-pointer ${
-                  activeIndex === index
+                className={`border-b border-border last:border-b-0 transition-all duration-300 cursor-pointer ${activeIndex === index
                     ? "bg-primary text-primary-foreground"
                     : "bg-background text-foreground hover:bg-muted"
-                }`}
+                  }`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
               >
@@ -125,11 +135,10 @@ export const InfrastructureSection = () => {
                       <ArrowDown className="w-5 h-5 flex-shrink-0" />
                     )}
                   </div>
-                  
+
                   <div
-                    className={`overflow-hidden transition-all duration-300 ${
-                      activeIndex === index ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
-                    }`}
+                    className={`overflow-hidden transition-all duration-300 ${activeIndex === index ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
+                      }`}
                   >
                     <p className="text-sm leading-relaxed">
                       {feature.description}

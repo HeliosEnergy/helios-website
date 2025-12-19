@@ -11,6 +11,12 @@ import category from './schemas/category'
 import blogPost from './schemas/blogPost'
 import page from './schemas/page'
 import blogSection from './schemas/blogSection'
+import logoBar from './schemas/logoBar'
+import modelsSection from './schemas/modelsSection'
+import infrastructureSection from './schemas/infrastructureSection'
+import lifecycleSection from './schemas/lifecycleSection'
+import whyHeliosSection from './schemas/whyHeliosSection'
+import caseStudySection from './schemas/caseStudySection'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -22,6 +28,12 @@ export const schemaTypes = [
     testimonialsSection,
     ctaSection,
     blogSection,
+    logoBar,
+    modelsSection,
+    infrastructureSection,
+    lifecycleSection,
+    whyHeliosSection,
+    caseStudySection,
 
     // Blog schemas
     author,

@@ -1,4 +1,5 @@
 import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const ResourcesDropdown = () => {
   return (
@@ -12,10 +13,10 @@ export const ResourcesDropdown = () => {
           Find the guides, tools, and insights to help you get the most from Helios
         </p>
         <div className="space-y-0">
-          <a href="#" className="flex items-center justify-between py-4 border-b border-border text-sm text-foreground hover:text-primary transition-colors group">
+          <Link to="/blog" className="flex items-center justify-between py-4 border-b border-border text-sm text-foreground hover:text-primary transition-colors group">
             Blog
             <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-          </a>
+          </Link>
           <a href="#" className="flex items-center justify-between py-4 border-b border-border text-sm text-foreground hover:text-primary transition-colors group">
             Events
             <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />

@@ -35,6 +35,12 @@ export default defineType({
                         { type: 'testimonialsSection' },
                         { type: 'ctaSection' },
                         { type: 'blogSection' },
+                        { type: 'logoBar' },
+                        { type: 'modelsSection' },
+                        { type: 'infrastructureSection' },
+                        { type: 'lifecycleSection' },
+                        { type: 'whyHeliosSection' },
+                        { type: 'caseStudySection' },
                     ]
                 },
             ],

@@ -1,6 +1,7 @@
 import { Zap, Shield, ArrowRight, Check } from "lucide-react";
+import { useSanityQuery } from "@/hooks/useSanityData";
 
-const audiences = [
+const defaultAudiences = [
   {
     title: "AI Natives",
     points: [
@@ -20,19 +21,22 @@ const audiences = [
 ];
 
 export const WhyHeliosSection = () => {
+  const { data: sectionData } = useSanityQuery<any>('why-helios-section', `*[_type == "whyHeliosSection"][0]`);
+  const audiences = sectionData?.audiences || defaultAudiences;
+
   return (
     <section className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-14">
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-            Why Helios
+            {sectionData?.sectionLabel || 'Why Helios'}
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
-            Startup velocity. Enterprise-grade stability.
+            {sectionData?.heading || 'Startup velocity. Enterprise-grade stability.'}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl">
-            From AI Natives to Enterprises, Helios powers everything from rapid prototyping to mission-critical workloads
+            {sectionData?.description || 'From AI Natives to Enterprises, Helios powers everything from rapid prototyping to mission-critical workloads'}
           </p>
         </div>
 
@@ -46,7 +50,7 @@ export const WhyHeliosSection = () => {
               <h3 className="text-xl font-semibold text-foreground mb-5">
                 {audience.title}
               </h3>
-              
+
               <ul className="space-y-3 mb-5">
                 {audience.points.map((point, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -55,7 +59,7 @@ export const WhyHeliosSection = () => {
                   </li>
                 ))}
               </ul>
-              
+
               <a href="#" className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all">
                 Learn more
                 <ArrowRight className="w-4 h-4" />

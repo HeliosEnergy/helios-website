@@ -1,8 +1,9 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRef, useState, useEffect } from "react";
+import { useSanityQuery } from "@/hooks/useSanityData";
 
-const models = [
+const defaultModels = [
   {
     name: "Deepseek R1",
     provider: "DeepSeek",
@@ -60,9 +61,12 @@ const models = [
 ];
 
 export const ModelsSection = () => {
+  const { data: sectionData } = useSanityQuery<any>('models-section', `*[_type == "modelsSection"][0]`);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const models = sectionData?.models || defaultModels;
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -79,7 +83,7 @@ export const ModelsSection = () => {
       ref.addEventListener("scroll", checkScroll);
       return () => ref.removeEventListener("scroll", checkScroll);
     }
-  }, []);
+  }, [models]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -98,16 +102,16 @@ export const ModelsSection = () => {
         <div className="flex items-start justify-between mb-12">
           <div>
             <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-              Model Library
+              {sectionData?.sectionLabel || 'Model Library'}
             </span>
             <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
-              Run the latest open models with a single line of code
+              {sectionData?.heading || 'Run the latest open models with a single line of code'}
             </h2>
             <p className="mt-4 text-muted-foreground max-w-2xl">
-              Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud
+              {sectionData?.description || 'Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud'}
             </p>
           </div>
-          <a href="#" className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
+          <a href={sectionData?.viewAllLink || '#'} className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
             View all models
             <ArrowRight className="w-4 h-4" />
           </a>
@@ -118,8 +122,8 @@ export const ModelsSection = () => {
           {/* Gradient Masks */}
           <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
-          
-          <div 
+
+          <div
             ref={scrollRef}
             className="flex overflow-x-auto pb-4 scrollbar-hide"
           >

@@ -12,9 +12,15 @@ The "Home Page" document in Sanity (type: `page`) allows you to:
 The following schemas are mapped in `Index.tsx`:
 - `announcementBanner`: The thin top bar.
 - `heroSection`: Main heading and primary/secondary CTAs.
+- `logoBar`: Scrolling reel of customer logos.
 - `useCasesSection`: Features grid with icons and stats.
+- `modelsSection`: Interactive model library carousel.
+- `infrastructureSection`: Interactive accordion with custom illustrations.
+- `lifecycleSection`: Build/Tune/Scale lifecycle grid.
+- `whyHeliosSection`: Audience comparison cards (AI Natives vs Enterprise).
 - `testimonialsSection`: Customer quotes carousel.
-- `blogSection`: Latest 3 blog articles (Title and Label can be changed).
+- `caseStudySection`: Split-view section with stats card.
+- `blogSection`: Latest 3 blog articles.
 - `ctaSection`: Bottom call-to-action bar.
 
 ## 🛠 Adding/Removing Sections

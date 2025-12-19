@@ -6,6 +6,7 @@ import { ModelsSection } from "@/components/ModelsSection";
 import { InfrastructureSection } from "@/components/InfrastructureSection";
 import { LifecycleSection } from "@/components/LifecycleSection";
 import { WhyHeliosSection } from "@/components/WhyHeliosSection";
+import { LogoBar } from "@/components/LogoBar";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { CaseStudySection } from "@/components/CaseStudySection";
 import { BlogSection } from "@/components/BlogSection";
@@ -19,13 +20,13 @@ const sectionMap: Record<string, React.ComponentType<any>> = {
   useCasesSection: UseCasesSection,
   testimonialsSection: TestimonialsSection,
   ctaSection: CTASection,
-  // Hardcoded placeholders for now
+  blogSection: BlogSection,
+  logoBar: LogoBar,
   modelsSection: ModelsSection,
   infrastructureSection: InfrastructureSection,
   lifecycleSection: LifecycleSection,
   whyHeliosSection: WhyHeliosSection,
   caseStudySection: CaseStudySection,
-  blogSection: BlogSection,
 };
 
 const Index = () => {
@@ -37,6 +38,7 @@ const Index = () => {
       return (
         <>
           <HeroSection />
+          <LogoBar />
           <UseCasesSection />
           <ModelsSection />
           <InfrastructureSection />
