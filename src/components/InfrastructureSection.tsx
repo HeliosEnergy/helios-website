@@ -26,25 +26,28 @@ export const InfrastructureSection = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
-    <section className="bg-background border-t border-border">
-      <div className="grid lg:grid-cols-2">
-        {/* Left side - Image area */}
-        <div className="relative bg-background p-12 lg:p-16 flex flex-col justify-center min-h-[500px] border-r border-border">
-          <span className="text-sm font-mono uppercase tracking-widest text-primary mb-6">
-            Building with Helios
-          </span>
-          
-          {/* Dynamic illustration based on hover */}
-          <div className="relative w-full max-w-xs">
-            {features.map((feature, index) => (
-              <div
-                key={feature.id}
-                className={`absolute inset-0 transition-opacity duration-500 ${
-                  activeIndex === index ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <div className="w-48 h-48 relative">
-                  {/* Isometric illustration placeholder */}
+    <section className="bg-background py-20">
+      {/* Centered header */}
+      <div className="text-center mb-12">
+        <span className="text-sm font-mono uppercase tracking-widest text-primary">
+          Building with Helios
+        </span>
+      </div>
+
+      {/* Fixed width container */}
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid lg:grid-cols-2 border border-border">
+          {/* Left side - Image area */}
+          <div className="relative bg-background p-12 flex items-center justify-center min-h-[400px] border-r border-border">
+            {/* Dynamic illustration based on hover */}
+            <div className="relative w-48 h-48">
+              {features.map((feature, index) => (
+                <div
+                  key={feature.id}
+                  className={`absolute inset-0 transition-opacity duration-500 ${
+                    activeIndex === index ? "opacity-100" : "opacity-0"
+                  }`}
+                >
                   <svg viewBox="0 0 200 200" className="w-full h-full">
                     {index === 0 && (
                       <>
@@ -77,16 +80,14 @@ export const InfrastructureSection = () => {
                     )}
                   </svg>
                 </div>
-              </div>
-            ))}
-            
-            {/* Default state illustration */}
-            <div
-              className={`transition-opacity duration-500 ${
-                activeIndex === null ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <div className="w-48 h-48 relative">
+              ))}
+              
+              {/* Default state illustration */}
+              <div
+                className={`transition-opacity duration-500 ${
+                  activeIndex === null ? "opacity-100" : "opacity-0"
+                }`}
+              >
                 <svg viewBox="0 0 200 200" className="w-full h-full">
                   {/* Cloud + server isometric */}
                   <path d="M60 120 Q40 120 40 100 Q40 80 60 80 Q60 60 90 60 Q120 60 130 80 Q160 80 160 100 Q160 120 140 120 Z" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" />
@@ -99,45 +100,45 @@ export const InfrastructureSection = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right side - Feature accordion */}
-        <div className="flex flex-col">
-          {features.map((feature, index) => (
-            <div
-              key={feature.id}
-              className={`border-b border-border transition-all duration-300 cursor-pointer ${
-                activeIndex === index
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background text-foreground hover:bg-muted"
-              }`}
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(null)}
-            >
-              <div className="p-8 lg:p-12">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-2xl lg:text-3xl font-heading font-bold">
-                    {feature.title}
-                  </h3>
-                  {activeIndex === index ? (
-                    <ArrowUp className="w-6 h-6 flex-shrink-0" />
-                  ) : (
-                    <ArrowDown className="w-6 h-6 flex-shrink-0" />
-                  )}
-                </div>
-                
-                <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    activeIndex === index ? "max-h-40 mt-6 opacity-100" : "max-h-0 opacity-0"
-                  }`}
-                >
-                  <p className="text-sm lg:text-base leading-relaxed max-w-md">
-                    {feature.description}
-                  </p>
+          {/* Right side - Feature accordion */}
+          <div className="flex flex-col">
+            {features.map((feature, index) => (
+              <div
+                key={feature.id}
+                className={`border-b border-border last:border-b-0 transition-all duration-300 cursor-pointer ${
+                  activeIndex === index
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-foreground hover:bg-muted"
+                }`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+              >
+                <div className="p-8">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl lg:text-2xl font-heading font-bold">
+                      {feature.title}
+                    </h3>
+                    {activeIndex === index ? (
+                      <ArrowUp className="w-5 h-5 flex-shrink-0" />
+                    ) : (
+                      <ArrowDown className="w-5 h-5 flex-shrink-0" />
+                    )}
+                  </div>
+                  
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${
+                      activeIndex === index ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
