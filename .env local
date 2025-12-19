@@ -1,0 +1,3 @@
+# Sanity CMS Configuration
+VITE_SANITY_PROJECT_ID=05vcm5dh
+VITE_SANITY_DATASET=production

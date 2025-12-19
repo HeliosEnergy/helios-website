@@ -1,41 +1,19 @@
 import { useState, useEffect } from "react";
-
-const testimonials = [
-  {
-    quote: "Helios has been a fantastic partner in building AI dev tools at Sourcegraph. Their fast, reliable model inference lets us focus on fine-tuning, AI-powered code search, and deep code context, making Cody the best AI coding assistant.",
-    author: "Beyang Liu",
-    role: "CTO at Sourcegraph",
-    company: "Sourcegraph",
-  },
-  {
-    quote: "By partnering with Helios to fine-tune models, we reduced latency from about 2 seconds to 350 milliseconds, significantly improving performance and enabling us to launch AI features at scale.",
-    author: "Sarah Sachs",
-    role: "AI Lead at Notion",
-    company: "Notion",
-  },
-  {
-    quote: "Helios has been an amazing partner getting our Fast Apply and Copilot++ models running performantly. They exceeded other competitors we reviewed on performance.",
-    author: "Sualeh Asif",
-    role: "CPO at Cursor",
-    company: "Cursor",
-  },
-  {
-    quote: "We've had a really great experience working with Helios to host open source models. After migrating one of our models, we noticed a 3x speedup in response time.",
-    author: "Spencer Chan",
-    role: "Product Lead at Quora",
-    company: "Quora",
-  },
-];
+import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 
 export const TestimonialsSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const { data: section, isLoading } = useSanityQuery<any>('testimonials-section', QUERIES.testimonialsSection);
 
   useEffect(() => {
+    if (!section?.testimonials?.length) return;
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+      setActiveIndex((prev) => (prev + 1) % section.testimonials.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [section?.testimonials]);
+
+  if (isLoading || !section?.testimonials?.length) return null;
 
   return (
     <section className="py-20 bg-surface border-y border-border">
@@ -43,22 +21,21 @@ export const TestimonialsSection = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-            Customer Love
+            {section.sectionLabel}
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
-            What our customers are saying
+            {section.heading}
           </h2>
         </div>
 
         {/* Testimonial */}
         <div className="max-w-3xl mx-auto">
           <div className="relative min-h-[200px]">
-            {testimonials.map((testimonial, i) => (
+            {section.testimonials.map((testimonial: any, i: number) => (
               <div
                 key={i}
-                className={`transition-all duration-500 ${
-                  i === activeIndex ? "opacity-100" : "opacity-0 absolute inset-0"
-                }`}
+                className={`transition-all duration-500 ${i === activeIndex ? "opacity-100" : "opacity-0 absolute inset-0"
+                  }`}
               >
                 <div className="text-center">
                   <p className="text-lg sm:text-xl text-foreground leading-relaxed mb-6">
@@ -66,14 +43,14 @@ export const TestimonialsSection = () => {
                   </p>
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary to-yellow-light flex items-center justify-center text-primary-foreground font-semibold">
-                      {testimonial.author.split(" ").map((n) => n[0]).join("")}
+                      {testimonial.author.split(" ").map((n: string) => n[0]).join("")}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">
                         {testimonial.author}
                       </p>
                       <p className="text-muted-foreground text-sm">
-                        {testimonial.role}
+                        {testimonial.role}, {testimonial.company}
                       </p>
                     </div>
                   </div>
@@ -84,15 +61,14 @@ export const TestimonialsSection = () => {
 
           {/* Dots */}
           <div className="flex justify-center gap-2 mt-8">
-            {testimonials.map((_, i) => (
+            {section.testimonials.map((_: any, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveIndex(i)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  i === activeIndex
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${i === activeIndex
                     ? "bg-primary w-6"
                     : "bg-border hover:bg-muted-foreground"
-                }`}
+                  }`}
               />
             ))}
           </div>

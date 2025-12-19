@@ -1,7 +1,6 @@
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
-import { LogoBar } from "@/components/LogoBar";
 import { UseCasesSection } from "@/components/UseCasesSection";
 import { ModelsSection } from "@/components/ModelsSection";
 import { InfrastructureSection } from "@/components/InfrastructureSection";
@@ -12,24 +11,57 @@ import { CaseStudySection } from "@/components/CaseStudySection";
 import { BlogSection } from "@/components/BlogSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
+import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
+
+const sectionMap: Record<string, React.ComponentType<any>> = {
+  announcementBanner: AnnouncementBanner,
+  heroSection: HeroSection,
+  useCasesSection: UseCasesSection,
+  testimonialsSection: TestimonialsSection,
+  ctaSection: CTASection,
+  // Hardcoded placeholders for now
+  modelsSection: ModelsSection,
+  infrastructureSection: InfrastructureSection,
+  lifecycleSection: LifecycleSection,
+  whyHeliosSection: WhyHeliosSection,
+  caseStudySection: CaseStudySection,
+  blogSection: BlogSection,
+};
 
 const Index = () => {
+  const { data: pageData, isLoading } = useSanityQuery<any>('landing-page', QUERIES.page, { slug: 'home' });
+
+  const renderSections = () => {
+    if (isLoading || !pageData?.sections) {
+      // Fallback to default order if loading or no CMS data
+      return (
+        <>
+          <HeroSection />
+          <UseCasesSection />
+          <ModelsSection />
+          <InfrastructureSection />
+          <LifecycleSection />
+          <WhyHeliosSection />
+          <TestimonialsSection />
+          <CaseStudySection />
+          <BlogSection />
+          <CTASection />
+        </>
+      );
+    }
+
+    return pageData.sections.map((section: any, index: number) => {
+      const SectionComponent = sectionMap[section._type];
+      return SectionComponent ? <SectionComponent key={section._id || index} /> : null;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AnnouncementBanner />
       <Navbar />
       <main>
-        <HeroSection />
-        <LogoBar />
-        <UseCasesSection />
-        <ModelsSection />
-        <InfrastructureSection />
-        <LifecycleSection />
-        <WhyHeliosSection />
-        <TestimonialsSection />
-        <CaseStudySection />
-        <BlogSection />
-        <CTASection />
+        {renderSections()}
       </main>
       <Footer />
     </div>

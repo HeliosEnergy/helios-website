@@ -1,7 +1,10 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
+import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 
 export const HeroSection = () => {
+  const { data: hero, isLoading } = useSanityQuery<any>('hero-section', QUERIES.heroSection);
+
   return (
     <section className="relative overflow-hidden bg-background">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
@@ -9,20 +12,28 @@ export const HeroSection = () => {
           {/* Text Content */}
           <div className="animate-fade-in-up">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-foreground tracking-tight leading-[1.1]">
-              Build. Tune. Scale.
+              {isLoading ? "Loading..." : hero?.heading}
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Open-source AI models at blazing speed, optimized for your use case, scaled globally with the Helios Inference Cloud
+              {isLoading ? "Please wait while we fetch content." : hero?.description}
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button variant="hero" size="lg" className="gap-2">
-                Get Started
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-              <Button variant="heroOutline" size="lg">
-                Talk to Our Team
-              </Button>
-            </div>
+            {!isLoading && (
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button variant="hero" size="lg" className="gap-2" asChild>
+                  <a href={hero?.primaryCtaLink || "#"}>
+                    {hero?.primaryCtaText}
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </Button>
+                {hero?.secondaryCtaText && (
+                  <Button variant="heroOutline" size="lg" asChild>
+                    <a href={hero?.secondaryCtaLink || "#"}>
+                      {hero?.secondaryCtaText}
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Geometric Pattern */}
