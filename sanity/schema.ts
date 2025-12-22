@@ -17,6 +17,10 @@ import infrastructureSection from './schemas/infrastructureSection'
 import lifecycleSection from './schemas/lifecycleSection'
 import whyHeliosSection from './schemas/whyHeliosSection'
 import caseStudySection from './schemas/caseStudySection'
+import gpuModel from './schemas/gpuModel'
+import pricingTier from './schemas/pricingTier'
+import pricingPageSection from './schemas/pricingPageSection'
+import legalPage from './schemas/legalPage'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -35,6 +39,11 @@ export const schemaTypes = [
     whyHeliosSection,
     caseStudySection,
 
+    // Pricing schemas
+    gpuModel,
+    pricingTier,
+    pricingPageSection,
+
     // Blog schemas
     author,
     category,
@@ -42,4 +51,7 @@ export const schemaTypes = [
 
     // Page builder
     page,
+
+    // Legal schemas
+    legalPage,
 ]

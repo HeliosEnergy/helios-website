@@ -2,7 +2,6 @@ import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "next-themes";
 import { PlatformDropdown } from "./nav/PlatformDropdown";
 import { ModelsDropdown } from "./nav/ModelsDropdown";
 import { DevelopersDropdown } from "./nav/DevelopersDropdown";
@@ -13,14 +12,13 @@ const navItems = [
   { label: "Platform", hasDropdown: true, dropdown: PlatformDropdown },
   { label: "Models", hasDropdown: true, dropdown: ModelsDropdown },
   { label: "Developers", hasDropdown: true, dropdown: DevelopersDropdown },
-  { label: "Pricing", hasDropdown: false },
+  { label: "Pricing", hasDropdown: false, href: "/pricing" },
   { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown },
   { label: "Resources", hasDropdown: true, dropdown: ResourcesDropdown },
   { label: "Company", hasDropdown: true },
 ];
 
 export const Navbar = () => {
-  const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,8 +52,8 @@ export const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
-              src={theme === 'dark' ? '/logos/logo-inverted.png' : '/logos/logo.png'}
-              className="w-6 h-6"
+              src="/logos/logo.png"
+              className="h-8 w-auto"
               alt="Helios AI Logo"
             />
           </Link>
@@ -69,20 +67,38 @@ export const Navbar = () => {
                 onMouseEnter={() => item.hasDropdown && handleMouseEnter(item.label)}
                 onMouseLeave={handleMouseLeave}
               >
-                <button
-                  className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors ${
-                    openDropdown === item.label 
-                      ? "text-primary" 
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {item.label}
-                  {item.hasDropdown && (
-                    openDropdown === item.label 
-                      ? <ChevronUp className="w-4 h-4" />
-                      : <ChevronDown className="w-4 h-4" />
-                  )}
-                </button>
+                {item.href ? (
+                  <Link
+                    to={item.href}
+                    className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors ${
+                      openDropdown === item.label
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                    {item.hasDropdown && (
+                      openDropdown === item.label
+                        ? <ChevronUp className="w-4 h-4" />
+                        : <ChevronDown className="w-4 h-4" />
+                    )}
+                  </Link>
+                ) : (
+                  <button
+                    className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors ${
+                      openDropdown === item.label
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                    {item.hasDropdown && (
+                      openDropdown === item.label
+                        ? <ChevronUp className="w-4 h-4" />
+                        : <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
                 
                 {/* Dropdown */}
                 {item.hasDropdown && item.dropdown && openDropdown === item.label && (
@@ -124,13 +140,24 @@ export const Navbar = () => {
           <div className="lg:hidden py-4 border-t border-border">
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
-                <button
-                  key={item.label}
-                  className="flex items-center justify-between px-2 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {item.label}
-                  {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
-                </button>
+                item.href ? (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    className="flex items-center justify-between px-2 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {item.label}
+                    {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
+                  </Link>
+                ) : (
+                  <button
+                    key={item.label}
+                    className="flex items-center justify-between px-2 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {item.label}
+                    {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
+                  </button>
+                )
               ))}
               <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
                 <Button variant="ghost" className="justify-start font-mono uppercase tracking-wider text-xs">

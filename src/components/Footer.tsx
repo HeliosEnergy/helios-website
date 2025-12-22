@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const footerLinks = {
   Platform: ["Inference", "Fine-tuning", "Evaluation", "Deployment"],
@@ -44,17 +45,26 @@ export const Footer = () => {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h3 className="font-semibold text-foreground text-sm mb-3">{category}</h3>
-              <ul className="space-y-2">
-                {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
+               <ul className="space-y-2">
+                 {links.map((link) => (
+                   <li key={link}>
+                     {link === "Terms" ? (
+                       <Link
+                         to="/tnc"
+                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                       >
+                         {link}
+                       </Link>
+                     ) : (
+                       <a
+                         href="#"
+                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                       >
+                         {link}
+                       </a>
+                     )}
+                   </li>
+                 ))}
               </ul>
             </div>
           ))}

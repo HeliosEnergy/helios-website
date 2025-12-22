@@ -287,6 +287,160 @@ const blogData = {
     ]
 }
 
+const pricingData = {
+    gpuModels: [
+        {
+            _id: 'gpu-h100-nvl',
+            _type: 'gpuModel',
+            id: 'h100-nvl',
+            name: 'H100 NVL',
+            vram: '94GB',
+            memory: '94GB HBM3',
+            specs: '94GB HBM3',
+            heliosPrice: 2.47,
+            awsPrice: '5.88',
+            googleCloudPrice: 'Not listed',
+            lambdaPrice: '2.49',
+            modalPrice: '3.95',
+            displayOrder: 0
+        },
+        {
+            _id: 'gpu-h100-sxm',
+            _type: 'gpuModel',
+            id: 'h100-sxm',
+            name: 'H100 SXM',
+            vram: '80GB',
+            memory: '80GB HBM3',
+            specs: '80GB HBM3',
+            heliosPrice: 2.25,
+            awsPrice: '4.40',
+            googleCloudPrice: '11.06',
+            lambdaPrice: '2.99',
+            modalPrice: '3.95',
+            displayOrder: 1
+        },
+        {
+            _id: 'gpu-rtx-pro-6000',
+            _type: 'gpuModel',
+            id: 'rtx-pro-6000',
+            name: 'RTX Pro 6000',
+            vram: '96GB',
+            memory: '96GB GDDR7 ECC',
+            specs: '96GB GDDR7 ECC, Blackwell Architecture',
+            heliosPrice: 1.70,
+            awsPrice: 'Not listed',
+            googleCloudPrice: 'Not listed',
+            lambdaPrice: 'Not listed',
+            modalPrice: 'Not listed',
+            displayOrder: 2
+        },
+        {
+            _id: 'gpu-l40s',
+            _type: 'gpuModel',
+            id: 'l40s',
+            name: 'L40S',
+            vram: '48GB',
+            memory: '48GB GDDR6',
+            specs: '48GB GDDR6',
+            heliosPrice: 0.87,
+            awsPrice: '1.86-2.24',
+            googleCloudPrice: 'Not listed',
+            lambdaPrice: 'Not Available',
+            modalPrice: '1.95',
+            displayOrder: 3
+        },
+        {
+            _id: 'gpu-a100',
+            _type: 'gpuModel',
+            id: 'a100',
+            name: 'A100',
+            vram: '80GB',
+            memory: '80GB HBM2e',
+            specs: '80GB HBM2e',
+            heliosPrice: 1.35,
+            awsPrice: '3.67-4.10',
+            googleCloudPrice: '3.67',
+            lambdaPrice: '1.29',
+            modalPrice: '2.50',
+            displayOrder: 4
+        }
+    ],
+    pricingTiers: [
+        {
+            _id: 'tier-on-demand',
+            _type: 'pricingTier',
+            id: 'on-demand',
+            label: 'On Demand',
+            duration: 'Hourly billing',
+            discount: 0,
+            featured: false,
+            displayOrder: 0
+        },
+        {
+            _id: 'tier-1-month',
+            _type: 'pricingTier',
+            id: '1-month',
+            label: '1 Month',
+            duration: '1-month commitment',
+            discount: 5,
+            featured: false,
+            displayOrder: 1
+        },
+        {
+            _id: 'tier-3-months',
+            _type: 'pricingTier',
+            id: '3-months',
+            label: '3 Months',
+            duration: '3-month commitment',
+            discount: 10,
+            featured: true,
+            displayOrder: 2
+        },
+        {
+            _id: 'tier-6-months',
+            _type: 'pricingTier',
+            id: '6-months',
+            label: '6 Months',
+            duration: '6-month commitment',
+            discount: 15,
+            featured: false,
+            displayOrder: 3
+        },
+        {
+            _id: 'tier-12-months',
+            _type: 'pricingTier',
+            id: '12-months',
+            label: '12 Months',
+            duration: '12-month commitment',
+            discount: 20,
+            featured: false,
+            displayOrder: 4
+        }
+    ],
+    pricingPageSection: {
+        _id: 'pricing-page-section-default',
+        _type: 'pricingPageSection',
+        title: 'Pricing Page Configuration',
+        heroTitle: 'GPU Pricing That Scales',
+        heroSubtitle: 'Compare our competitive GPU pricing against leading cloud providers. Built for AI workloads, optimized for performance, designed for scale.',
+        ctaButtonText: 'Get Started',
+        ctaButtonUrl: 'https://console.heliosenergy.io/',
+        calculatorTitle: 'Calculate Your Costs',
+        comparisonTableTitle: 'GPU Pricing Comparison',
+        footerNote: 'Prices are subject to change. Contact us for enterprise pricing and volume discounts.',
+        calendlyUrl: 'https://calendly.com/jose-helios/30min'
+    },
+    pricingPage: {
+        _id: 'pricing-page',
+        _type: 'page',
+        title: 'Pricing',
+        slug: { _type: 'slug', current: 'pricing' },
+        sections: [
+            { _type: 'reference', _ref: 'pricing-page-section-default', _key: uuidv4() }
+        ]
+    }
+}
+
 async function migrate() {
     console.log('🚀 Starting content migration to Sanity...')
 
@@ -314,6 +468,13 @@ async function migrate() {
         transaction.createOrReplace(blogData.author)
         transaction.createOrReplace(blogData.category)
         blogData.posts.forEach(post => transaction.createOrReplace(post))
+
+        // 3. Pricing Data
+        console.log('  Creating pricing data...')
+        pricingData.gpuModels.forEach(gpu => transaction.createOrReplace(gpu))
+        pricingData.pricingTiers.forEach(tier => transaction.createOrReplace(tier))
+        transaction.createOrReplace(pricingData.pricingPageSection)
+        transaction.createOrReplace(pricingData.pricingPage)
 
         const result = await transaction.commit()
         console.log('✅ Migration successful!', result)

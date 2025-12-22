@@ -37,5 +37,11 @@ export const QUERIES = {
     page: `*[_type == "page" && slug.current == $slug][0] {
     ...,
     sections[]->
+  }`,
+
+    legalPage: `*[_type == "legalPage"][0] {
+    title,
+    lastUpdated,
+    content
   }`
 }
