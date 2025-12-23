@@ -131,20 +131,216 @@ const landingPageContent = {
         title: 'Customer Logos',
         logos: ["Uber", "DoorDash", "Notion", "GitLab", "Upwork", "HubSpot", "Cursor", "Samsung", "Verizon", "Quora"]
     },
+    modelLibrary: [
+        {
+            _id: 'model-deepseek-r1',
+            _type: 'modelLibrary',
+            name: 'Deepseek R1',
+            slug: { _type: 'slug', current: 'deepseek-r1' },
+            provider: 'DeepSeek',
+            description: 'Advanced reasoning model with exceptional performance on complex tasks',
+            iconFilename: 'deepseek-color.png',
+            modelType: 'LLM',
+            categories: ['featured', 'serverless'],
+            inputPrice: 1.35,
+            outputPrice: 5.4,
+            pricingDisplay: '$1.35/M Input • $5.4/M Output',
+            contextWindow: '163840',
+            color: 'bg-blue-500',
+            initial: 'D'
+        },
+        {
+            _id: 'model-llama-3-70b',
+            _type: 'modelLibrary',
+            name: 'Llama 3 70B Instruct',
+            slug: { _type: 'slug', current: 'llama-3-70b-instruct' },
+            provider: 'Meta',
+            description: 'Meta\'s flagship open-source language model',
+            iconFilename: 'llamaindex.png',
+            modelType: 'LLM',
+            categories: ['featured', 'serverless'],
+            inputPrice: 0.9,
+            pricingDisplay: '$0.9/M Tokens',
+            contextWindow: '8192',
+            color: 'bg-blue-600',
+            initial: 'M'
+        },
+        {
+            _id: 'model-gemma-3-27b',
+            _type: 'modelLibrary',
+            name: 'Gemma 3 27B Instruct',
+            slug: { _type: 'slug', current: 'gemma-3-27b-instruct' },
+            provider: 'Google',
+            description: 'Google\'s efficient instruction-tuned model',
+            iconFilename: 'gemini-color.png',
+            modelType: 'LLM',
+            categories: ['featured'],
+            inputPrice: 0.9,
+            pricingDisplay: '$0.9/M Tokens',
+            contextWindow: '131072',
+            color: 'bg-red-500',
+            initial: 'G'
+        },
+        {
+            _id: 'model-flux-kontext-pro',
+            _type: 'modelLibrary',
+            name: 'FLUX.1 Kontext Pro',
+            slug: { _type: 'slug', current: 'flux-1-kontext-pro' },
+            provider: 'Flux',
+            description: 'State-of-the-art image generation model',
+            iconFilename: 'flux.png',
+            modelType: 'Image',
+            categories: ['featured'],
+            imagePrice: 0.04,
+            pricingDisplay: '$0.04/Image',
+            color: 'bg-gray-800',
+            initial: 'F'
+        },
+        {
+            _id: 'model-whisper-v3',
+            _type: 'modelLibrary',
+            name: 'Whisper V3 Large',
+            slug: { _type: 'slug', current: 'whisper-v3-large' },
+            provider: 'OpenAI',
+            description: 'Advanced speech recognition and transcription',
+            iconFilename: 'openai (1).png',
+            modelType: 'Audio',
+            categories: ['featured'],
+            inputPrice: 0,
+            pricingDisplay: '$0/M Tokens',
+            color: 'bg-emerald-600',
+            initial: 'O'
+        },
+        {
+            _id: 'model-kimi-k2',
+            _type: 'modelLibrary',
+            name: 'Kimi K2 Instruct',
+            slug: { _type: 'slug', current: 'kimi-k2-instruct' },
+            provider: 'Moonshot',
+            description: 'Long-context language model from Moonshot AI',
+            iconFilename: 'kimi-color.png',
+            modelType: 'LLM',
+            categories: ['featured', 'serverless'],
+            inputPrice: 0.6,
+            outputPrice: 2.5,
+            pricingDisplay: '$0.6/M Input • $2.5/M Output',
+            contextWindow: '131072',
+            color: 'bg-purple-500',
+            initial: 'M'
+        },
+        {
+            _id: 'model-owen3-coder-480b',
+            _type: 'modelLibrary',
+            name: 'Owen3 Coder 480B A35B Instruct',
+            slug: { _type: 'slug', current: 'owen3-coder-480b-a35b' },
+            provider: 'Qwen',
+            description: 'Specialized coding model with exceptional performance',
+            iconFilename: 'deepseek-color.png',
+            modelType: 'LLM',
+            categories: ['featured', 'serverless'],
+            inputPrice: 0.45,
+            outputPrice: 1.8,
+            pricingDisplay: '$0.45/M Input • $1.8/M Output',
+            contextWindow: '262144',
+            color: 'bg-indigo-500',
+            initial: 'Q'
+        },
+        {
+            _id: 'model-openai-gpt-oss-20b',
+            _type: 'modelLibrary',
+            name: 'OpenAI gpt-oss-20b',
+            slug: { _type: 'slug', current: 'openai-gpt-oss-20b' },
+            provider: 'OpenAI',
+            description: 'Open-source GPT model optimized for general tasks',
+            iconFilename: 'openai (1).png',
+            modelType: 'LLM',
+            categories: ['featured'],
+            inputPrice: 0.07,
+            outputPrice: 0.3,
+            pricingDisplay: '$0.07/M Input • $0.3/M Output',
+            contextWindow: '131072',
+            color: 'bg-emerald-500',
+            initial: 'O'
+        },
+        {
+            _id: 'model-openai-gpt-oss-120b',
+            _type: 'modelLibrary',
+            name: 'OpenAI gpt-oss-120b',
+            slug: { _type: 'slug', current: 'openai-gpt-oss-120b' },
+            provider: 'OpenAI',
+            description: 'Larger open-source GPT variant for complex reasoning',
+            iconFilename: 'openai (1).png',
+            modelType: 'LLM',
+            categories: ['featured'],
+            inputPrice: 0.15,
+            outputPrice: 0.6,
+            pricingDisplay: '$0.15/M Input • $0.6/M Output',
+            contextWindow: '131072',
+            color: 'bg-emerald-600',
+            initial: 'O'
+        },
+        {
+            _id: 'model-embedding-v3',
+            _type: 'modelLibrary',
+            name: 'Embedding V3 Large',
+            slug: { _type: 'slug', current: 'embedding-v3-large' },
+            provider: 'OpenAI',
+            description: 'High-quality text embeddings for semantic search',
+            iconFilename: 'openai (1).png',
+            modelType: 'Embedding',
+            categories: ['embedding', 'serverless'],
+            inputPrice: 0.13,
+            pricingDisplay: '$0.13/M Tokens',
+            color: 'bg-teal-500',
+            initial: 'O'
+        },
+        {
+            _id: 'model-reranker-v1',
+            _type: 'modelLibrary',
+            name: 'Reranker V1',
+            slug: { _type: 'slug', current: 'reranker-v1' },
+            provider: 'Cohere',
+            description: 'Advanced reranking model for search optimization',
+            iconFilename: 'flux.png',
+            modelType: 'Reranker',
+            categories: ['reranker'],
+            inputPrice: 0.02,
+            pricingDisplay: '$0.02/M Tokens',
+            color: 'bg-orange-500',
+            initial: 'C'
+        },
+        {
+            _id: 'model-claude-vision',
+            _type: 'modelLibrary',
+            name: 'Claude Vision 3.5',
+            slug: { _type: 'slug', current: 'claude-vision-3-5' },
+            provider: 'Anthropic',
+            description: 'Multimodal model with vision capabilities',
+            iconFilename: 'gemini-color.png',
+            modelType: 'Vision',
+            categories: ['featured'],
+            inputPrice: 3.0,
+            outputPrice: 15.0,
+            pricingDisplay: '$3.0/M Input • $15.0/M Output',
+            contextWindow: '200000',
+            color: 'bg-purple-600',
+            initial: 'A'
+        }
+    ],
     models: {
         _id: 'models-section-default',
         _type: 'modelsSection',
         sectionLabel: 'Model Library',
         heading: 'Run the latest open models with a single line of code',
         description: 'Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud',
-        viewAllLink: '#',
+        viewAllLink: '/model-library',
         models: [
-            { _key: uuidv4(), name: "Deepseek R1", provider: "DeepSeek", pricing: "$1.35/M Input • $5.4/M Output", context: "163840", type: "LLM", color: "bg-blue-500", initial: "D" },
-            { _key: uuidv4(), name: "Llama 3 70B Instruct", provider: "Meta", pricing: "$0.9/M Tokens", context: "8192", type: "LLM", color: "bg-blue-600", initial: "M" },
-            { _key: uuidv4(), name: "Gemma 3 27B Instruct", provider: "Google", pricing: "$0.9/M Tokens", context: "131072", type: "LLM", color: "bg-red-500", initial: "G" },
-            { _key: uuidv4(), name: "FLUX.1 Kontext Pro", provider: "Flux", pricing: "$0.04/Image", context: null, type: "Image", color: "bg-gray-800", initial: "F" },
-            { _key: uuidv4(), name: "Whisper V3 Large", provider: "OpenAI", pricing: "$0/M Tokens", context: null, type: "Audio", color: "bg-emerald-600", initial: "O" },
-            { _key: uuidv4(), name: "Kimi K2 Instruct", provider: "Moonshot", pricing: "$0.6/M Input • $2.5/M Output", context: "131072", type: "LLM", color: "bg-purple-500", initial: "M" }
+            { _type: 'reference', _ref: 'model-deepseek-r1', _key: uuidv4() },
+            { _type: 'reference', _ref: 'model-llama-3-70b', _key: uuidv4() },
+            { _type: 'reference', _ref: 'model-gemma-3-27b', _key: uuidv4() },
+            { _type: 'reference', _ref: 'model-flux-kontext-pro', _key: uuidv4() },
+            { _type: 'reference', _ref: 'model-whisper-v3', _key: uuidv4() },
+            { _type: 'reference', _ref: 'model-kimi-k2', _key: uuidv4() }
         ]
     },
     infrastructure: {
@@ -456,6 +652,12 @@ async function migrate() {
         transaction.createOrReplace(landingPageContent.cta)
         transaction.createOrReplace(landingPageContent.blogSection)
         transaction.createOrReplace(landingPageContent.logoBar)
+
+        // Create model library documents first
+        console.log('  Creating model library...')
+        landingPageContent.modelLibrary.forEach(model => transaction.createOrReplace(model))
+
+        // Then create models section with references
         transaction.createOrReplace(landingPageContent.models)
         transaction.createOrReplace(landingPageContent.infrastructure)
         transaction.createOrReplace(landingPageContent.lifecycle)

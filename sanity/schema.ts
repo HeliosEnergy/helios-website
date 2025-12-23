@@ -12,6 +12,7 @@ import blogPost from './schemas/blogPost'
 import page from './schemas/page'
 import blogSection from './schemas/blogSection'
 import logoBar from './schemas/logoBar'
+import modelLibrary from './schemas/modelLibrary'
 import modelsSection from './schemas/modelsSection'
 import infrastructureSection from './schemas/infrastructureSection'
 import lifecycleSection from './schemas/lifecycleSection'
@@ -33,6 +34,7 @@ export const schemaTypes = [
     ctaSection,
     blogSection,
     logoBar,
+    modelLibrary,
     modelsSection,
     infrastructureSection,
     lifecycleSection,

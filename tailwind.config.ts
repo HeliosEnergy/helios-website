@@ -61,6 +61,7 @@ export default {
           DEFAULT: "hsl(var(--primary))",
           light: "hsl(var(--yellow-light))",
           dark: "hsl(var(--yellow-dark))",
+          "dark-foreground": "hsl(var(--yellow-dark-foreground))",
           glow: "hsl(var(--yellow-glow))",
         },
         surface: {

@@ -1,0 +1,226 @@
+import { defineField, defineType } from 'sanity'
+
+export default defineType({
+    name: 'modelLibrary',
+    title: 'Model Library',
+    type: 'document',
+    fields: [
+        defineField({
+            name: 'name',
+            title: 'Model Name',
+            type: 'string',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'slug',
+            title: 'Slug',
+            type: 'slug',
+            options: {
+                source: 'name',
+                maxLength: 96,
+            },
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'provider',
+            title: 'Provider',
+            type: 'string',
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'description',
+            title: 'Description',
+            type: 'text',
+            rows: 3,
+        }),
+        defineField({
+            name: 'icon',
+            title: 'Model Icon',
+            type: 'image',
+            options: {
+                hotspot: true,
+            },
+        }),
+        defineField({
+            name: 'iconFilename',
+            title: 'Icon Filename (Legacy)',
+            type: 'string',
+            description: 'Fallback for /model-lib/ folder icons',
+        }),
+        defineField({
+            name: 'providerLogo',
+            title: 'Provider Logo',
+            type: 'image',
+            options: {
+                hotspot: true,
+            },
+        }),
+        defineField({
+            name: 'modelType',
+            title: 'Model Type',
+            type: 'string',
+            options: {
+                list: [
+                    { title: 'LLM', value: 'LLM' },
+                    { title: 'Image', value: 'Image' },
+                    { title: 'Audio', value: 'Audio' },
+                    { title: 'Vision', value: 'Vision' },
+                    { title: 'Embedding', value: 'Embedding' },
+                    { title: 'Reranker', value: 'Reranker' },
+                ],
+            },
+            validation: Rule => Rule.required(),
+        }),
+        defineField({
+            name: 'categories',
+            title: 'Categories',
+            type: 'array',
+            of: [{ type: 'string' }],
+            options: {
+                list: [
+                    { title: 'Featured', value: 'featured' },
+                    { title: 'Serverless', value: 'serverless' },
+                    { title: 'Embedding', value: 'embedding' },
+                    { title: 'Reranker', value: 'reranker' },
+                ],
+            },
+        }),
+        defineField({
+            name: 'inputPrice',
+            title: 'Input Price (per M tokens)',
+            type: 'number',
+            description: 'Price in dollars per million input tokens',
+        }),
+        defineField({
+            name: 'outputPrice',
+            title: 'Output Price (per M tokens)',
+            type: 'number',
+            description: 'Price in dollars per million output tokens',
+        }),
+        defineField({
+            name: 'imagePrice',
+            title: 'Image Price',
+            type: 'number',
+            description: 'Price per image generation',
+        }),
+        defineField({
+            name: 'pricingDisplay',
+            title: 'Pricing Display Text',
+            type: 'string',
+            description: 'Custom pricing text (e.g., "$1.35/M Input • $5.4/M Output")',
+        }),
+        defineField({
+            name: 'contextWindow',
+            title: 'Context Window',
+            type: 'string',
+            description: 'Context window size (e.g., "163840")',
+        }),
+        defineField({
+            name: 'capabilities',
+            title: 'Capabilities',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description: 'List of model capabilities',
+        }),
+        defineField({
+            name: 'useCases',
+            title: 'Use Cases',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description: 'Common use cases for this model',
+        }),
+        defineField({
+            name: 'color',
+            title: 'Accent Color',
+            type: 'string',
+            description: 'Tailwind color class (e.g., "bg-blue-500")',
+        }),
+        defineField({
+            name: 'initial',
+            title: 'Initial',
+            type: 'string',
+            description: 'Single letter initial for fallback display',
+            validation: Rule => Rule.max(1),
+        }),
+        defineField({
+            name: 'fullId',
+            title: 'Full ID',
+            type: 'string',
+            description: 'Unique full identifier for the model (e.g., "deepseek-ai/deepseek-r1")',
+        }),
+        defineField({
+            name: 'createdDate',
+            title: 'Created Date',
+            type: 'datetime',
+            description: 'Date the model was created or released',
+        }),
+        defineField({
+            name: 'parameters',
+            title: 'Parameters',
+            type: 'number',
+            description: 'Total number of parameters in the model (e.g., 671000000000 for 671B)',
+        }),
+        defineField({
+            name: 'isMoe',
+            title: 'Is Mixture of Experts',
+            type: 'boolean',
+            description: 'Whether the model uses Mixture of Experts architecture',
+        }),
+        defineField({
+            name: 'recommendedGpu',
+            title: 'Recommended GPU',
+            type: 'string',
+            description: 'Recommended GPU for running this model (e.g., "H100 NVL")',
+        }),
+        defineField({
+            name: 'fineTuningSupported',
+            title: 'Fine-Tuning Supported',
+            type: 'boolean',
+            description: 'Whether fine-tuning is supported for this model',
+        }),
+        defineField({
+            name: 'functionCalling',
+            title: 'Function Calling',
+            type: 'boolean',
+            description: 'Whether the model supports function calling',
+        }),
+        defineField({
+            name: 'imageInput',
+            title: 'Image Input',
+            type: 'boolean',
+            description: 'Whether the model supports image input',
+        }),
+        defineField({
+            name: 'embeddings',
+            title: 'Embeddings',
+            type: 'boolean',
+            description: 'Whether the model supports generating embeddings',
+        }),
+        defineField({
+            name: 'contextLength',
+            title: 'Context Length',
+            type: 'number',
+            description: 'Maximum context length in tokens (numeric version of contextWindow)',
+        }),
+        defineField({
+            name: 'shortDescription',
+            title: 'Short Description',
+            type: 'text',
+            rows: 3,
+            description: 'Brief description of the model (2-3 sentences)',
+        }),
+        defineField({
+            name: 'huggingFaceUrl',
+            title: 'Hugging Face URL',
+            type: 'url',
+            description: 'Link to the model\'s Hugging Face repository',
+        }),
+    ],
+    preview: {
+        select: {
+            title: 'name',
+            subtitle: 'provider',
+            media: 'icon',
+        },
+    },
+})

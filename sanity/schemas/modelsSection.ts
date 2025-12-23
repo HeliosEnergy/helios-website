@@ -33,19 +33,11 @@ export default defineType({
             type: 'array',
             of: [
                 {
-                    type: 'object',
-                    fields: [
-                        { name: 'name', type: 'string', title: 'Model Name' },
-                        { name: 'provider', type: 'string', title: 'Provider' },
-                        { name: 'pricing', type: 'string', title: 'Pricing Info' },
-                        { name: 'context', type: 'string', title: 'Context Window' },
-                        { name: 'type', type: 'string', title: 'Model Type (LLM, Image, Audio)' },
-                        { name: 'icon', type: 'string', title: 'Icon Filename' },
-                        { name: 'color', type: 'string', title: 'Tailwind Color (e.g., bg-blue-500)' },
-                        { name: 'initial', type: 'string', title: 'Initial' },
-                    ],
+                    type: 'reference',
+                    to: [{ type: 'modelLibrary' }],
                 },
             ],
+            description: 'Select models from the Model Library to display in the carousel',
         }),
     ],
 })

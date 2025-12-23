@@ -37,7 +37,8 @@
     /* Custom colors */
     --yellow-glow: 43 85% 45%;
     --yellow-light: 43 85% 55%;
-    --yellow-dark: 43 85% 35%;
+    --yellow-dark: 25 79% 37%;
+    --yellow-dark-foreground: 0 0% 100%;
     --surface: 40 37% 94%;
     --surface-elevated: 40 37% 96%;
     --text-secondary: 240 5% 46%;

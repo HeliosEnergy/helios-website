@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRef, useState, useEffect } from "react";
 import { useSanityQuery } from "@/hooks/useSanityData";
+import { Link } from "react-router-dom";
 
 const defaultModels = [
   {
@@ -67,7 +68,31 @@ const defaultModels = [
 ];
 
 export const ModelsSection = () => {
-  const { data: sectionData } = useSanityQuery<any>('models-section', `*[_type == "modelsSection"][0]`);
+  const { data: sectionData } = useSanityQuery<any>(
+    'models-section',
+    `*[_type == "modelsSection"][0] {
+      sectionLabel,
+      heading,
+      description,
+      viewAllLink,
+       models[]-> {
+        _id,
+        name,
+        slug,
+        provider,
+        pricingDisplay,
+        inputPrice,
+        outputPrice,
+        imagePrice,
+        contextWindow,
+        modelType,
+        iconFilename,
+        icon,
+        color,
+        initial
+      }
+    }`
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -117,7 +142,7 @@ export const ModelsSection = () => {
               {sectionData?.description || 'Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud'}
             </p>
           </div>
-          <a href={sectionData?.viewAllLink || '#'} className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
+          <a href={sectionData?.viewAllLink || '/model-library'} className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
             View all models
             <ArrowRight className="w-4 h-4" />
           </a>
@@ -133,38 +158,52 @@ export const ModelsSection = () => {
             ref={scrollRef}
             className="flex overflow-x-auto pb-4 scrollbar-hide"
           >
-            {models.map((model, i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-64 bg-card border border-border border-l-0 first:border-l p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 cursor-pointer group"
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <img
-                    src={`/model-lib/${model.icon}`}
-                    alt={`${model.provider} logo`}
-                    className="w-10 h-10 object-contain shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-sm truncate">
-                      {model.name}
-                    </h3>
+            {models.map((model, i) => {
+              // Format pricing for display
+              const getPricing = () => {
+                if (model.pricingDisplay) return model.pricingDisplay;
+                if (model.imagePrice) return `$${model.imagePrice}/Image`;
+                if (model.inputPrice && model.outputPrice) {
+                  return `$${model.inputPrice}/M Input • $${model.outputPrice}/M Output`;
+                }
+                if (model.inputPrice) return `$${model.inputPrice}/M Tokens`;
+                return 'Contact for pricing';
+              };
+
+              return (
+                <Link
+                  key={model._id || i}
+                  to={`/model-library/${model.slug?.current}`}
+                  className="block flex-shrink-0 w-64 bg-card border border-border border-l-0 first:border-l p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 group"
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <img
+                      src={`/model-lib/${model.iconFilename || model.icon}`}
+                      alt={`${model.provider} logo`}
+                      className="w-10 h-10 object-contain shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm truncate">
+                        {model.name}
+                      </h3>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground">
-                    {model.pricing}
-                  </p>
-                  {model.context && (
+                  <div className="space-y-1.5">
                     <p className="text-xs text-muted-foreground">
-                      {parseInt(model.context).toLocaleString()} Context
+                      {getPricing()}
                     </p>
-                  )}
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-secondary text-muted-foreground">
-                    {model.type}
-                  </span>
-                </div>
-              </div>
-            ))}
+                    {model.contextWindow && (
+                      <p className="text-xs text-muted-foreground">
+                        {parseInt(model.contextWindow).toLocaleString()} Context
+                      </p>
+                    )}
+                    <span className="inline-block px-2 py-0.5 text-xs font-medium bg-secondary text-muted-foreground">
+                      {model.modelType}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
