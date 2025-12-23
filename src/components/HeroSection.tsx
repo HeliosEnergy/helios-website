@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
+import { IsometricGPUAnimation } from "./hero/IsometricGPUAnimation";
 
 export const HeroSection = () => {
   const { data: hero, isLoading } = useSanityQuery<any>('hero-section', QUERIES.heroSection);
@@ -36,44 +37,12 @@ export const HeroSection = () => {
             )}
           </div>
 
-          {/* Geometric Pattern */}
+          {/* Isometric 3D GPU Animation */}
           <div className="relative hidden lg:block animate-fade-in-delay-2">
-            <GeometricPattern />
+            <IsometricGPUAnimation />
           </div>
         </div>
       </div>
     </section>
-  );
-};
-
-const GeometricPattern = () => {
-  const rows = [
-    [0.9, 0.7, 0.5, 0.8, 0.6],
-    [0.7, 0.9, 0.6, 0.5, 0.8],
-    [0.5, 0.6, 0.8, 0.9, 0.7],
-    [0.8, 0.5, 0.7, 0.6, 0.9],
-  ];
-
-  return (
-    <div className="relative w-full max-w-md ml-auto">
-      <div className="grid gap-3 transform -rotate-6">
-        {rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex gap-3 justify-end" style={{ paddingRight: `${rowIndex * 20}px` }}>
-            {row.map((opacity, colIndex) => (
-              <div
-                key={colIndex}
-                className="w-16 h-16 transition-all duration-300 hover:scale-105"
-                style={{
-                  backgroundColor: `hsl(48 96% 53% / ${opacity})`,
-                }}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-      {/* Floating tiles */}
-      <div className="absolute -top-4 left-12 w-12 h-12 bg-primary/20 transform rotate-12" />
-      <div className="absolute bottom-8 -left-4 w-14 h-14 bg-primary/30 transform -rotate-6" />
-    </div>
   );
 };
