@@ -11,6 +11,7 @@ import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { CaseStudySection } from "@/components/CaseStudySection";
 import { BlogSection } from "@/components/BlogSection";
 import { CTASection } from "@/components/CTASection";
+import { CoreValueProposition } from "@/components/CoreValueProposition";
 import { Footer } from "@/components/Footer";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 
@@ -27,6 +28,7 @@ const sectionMap: Record<string, React.ComponentType<any>> = {
   lifecycleSection: LifecycleSection,
   whyHeliosSection: WhyHeliosSection,
   caseStudySection: CaseStudySection,
+  coreValueProposition: CoreValueProposition,
 };
 
 const Index = () => {
@@ -42,6 +44,7 @@ const Index = () => {
           <UseCasesSection />
           <ModelsSection />
           <InfrastructureSection />
+          <CoreValueProposition />
           <LifecycleSection />
           <WhyHeliosSection />
           <TestimonialsSection />

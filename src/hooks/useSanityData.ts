@@ -2,20 +2,21 @@ import { useQuery } from '@tanstack/react-query'
 import { client } from '@/lib/sanity'
 
 export function useSanityQuery<T>(name: string, query: string, params: Record<string, any> = {}) {
-    return useQuery({
-        queryKey: [name, params],
-        queryFn: () => client.fetch<T>(query, params),
-    })
+  return useQuery({
+    queryKey: [name, params],
+    queryFn: () => client.fetch<T>(query, params),
+  })
 }
 
 export const QUERIES = {
-    announcementBanner: `*[_type == "announcementBanner" && enabled == true][0]`,
-    heroSection: `*[_type == "heroSection"][0]`,
-    useCasesSection: `*[_type == "useCasesSection"][0]`,
-    testimonialsSection: `*[_type == "testimonialsSection"][0]`,
-    ctaSection: `*[_type == "ctaSection"][0]`,
+  announcementBanner: `*[_type == "announcementBanner" && enabled == true][0]`,
+  heroSection: `*[_type == "heroSection"][0]`,
+  useCasesSection: `*[_type == "useCasesSection"][0]`,
+  testimonialsSection: `*[_type == "testimonialsSection"][0]`,
+  ctaSection: `*[_type == "ctaSection"][0]`,
+  coreValueProposition: `*[_type == "coreValueProposition"][0]`,
 
-    blogPosts: `*[_type == "blogPost"] | order(publishedAt desc) {
+  blogPosts: `*[_type == "blogPost"] | order(publishedAt desc) {
     title,
     slug,
     publishedAt,
@@ -24,7 +25,7 @@ export const QUERIES = {
     "author": author->name
   }`,
 
-    blogPost: `*[_type == "blogPost" && slug.current == $slug][0] {
+  blogPost: `*[_type == "blogPost" && slug.current == $slug][0] {
     ...,
     "author": author-> {
       name,
@@ -34,12 +35,12 @@ export const QUERIES = {
     "categories": categories[]->title
   }`,
 
-    page: `*[_type == "page" && slug.current == $slug][0] {
+  page: `*[_type == "page" && slug.current == $slug][0] {
     ...,
     sections[]->
   }`,
 
-    legalPage: `*[_type == "legalPage"][0] {
+  legalPage: `*[_type == "legalPage"][0] {
     title,
     lastUpdated,
     content

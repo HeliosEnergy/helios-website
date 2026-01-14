@@ -22,6 +22,7 @@ import gpuModel from './schemas/gpuModel'
 import pricingTier from './schemas/pricingTier'
 import pricingPageSection from './schemas/pricingPageSection'
 import legalPage from './schemas/legalPage'
+import coreValueProposition from './schemas/coreValueProposition'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -40,6 +41,7 @@ export const schemaTypes = [
     lifecycleSection,
     whyHeliosSection,
     caseStudySection,
+    coreValueProposition,
 
     // Pricing schemas
     gpuModel,

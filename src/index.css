@@ -4,55 +4,55 @@
 
 @layer base {
   :root {
-    --background: 40 37% 96%;
+    --background: 45 15% 98%;
     --foreground: 240 10% 10%;
 
-    --card: 40 37% 96%;
+    --card: 45 10% 96%;
     --card-foreground: 240 10% 10%;
 
-    --popover: 40 37% 96%;
+    --popover: 45 10% 96%;
     --popover-foreground: 240 10% 10%;
 
-    --primary: 43 85% 45%;
+    --primary: 48 95% 53%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 240 5% 96%;
+    --secondary: 45 5% 94%;
     --secondary-foreground: 240 10% 10%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 5% 46%;
+    --muted: 45 5% 92%;
+    --muted-foreground: 45 5% 40%;
 
-    --accent: 43 85% 45%;
+    --accent: 48 95% 53%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 43 85% 45%;
+    --border: 45 10% 90%;
+    --input: 45 10% 90%;
+    --ring: 48 95% 53%;
 
     --radius: 0px;
 
     /* Custom colors */
-    --yellow-glow: 43 85% 45%;
-    --yellow-light: 43 85% 55%;
-    --yellow-dark: 25 79% 37%;
-    --yellow-dark-foreground: 0 0% 100%;
-    --surface: 40 37% 94%;
-    --surface-elevated: 40 37% 96%;
-    --text-secondary: 240 5% 46%;
-    --text-tertiary: 240 5% 65%;
-    --banner-bg: 43 85% 45%;
+    --yellow-glow: 48 95% 53%;
+    --yellow-light: 48 95% 63%;
+    --yellow-dark: 48 95% 43%;
+    --yellow-dark-foreground: 0 0% 0%;
+    --surface: 45 10% 95%;
+    --surface-elevated: 45 10% 97%;
+    --text-secondary: 45 5% 40%;
+    --text-tertiary: 45 5% 60%;
+    --banner-bg: 48 95% 53%;
 
-    --sidebar-background: 40 37% 96%;
+    --sidebar-background: 45 15% 98%;
     --sidebar-foreground: 240 10% 10%;
-    --sidebar-primary: 43 85% 45%;
+    --sidebar-primary: 48 95% 53%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent: 45 5% 94%;
     --sidebar-accent-foreground: 240 10% 10%;
-    --sidebar-border: 240 6% 90%;
-    --sidebar-ring: 43 85% 45%;
+    --sidebar-border: 45 10% 90%;
+    --sidebar-ring: 48 95% 53%;
   }
 
   .dark {

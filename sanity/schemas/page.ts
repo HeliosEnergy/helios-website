@@ -42,6 +42,7 @@ export default defineType({
                         { type: 'whyHeliosSection' },
                         { type: 'caseStudySection' },
                         { type: 'pricingPageSection' },
+                        { type: 'coreValueProposition' },
                     ]
                 },
             ],
