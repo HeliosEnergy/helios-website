@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 import { urlFor } from "@/lib/sanity";
 import { format } from "date-fns";
@@ -17,8 +17,8 @@ export const BlogSection = () => {
   }`);
 
   return (
-    <section className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 bg-background">
+      <div className="max-w-7xl mx-auto px-3 lg:px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <span className="text-sm font-mono uppercase tracking-widest text-primary">
@@ -41,10 +41,10 @@ export const BlogSection = () => {
             ))
           ) : (
             posts?.map((post) => (
-              <div
+              <Link
                 key={post.slug.current}
+                to={`/blog/${post.slug.current}`}
                 className="group cursor-pointer rounded-xl overflow-hidden border border-border bg-card hover:border-primary transition-all duration-300"
-                onClick={() => navigate(`/blog/${post.slug.current}`)}
               >
                 <div className="aspect-video overflow-hidden border-b border-border">
                   {post.heroImage ? (
@@ -69,7 +69,7 @@ export const BlogSection = () => {
                     {post.title}
                   </h3>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>

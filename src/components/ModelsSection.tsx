@@ -3,69 +3,9 @@ import { Button } from "./ui/button";
 import { useRef, useState, useEffect } from "react";
 import { useSanityQuery } from "@/hooks/useSanityData";
 import { Link } from "react-router-dom";
-
-const defaultModels = [
-  {
-    name: "Deepseek R1",
-    provider: "DeepSeek",
-    pricing: "$1.35/M Input • $5.4/M Output",
-    context: "163840",
-    type: "LLM",
-    icon: "deepseek-color.png",
-    color: "bg-blue-500",
-    initial: "D",
-  },
-  {
-    name: "Llama 3 70B Instruct",
-    provider: "Meta",
-    pricing: "$0.9/M Tokens",
-    context: "8192",
-    type: "LLM",
-    icon: "llamaindex.png",
-    color: "bg-blue-600",
-    initial: "M",
-  },
-  {
-    name: "Gemma 3 27B Instruct",
-    provider: "Google",
-    pricing: "$0.9/M Tokens",
-    context: "131072",
-    type: "LLM",
-    icon: "gemini-color.png",
-    color: "bg-red-500",
-    initial: "G",
-  },
-  {
-    name: "FLUX.1 Kontext Pro",
-    provider: "Flux",
-    pricing: "$0.04/Image",
-    context: null,
-    type: "Image",
-    icon: "flux.png",
-    color: "bg-gray-800",
-    initial: "F",
-  },
-  {
-    name: "Whisper V3 Large",
-    provider: "OpenAI",
-    pricing: "$0/M Tokens",
-    context: null,
-    type: "Audio",
-    icon: "openai (1).png",
-    color: "bg-emerald-600",
-    initial: "O",
-  },
-  {
-    name: "Kimi K2 Instruct",
-    provider: "Moonshot",
-    pricing: "$0.6/M Input • $2.5/M Output",
-    context: "131072",
-    type: "LLM",
-    icon: "kimi-color.png",
-    color: "bg-purple-500",
-    initial: "M",
-  },
-];
+import { motion, AnimatePresence } from "framer-motion";
+import { urlFor } from "@/lib/sanity";
+import { StaticMeshGradient } from '@paper-design/shaders-react';
 
 export const ModelsSection = () => {
   const { data: sectionData } = useSanityQuery<any>(
@@ -93,11 +33,13 @@ export const ModelsSection = () => {
       }
     }`
   );
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const models = sectionData?.models || defaultModels;
+  const models = sectionData?.models || [];
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -116,117 +58,202 @@ export const ModelsSection = () => {
     }
   }, [models]);
 
+  // Autoscroll logic
+  useEffect(() => {
+    if (isHovered || !canScrollRight && !canScrollLeft) return;
+
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+
+        if (scrollLeft >= maxScroll - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          scroll("right");
+        }
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isHovered, canScrollRight, canScrollLeft]);
+
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 280;
+      const { clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth; // Scroll by a full view for precision
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
       });
     }
   };
+const shaderConfigs = [
+  {
+    // Molten Sunrise
+    colors: ["#FF6B35", "#FFE5B4", "#FF9F6B", "#FFFFFF"],
+    waveX: 0.18,
+    rotation: 245,
+    mixing: 0.45,      // LOW mixing = distinct color bands like OpenAI
+    scale: 0.55
+  },
+  {
+    // Peach Flare
+    colors: ["#FFAA80", "#FFFFFF", "#FF6B35", "#FFD4AA"],
+    waveX: 0.20,
+    rotation: 280,
+    mixing: 0.42,
+    scale: 0.52
+  },
+  {
+    // Golden Plasma
+    colors: ["#FFB800", "#FFF5E0", "#FF8C00", "#FFFFFF"],
+    waveX: 0.17,
+    rotation: 260,
+    mixing: 0.48,
+    scale: 0.58
+  },
+  {
+    // Ember Silk
+    colors: ["#FF7043", "#FFFFFF", "#FFAB91", "#FF5722"],
+    waveX: 0.19,
+    rotation: 270,
+    mixing: 0.44,
+    scale: 0.54
+  }
+];
+return (
+    <section className="py-16 bg-black relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 lg:px-6">
+        {/* Jony's Header: Pure & Monolithic */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-32">
+          <div className="max-w-3xl space-y-6">
 
-  return (
-    <section className="py-20 bg-surface border-y border-border overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-12">
-          <div>
-            <span className="text-sm font-mono uppercase tracking-widest text-muted-foreground">
-              {sectionData?.sectionLabel || 'Model Library'}
-            </span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-heading font-bold text-foreground">
-              {sectionData?.heading || 'Run the latest open models with a single line of code'}
+            <h2 className="text-7xl sm:text-8xl font-heading font-bold text-white tracking-tightest leading-[0.85]">
+              {sectionData?.heading ? sectionData.heading : 'All Models.\nOne Platform.'}
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-2xl">
-              {sectionData?.description || 'Helios gives you instant access to the most popular OSS models — optimized for cost, speed, and quality on the fastest AI cloud'}
-            </p>
           </div>
-          <a href={sectionData?.viewAllLink || '/model-library'} className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1 shrink-0">
-            View all models
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <div className="flex flex-col gap-6 lg:items-end">
+            <p className="text-2xl text-white/40 max-w-sm font-light leading-relaxed lg:text-right">
+              {sectionData?.description || 'The fastest AI cloud.'}
+            </p>
+            <Link to="/model-library" className="text-xs font-mono uppercase tracking-[0.4em] text-white/60 hover:text-primary transition-colors flex items-center gap-4 group">
+              View Collection
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-500" />
+            </Link>
+          </div>
         </div>
 
-        {/* Scrolling Cards */}
-        <div className="relative">
-          {/* Gradient Masks */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-surface to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-surface to-transparent z-10 pointer-events-none" />
-
+        {/* The Carousel of Identity */}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           <div
             ref={scrollRef}
-            className="flex overflow-x-auto pb-4 scrollbar-hide"
+            className="flex gap-8 overflow-x-auto pb-12 scrollbar-hide snap-x snap-mandatory px-2"
           >
-            {models.map((model, i) => {
-              // Format pricing for display
+            {models.map((model: any, i: number) => {
               const getPricing = () => {
                 if (model.pricingDisplay) return model.pricingDisplay;
-                if (model.imagePrice) return `$${model.imagePrice}/Image`;
+                if (model.imagePrice) return `$${model.imagePrice}/Img`;
                 if (model.inputPrice && model.outputPrice) {
-                  return `$${model.inputPrice}/M Input • $${model.outputPrice}/M Output`;
+                  return `$${model.inputPrice}/M · $${model.outputPrice}/M`;
                 }
-                if (model.inputPrice) return `$${model.inputPrice}/M Tokens`;
-                return 'Contact for pricing';
+                return 'Contact';
               };
+
+              const iconUrl = model.icon ? urlFor(model.icon).width(200).height(200).url() : `/model-lib/${model.iconFilename}`;
+              const shader = shaderConfigs[i % shaderConfigs.length];
 
               return (
                 <Link
                   key={model._id || i}
                   to={`/model-library/${model.slug?.current}`}
-                  className="block flex-shrink-0 w-64 bg-card border border-border border-l-0 first:border-l p-5 hover:border-primary/40 hover:shadow-md transition-all duration-300 group"
+                  className="block flex-shrink-0 w-full md:w-[calc((100%-32px)/2)] lg:w-[calc((100%-64px)/3)] bg-[#0A0A0A] rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-700 ease-out group snap-start relative h-[500px]"
                 >
-                  <div className="flex items-start gap-3 mb-4">
-                    <img
-                      src={`/model-lib/${model.iconFilename || model.icon}`}
-                      alt={`${model.provider} logo`}
-                      className="w-10 h-10 object-contain shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground text-sm truncate">
-                        {model.name}
-                      </h3>
-                    </div>
+                  {/* The Background: Paper Shader */}
+                  <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-1000">
+<StaticMeshGradient
+  width={800}
+  height={1200}
+  colors={shader.colors}
+  
+  // COLOR FLOW FIXES
+  positions={4}              // was 2 — more positions = smoother color distribution
+  mixing={0.75}              // was 0.58 — higher = colors blend into each other more
+  
+  // WAVE SMOOTHNESS
+  waveX={shader.waveX}
+  waveXShift={0.25}          // was 0.43 — lower = gentler wave offset
+  waveY={0.45}               // was 0.63 — soften the Y wave
+  waveYShift={0.35}          // was 0.65 — less aggressive shift
+  
+  // SCALE & MOVEMENT
+  scale={0.65}               // was 0.46 — larger scale = smoother, less busy
+  rotation={shader.rotation}
+  offsetX={-0.2}             // was -0.4 — less extreme offset
+  offsetY={-0.15}            // was -0.26
+  
+  // GRAIN (keep subtle)
+  grainMixer={0.015}         // was 0.02 — slightly less
+  grainOverlay={0.04}        // was 0.05
+/>
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground">
-                      {getPricing()}
-                    </p>
-                    {model.contextWindow && (
-                      <p className="text-xs text-muted-foreground">
-                        {parseInt(model.contextWindow).toLocaleString()} Context
-                      </p>
-                    )}
-                    <span className="inline-block px-2 py-0.5 text-xs font-medium bg-secondary text-muted-foreground">
-                      {model.modelType}
-                    </span>
+
+                  <div className="relative z-10 p-10 h-full flex flex-col justify-between">
+                    {/* Top Left: Small Icon (No bounding box) */}
+                    <div className="w-12 h-12 flex items-start justify-start group-hover:scale-110 transition-transform duration-500">
+                      <img
+                        src={iconUrl}
+                        alt={`${model.provider} logo`}
+                        className="w-10 h-10 object-contain filter brightness-100"
+                      />
+                    </div>
+
+                    {/* Bottom Left: Identity */}
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-xs font-mono uppercase tracking-[0.4em] text-white block mb-2">{model.provider}</span>
+                        <h3 className="text-5xl font-heading font-bold text-white tracking-tight leading-none">
+                          {model.name}
+                        </h3>
+                      </div>
+
+                      <div className="pt-4">
+                        <p className="text-sm font-mono tracking-[0.2em] text-white uppercase leading-relaxed">
+                          {model.modelType} • {model.contextWindow ? `${parseInt(model.contextWindow).toLocaleString()} Context` : 'Standard'}
+                          <br />
+                          <span className="font-bold">{getPricing()}</span>
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               );
             })}
           </div>
-        </div>
 
-        {/* Arrows below carousel */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
-            className="h-10 w-10 border-border"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => scroll("right")}
-            disabled={!canScrollRight}
-            className="h-10 w-10 border-border"
-          >
-            <ArrowRight className="w-4 h-4" />
-          </Button>
+          {/* Controls: Restrained & Silent */}
+          <div className="flex items-center gap-4 mt-12 justify-end">
+            <button
+              onClick={() => scroll("left")}
+              disabled={!canScrollLeft}
+              aria-label="Scroll models left"
+              className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-all ${canScrollLeft ? 'text-white hover:bg-white hover:text-black hover:border-white' : 'text-white/10'}`}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => scroll("right")}
+              disabled={!canScrollRight}
+              aria-label="Scroll models right"
+              className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-all ${canScrollRight ? 'text-white hover:bg-white hover:text-black hover:border-white' : 'text-white/10'}`}
+            >
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

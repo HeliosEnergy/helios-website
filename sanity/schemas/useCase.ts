@@ -31,6 +31,14 @@ export default defineType({
             validation: (Rule) => Rule.required().max(10),
         }),
         defineField({
+            name: 'image',
+            title: 'Visual / Screenshot',
+            type: 'image',
+            options: {
+                hotspot: true,
+            },
+        }),
+        defineField({
             name: 'stat',
             title: 'Stat',
             type: 'string',

@@ -1,47 +1,38 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface PricingHeroProps {
     title: string;
     subtitle?: string;
-    ctaButtonText?: string;
-    ctaButtonUrl?: string;
 }
 
 const PricingHero: React.FC<PricingHeroProps> = ({
     title,
     subtitle,
-    ctaButtonText = 'Get Started',
-    ctaButtonUrl = 'https://console.heliosenergy.io/'
 }) => {
     return (
-        <section className="w-full bg-foreground text-background py-24 md:py-32">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                <div className="text-center space-y-8">
-                    {/* Main Title - Large Typography */}
-                    <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight">
-                        <span className="text-background">{title.split(' ').slice(0, -1).join(' ')}</span>
-                        <br />
-                        <span className="text-primary">{title.split(' ').slice(-1)}</span>
-                    </h1>
+        <section className="w-full bg-white pt-32 lg:pt-48 pb-24 border-b border-black/5">
+            <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
+                <div className="max-w-4xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                        <span className="font-mono text-[11px] uppercase tracking-[0.6em] text-black/40 block mb-12 font-bold">
+                            Commercial Infrastructure
+                        </span>
+                        
+                        <h1 className="text-6xl md:text-8xl font-heading font-bold tracking-tightest leading-[0.95] text-black">
+                            {title}
+                        </h1>
 
-                    {/* Subtitle */}
-                    {subtitle && (
-                        <p className="text-xl md:text-2xl text-background/80 leading-relaxed max-w-3xl mx-auto">
-                            {subtitle}
-                        </p>
-                    )}
-
-                    {/* CTA Button */}
-                    <div className="flex justify-center mt-8">
-                        <Button
-                            onClick={() => window.open(ctaButtonUrl, '_blank', 'noopener,noreferrer')}
-                            className="px-12 py-6 bg-primary text-foreground font-semibold text-lg hover:bg-primary/90 transition-all duration-300"
-                            size="lg"
-                        >
-                            {ctaButtonText}
-                        </Button>
-                    </div>
+                        {subtitle && (
+                            <p className="mt-12 text-2xl text-black/60 leading-relaxed max-w-3xl font-light">
+                                {subtitle}
+                            </p>
+                        )}
+                    </motion.div>
                 </div>
             </div>
         </section>

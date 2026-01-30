@@ -23,11 +23,13 @@ export const IsometricGPUAnimation = ({ onPhaseChange }: IsometricGPUAnimationPr
     if (!containerRef.current || hasAnimatedRef.current) return;
     hasAnimatedRef.current = true;
 
+    const container = containerRef.current;
+
     const scene = new THREE.Scene();
     scene.background = null;
 
-    const width = containerRef.current.clientWidth;
-    const height = containerRef.current.clientHeight;
+    const width = container.clientWidth;
+    const height = container.clientHeight;
     const aspect = width / height;
     const d = 8;
 
@@ -39,7 +41,7 @@ export const IsometricGPUAnimation = ({ onPhaseChange }: IsometricGPUAnimationPr
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.current.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -215,7 +217,7 @@ export const IsometricGPUAnimation = ({ onPhaseChange }: IsometricGPUAnimationPr
     const easeOutCubic = (x: number): number => 1 - Math.pow(1 - x, 3);
 
     let maximaTime = 0;
-    let traceAnimProgress: number[] = traces.map(() => Math.random() * 2); // staggered start
+    const traceAnimProgress: number[] = traces.map(() => Math.random() * 2); // staggered start
 
     const animate = () => {
       const now = Date.now();
@@ -379,8 +381,8 @@ export const IsometricGPUAnimation = ({ onPhaseChange }: IsometricGPUAnimationPr
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (container && renderer.domElement) {
+        container.removeChild(renderer.domElement);
       }
       renderer.dispose();
     };

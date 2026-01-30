@@ -1,5 +1,4 @@
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { motion } from "framer-motion";
 
 interface ModelFiltersProps {
     activeFilter: string;
@@ -8,86 +7,41 @@ interface ModelFiltersProps {
 
 const filterCategories = [
     { label: "Featured", value: "featured" },
-    { label: "Serverless", value: "serverless" },
-    { label: "Embedding", value: "embedding" },
     { label: "LLM", value: "LLM" },
+    { label: "Vision", value: "Vision" },
     { label: "Image", value: "Image" },
     { label: "Audio", value: "Audio" },
-    { label: "Vision", value: "Vision" },
+    { label: "Embedding", value: "embedding" },
     { label: "Reranker", value: "reranker" },
-];
-
-const providers = [
-    "Qwen",
-    "OpenAI",
-    "Moonshot AI",
-    "Meta",
-    "DeepSeek",
-    "Google",
-    "Flux",
-    "Anthropic",
-    "Z.ai",
+    { label: "Serverless", value: "serverless" },
 ];
 
 export const ModelFilters = ({ activeFilter, onFilterChange }: ModelFiltersProps) => {
-    const [showProviders, setShowProviders] = useState(false);
-
     return (
-        <div className="border-b border-border">
+        <div className="border-b border-border/40 bg-background/50 backdrop-blur-md sticky top-20 z-40">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-                    {filterCategories.map((filter) => (
-                        <button
-                            key={filter.value}
-                            onClick={() => onFilterChange(filter.value)}
-                            className={`px-4 py-4 text-sm font-mono uppercase tracking-wider whitespace-nowrap transition-colors relative ${activeFilter === filter.value
-                                    ? "text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
+                <div className="flex items-center gap-8 overflow-x-auto scrollbar-hide py-0 h-14">
+                    {filterCategories.map((filter) => {
+                        const isActive = activeFilter === filter.value;
+                        return (
+                            <button
+                                key={filter.value}
+                                onClick={() => onFilterChange(filter.value)}
+                                className={`h-full flex items-center text-[10px] font-mono uppercase tracking-[0.25em] whitespace-nowrap transition-colors relative group ${
+                                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                                 }`}
-                        >
-                            {filter.label}
-                            {activeFilter === filter.value && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                            )}
-                        </button>
-                    ))}
-
-                    {/* Providers Dropdown */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowProviders(!showProviders)}
-                            className={`px-4 py-4 text-sm font-mono uppercase tracking-wider whitespace-nowrap transition-colors flex items-center gap-1 ${activeFilter.startsWith("provider:")
-                                    ? "text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                }`}
-                        >
-                            Providers
-                            <ChevronDown className={`w-4 h-4 transition-transform ${showProviders ? 'rotate-180' : ''}`} />
-                            {activeFilter.startsWith("provider:") && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                            )}
-                        </button>
-
-                        {showProviders && (
-                            <div className="absolute top-full left-0 mt-2 bg-background border border-border shadow-xl z-50 min-w-[200px]">
-                                {providers.map((provider) => (
-                                    <button
-                                        key={provider}
-                                        onClick={() => {
-                                            onFilterChange(`provider:${provider}`);
-                                            setShowProviders(false);
-                                        }}
-                                        className={`block w-full text-left px-4 py-3 text-sm transition-colors ${activeFilter === `provider:${provider}`
-                                                ? "bg-primary/10 text-primary"
-                                                : "text-foreground hover:bg-secondary"
-                                            }`}
-                                    >
-                                        {provider}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                            >
+                                {filter.label}
+                                {isActive && (
+                                    <motion.div 
+                                        layoutId="activeFilter"
+                                        className="absolute bottom-0 left-0 right-0 h-[1px] bg-primary shadow-[0_0_8px_hsl(var(--primary))]"
+                                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
         </div>

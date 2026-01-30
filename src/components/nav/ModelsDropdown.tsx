@@ -1,107 +1,88 @@
-import { Sparkles, Server, Brain, Image, AudioLines, Eye } from "lucide-react";
+import { Sparkles, Server, Brain, Image, AudioLines, Eye, ArrowRight } from "lucide-react";
 
 export const ModelsDropdown = () => {
   return (
-    <div className="grid grid-cols-3 gap-0 p-0 bg-background border border-border min-w-[900px]">
+    <div className="flex gap-0 p-0 min-w-[1000px] bg-transparent">
       {/* Model Types */}
-      <div className="p-8 border-r border-border">
-        <h3 className="text-primary font-mono text-xs uppercase tracking-wider mb-3">
-          Model Types
-        </h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Browse models by category to find the right fit for your use case
-        </p>
-         <div className="grid grid-cols-2 gap-4">
-           <a href="/model-library?filter=featured" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <Sparkles className="w-4 h-4 text-muted-foreground" />
-             Featured Models
-           </a>
-           <a href="/model-library?filter=serverless" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <Server className="w-4 h-4 text-muted-foreground" />
-             Serverless
-           </a>
-           <a href="/model-library?filter=LLM" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <Brain className="w-4 h-4 text-muted-foreground" />
-             LLM
-           </a>
-           <a href="/model-library?filter=Image" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <Image className="w-4 h-4 text-muted-foreground" />
-             Image
-           </a>
-           <a href="/model-library?filter=Audio" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <AudioLines className="w-4 h-4 text-muted-foreground" />
-             Audio
-           </a>
-           <a href="/model-library?filter=Vision" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <Eye className="w-4 h-4 text-muted-foreground" />
-             Vision
-           </a>
-         </div>
+      <div className="flex-1 p-12 space-y-10">
+        <div>
+          <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-6">
+            Classification
+          </h3>
+          <p className="text-xl text-white/80 leading-relaxed font-light">
+            The right architecture <br />for the task.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+           {[
+             { icon: Sparkles, label: "Featured" },
+             { icon: Server, label: "Serverless" },
+             { icon: Brain, label: "Language" },
+             { icon: Image, label: "Vision" },
+             { icon: AudioLines, label: "Audio" },
+             { icon: Eye, label: "Multimodal" },
+           ].map((item) => (
+             <a key={item.label} href={`/model-library?filter=${item.label}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-white transition-colors group">
+               <item.icon className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
+               {item.label}
+             </a>
+           ))}
+        </div>
       </div>
 
       {/* Featured Providers */}
-      <div className="p-8 border-r border-border">
-        <h3 className="text-primary font-mono text-xs uppercase tracking-wider mb-3">
-          Featured Providers
+      <div className="flex-1 p-12 bg-white/[0.02] space-y-10">
+        <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
+          The Ecosystem
         </h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Discover top model providers powering Helios AI
-        </p>
-         <div className="grid grid-cols-2 gap-4">
-           <a href="/model-library?filter=provider:Qwen" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-primary">✦</span>
-             Qwen
-           </a>
-           <a href="/model-library?filter=provider:OpenAI" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center">⬡</span>
-             OpenAI
-           </a>
-           <a href="/model-library?filter=provider:Moonshot AI" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-primary">☾</span>
-             Moonshot AI
-           </a>
-           <a href="/model-library?filter=provider:Meta" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-primary">∞</span>
-             Meta
-           </a>
-           <a href="/model-library?filter=provider:DeepSeek" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-blue-500">◇</span>
-             DeepSeek
-           </a>
-           <a href="/model-library?filter=provider:Z.ai" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center">Z</span>
-             Z.ai
-           </a>
-         </div>
+        <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+           {[
+             { symbol: "✦", label: "Qwen" },
+             { symbol: "⬡", label: "OpenAI" },
+             { symbol: "☾", label: "Moonshot" },
+             { symbol: "∞", label: "Meta" },
+             { symbol: "◇", label: "DeepSeek" },
+             { symbol: "Z", label: "Z.ai" },
+           ].map((item) => (
+             <a key={item.label} href={`/model-library?filter=provider:${item.label}`} className="flex items-center gap-3 text-sm text-white hover:text-white group">
+               <span className="w-5 h-5 flex items-center justify-center text-white/50 group-hover:text-primary transition-colors">{item.symbol}</span>
+               {item.label}
+             </a>
+           ))}
+        </div>
       </div>
 
       {/* 400+ Models Supported */}
-      <div className="p-8 flex flex-col">
-        <h3 className="text-primary font-mono text-xs uppercase tracking-wider mb-3">
-          400+ Models Supported
-        </h3>
-        <p className="text-sm text-muted-foreground mb-6">
-          Explore our large Model Library with full support and integration
-        </p>
-        <div className="space-y-3 flex-1">
-           <a href="/model-library/glm-4-6" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center bg-primary/10 text-primary text-xs">Z</span>
-             GLM-4.6
-           </a>
-           <a href="/model-library/deepseek-v3-1-terminus" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-blue-500">◇</span>
-             DeepSeek V3.1 Terminus
-           </a>
-           <a href="/model-library/kimi-k2-instruct-0905" className="flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors">
-             <span className="w-5 h-5 flex items-center justify-center text-primary">☾</span>
-             Kimi K2 Instruct 0905
-           </a>
+      <div className="flex-1 p-12 bg-[#111111] flex flex-col justify-between">
+        <div className="space-y-8">
+          <div className="space-y-2">
+            <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-[#FF6B35]">Library</span>
+            <h4 className="text-4xl font-heading font-bold tracking-tighter text-white">400+</h4>
+            <p className="text-sm text-white/70 leading-relaxed">
+              Models supported with <br />optimized inference.
+            </p>
+          </div>
+          
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            {[
+              "GLM-4.6",
+              "DeepSeek V3",
+              "Kimi K2 Instruct"
+            ].map(model => (
+              <a key={model} href="#" className="flex items-center justify-between text-xs text-white/80 hover:text-white group transition-colors">
+                {model}
+                <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+              </a>
+            ))}
+          </div>
         </div>
+        
         <a
           href="/model-library"
-          className="mt-6 block w-full py-3 bg-primary/10 text-primary text-center text-sm font-mono uppercase tracking-wider hover:bg-primary/20 transition-colors"
+          className="mt-12 block w-full py-4 bg-white text-black text-center text-[10px] font-mono font-bold uppercase tracking-[0.3em] rounded-full hover:bg-white/90 transition-all hover:scale-[1.02]"
         >
-          View All Models
+          Explore All
         </a>
       </div>
     </div>

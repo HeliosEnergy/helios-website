@@ -1,133 +1,143 @@
-import {
-  Code2, MessageSquare, Brain, Search, Image, Database,
-  ArrowRight, ArrowUpRight, LucideIcon
-} from "lucide-react";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
+import { StaticMeshGradient } from '@paper-design/shaders-react';
+import { urlFor } from "@/lib/sanity";
 
-const iconMap: Record<string, LucideIcon> = {
-  Code2, MessageSquare, Brain, Search, Image, Database
-};
+// Helios Theme Palette (Solar, Ember, Warmth, Black)
+const HELIOS_PALETTE = ["#FFB800", "#FF6B35", "#FF9500", "#000000"];
+
+const cardConfigs = [
+  { colors: HELIOS_PALETTE, waveX: 1.0, waveY: 0.8, rotation: 0.5 },
+  { colors: HELIOS_PALETTE, waveX: 0.95, waveY: 0.85, rotation: 0.55 },
+  { colors: HELIOS_PALETTE, waveX: 1.05, waveY: 0.75, rotation: 0.45 }
+];
 
 export const UseCasesSection = () => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
   const { data: section, isLoading } = useSanityQuery<any>('use-cases-section', QUERIES.useCasesSection);
 
   if (isLoading || !section) return null;
 
+  // Filter out "Semantic Search" and limit to 3-4 tabs
+  const filteredUseCases = section.useCases
+    ?.filter((uc: any) => uc.title.toLowerCase() !== "semantic search")
+    ?.slice(0, 4);
+
+  if (!filteredUseCases || filteredUseCases.length === 0) return null;
+
+  const activeUseCase = filteredUseCases[activeTab];
+  const config = cardConfigs[activeTab % cardConfigs.length];
+
   return (
-    <section className="py-24 bg-background relative overflow-hidden text-card-foreground">
-      {/* Industrial grid background */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div className="h-full w-full" style={{
-          backgroundImage: `
-            repeating-linear-gradient(0deg, transparent, transparent 49px, currentColor 49px, currentColor 50px),
-            repeating-linear-gradient(90deg, transparent, transparent 49px, currentColor 49px, currentColor 50px)
-          `,
-        }} />
-      </div>
+    <section id="use-cases" className="py-24 bg-black">
+      <div className="max-w-[95vw] mx-auto px-4">
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-[24px] p-4 sm:p-8 overflow-hidden relative">
+          {/* Subtle background glow */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Header */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-primary" />
-            <span className="text-xs font-mono uppercase tracking-[0.3em] text-primary">
-              {section.sectionLabel}
-            </span>
+          {/* Centered Header: Pure Typography - COMMENTED OUT AS REQUESTED */}
+          {/* 
+          <div className="text-center mb-12 space-y-6 relative z-10">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="text-5xl sm:text-7xl font-heading font-bold text-white tracking-tightest leading-tight max-w-4xl mx-auto"
+            >
+              {section.heading}
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="text-xl text-white/40 max-w-2xl mx-auto font-light leading-relaxed"
+            >
+              {section.description}
+            </motion.p>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-heading font-bold text-foreground tracking-tight">
-            {section.heading}
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-xl text-lg">
-            {section.description}
-          </p>
-        </div>
+          */}
 
-        {/* Industrial Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {section.useCases?.map((useCase: any, i: number) => {
-            const Icon = iconMap[useCase.icon] || Brain;
-            return (
-              <div
-                key={useCase.title}
-                className="group relative border border-border bg-card cursor-pointer transition-all duration-500"
-                onMouseEnter={() => setHoveredIndex(i)}
-                onMouseLeave={() => setHoveredIndex(null)}
-                style={{
-                  transform: hoveredIndex === i ? 'scale(1.02)' : 'scale(1)',
-                  zIndex: hoveredIndex === i ? 10 : 1,
-                }}
-              >
-                {/* Hover highlight bar */}
-                <div className={`absolute top-0 left-0 h-1 bg-primary transition-all duration-300 ${hoveredIndex === i ? 'w-full' : 'w-0'
-                  }`} />
+          {/* Pill-shaped Tab Switcher */}
+          <div className="flex justify-center mb-12 mt-8 relative z-10">
+            <div className="inline-flex p-1 bg-white/5 rounded-full border border-white/10 relative">
+              {filteredUseCases.map((useCase: any, index: number) => (
+                <button
+                  key={useCase.title}
+                  onClick={() => setActiveTab(index)}
+                  className={`relative px-6 py-2.5 text-sm font-medium transition-colors duration-300 z-10 ${activeTab === index ? "text-black" : "text-white/60 hover:text-white"
+                    }`}
+                >
+                  {activeTab === index && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-white rounded-full -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  {useCase.title}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* Content */}
-                <div className="p-8">
-                  {/* Top row: Tag + Icon */}
-                  <div className="flex items-start justify-between mb-6">
-                    <span className="text-[10px] font-mono tracking-widest text-muted-foreground border border-border px-2 py-1">
-                      {useCase.tag}
-                    </span>
-                    <div className={`p-3 border border-border transition-all duration-300 ${hoveredIndex === i ? 'bg-primary border-primary' : 'bg-transparent'
-                      }`}>
-                      <Icon className={`w-5 h-5 transition-colors duration-300 ${hoveredIndex === i ? 'text-primary-foreground' : 'text-foreground'
-                        }`} />
-                    </div>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-xl font-heading font-semibold text-foreground mb-2">
-                    {useCase.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                    {useCase.description}
-                  </p>
-
-                  {/* Stat display */}
-                  <div className={`flex items-end justify-between pt-4 border-t border-border transition-all duration-300 ${hoveredIndex === i ? 'border-primary/30' : ''
-                    }`}>
-                    <div>
-                      <span className={`text-3xl font-heading font-bold transition-colors duration-300 ${hoveredIndex === i ? 'text-primary' : 'text-foreground'
-                        }`}>
-                        {useCase.stat}
-                      </span>
-                      <span className="block text-xs text-muted-foreground mt-1">
-                        {useCase.statLabel}
-                      </span>
-                    </div>
-
-                    {/* Arrow button */}
-                    <div className={`p-2 transition-all duration-300 ${hoveredIndex === i
-                        ? 'bg-primary text-primary-foreground translate-x-0 opacity-100'
-                        : 'bg-transparent text-muted-foreground -translate-x-2 opacity-0'
-                      }`}>
-                      <ArrowUpRight className="w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Corner accent */}
-                <div className={`absolute bottom-0 right-0 w-8 h-8 transition-all duration-500 ${hoveredIndex === i ? 'opacity-100' : 'opacity-0'
-                  }`}>
-                  <div className="absolute bottom-0 right-0 w-full h-px bg-primary" />
-                  <div className="absolute bottom-0 right-0 h-full w-px bg-primary" />
-                </div>
+          {/* Content Block: Asymmetric 3/5 Split */}
+          <div className="grid lg:grid-cols-5 gap-8 lg:gap-16 items-start relative z-10">
+            {/* Left Column: Large Image (3/5ths = 60%, approx Golden Ratio) */}
+            <motion.div
+              key={`image-${activeTab}`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full aspect-square lg:aspect-[4/3] rounded-[24px] overflow-hidden border border-white/10 group lg:col-span-3"
+            >
+              <div className="absolute inset-0 z-0 opacity-40">
+                <StaticMeshGradient
+                  colors={config.colors}
+                  waveX={config.waveX}
+                  waveY={config.waveY}
+                  rotation={config.rotation}
+                />
               </div>
-            );
-          })}
-        </div>
 
-        {/* Bottom accent line */}
-        <div className="mt-16 flex items-center gap-4">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs font-mono text-muted-foreground tracking-widest">
-            HELIOS.BUILD
-          </span>
-          <div className="h-px w-24 bg-primary" />
+              {activeUseCase.image && (
+                <img
+                  src={urlFor(activeUseCase.image).url()}
+                  alt={activeUseCase.title}
+                  className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-50 group-hover:scale-105 transition-transform duration-1000 ease-out"
+                />
+              )}
+
+              {/* Dark overlay for depth */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-black via-transparent to-transparent opacity-60" />
+            </motion.div>
+
+            {/* Right Column: Descriptive Text (2/5ths) - Top Aligned */}
+            <div className="space-y-8 p-4 lg:p-0 lg:pt-8 lg:col-span-2">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  className="space-y-6"
+                >
+                  <h3 className="text-4xl sm:text-5xl font-heading font-bold tracking-tightest text-white leading-tight">
+                    {activeUseCase.title}
+                  </h3>
+                  <p className="text-lg sm:text-xl leading-relaxed text-white/40 font-light max-w-lg">
+                    {activeUseCase.description}
+                  </p>
+                  <div className="pt-4">
+                    <button className="px-8 py-3 bg-white text-black rounded-full font-medium hover:scale-105 transition-transform duration-300">
+                      Learn more
+                    </button>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </div>
     </section>

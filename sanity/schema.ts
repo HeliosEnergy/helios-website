@@ -23,6 +23,10 @@ import pricingTier from './schemas/pricingTier'
 import pricingPageSection from './schemas/pricingPageSection'
 import legalPage from './schemas/legalPage'
 import coreValueProposition from './schemas/coreValueProposition'
+import careersPage from './schemas/careersPage'
+import contactPage from './schemas/contactPage'
+import pressPage from './schemas/pressPage'
+import eventsPage from './schemas/eventsPage'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -58,4 +62,10 @@ export const schemaTypes = [
 
     // Legal schemas
     legalPage,
+
+    // New standalone pages
+    careersPage,
+    contactPage,
+    pressPage,
+    eventsPage,
 ]

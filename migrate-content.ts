@@ -7,7 +7,7 @@ const initialContent = {
         title: 'Helios RFT now available!',
         description: 'Fine-tune open models that outperform frontier models.',
         ctaText: 'Try today',
-        ctaLink: 'https://helios.ai/docs/rft',
+        ctaLink: 'https://heliosenergy.io/docs',
         enabled: true
     },
     hero: {
@@ -15,9 +15,9 @@ const initialContent = {
         heading: 'Build. Tune. Scale.',
         description: 'Open-source AI models at blazing speed, optimized for your use case, scaled globally with the Helios Inference Cloud',
         primaryCtaText: 'Get Started',
-        primaryCtaLink: 'https://helios.ai/signup',
+        primaryCtaLink: 'https://console.heliosenergy.io/login?tab=signup',
         secondaryCtaText: 'Talk to Our Team',
-        secondaryCtaLink: 'https://helios.ai/contact'
+        secondaryCtaLink: '/contact'
     },
     useCases: [
         {

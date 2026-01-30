@@ -5,7 +5,7 @@ const footerLinks = {
   Platform: ["Inference", "Fine-tuning", "Evaluation", "Deployment"],
   Models: ["LLMs", "Image", "Audio", "Embeddings"],
   Developers: ["Documentation", "API Reference", "Quickstart", "Pricing"],
-  Company: ["About", "Blog", "Careers", "Contact"],
+  Company: ["About", /* "Blog", */ "Careers", "Contact"], // Blog hidden until content is ready
   Legal: ["Privacy", "Terms", "Security"],
 };
 
@@ -16,26 +16,44 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Logo */}
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-1.5 mb-4">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary" fill="currentColor">
-                <path d="M4 4h4v4H4V4zm6 0h4v4h-4V4zm6 0h4v4h-4V4zM4 10h4v4H4v-4zm6 0h4v4h-4v-4zm6 0h4v4h-4v-4zM4 16h4v4H4v-4zm6 0h4v4h-4v-4z" />
-              </svg>
-              <span className="text-base font-semibold text-foreground">Helios AI</span>
+            <div className="flex items-center gap-2 mb-4">
+              <img
+                src="/logos/logo-original.png"
+                className="h-6 w-auto"
+                alt="Helios Cloud Logo"
+              />
+              <span className="text-base font-semibold text-foreground">Helios Cloud, Inc.</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-white/80 mb-4">
               The fastest inference platform for generative AI.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+            <div className="flex gap-2">
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
+              >
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a
+                href="#"
+                aria-label="GitHub"
+                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
+              >
                 <Github className="w-4 h-4" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
+              >
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
+              >
                 <Youtube className="w-4 h-4" />
               </a>
             </div>
@@ -45,26 +63,38 @@ export const Footer = () => {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <h3 className="font-semibold text-foreground text-sm mb-3">{category}</h3>
-               <ul className="space-y-2">
-                 {links.map((link) => (
-                   <li key={link}>
-                     {link === "Terms" ? (
-                       <Link
-                         to="/tnc"
-                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                       >
-                         {link}
-                       </Link>
-                     ) : (
-                       <a
-                         href="#"
-                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                       >
-                         {link}
-                       </a>
-                     )}
-                   </li>
-                 ))}
+              <ul className="space-y-2">
+                {links.map((link) => {
+                  const internalRoutes: Record<string, string> = {
+                    "Pricing": "/pricing",
+                    // "Blog": "/blog", // HIDDEN
+                    "Careers": "/careers",
+                    "Contact": "/contact",
+                    "Terms": "/tnc",
+                  };
+
+                  const to = internalRoutes[link];
+
+                  return (
+                    <li key={link}>
+                      {to ? (
+                        <Link
+                          to={to}
+                          className="text-sm text-white/50 hover:text-white transition-colors"
+                        >
+                          {link}
+                        </Link>
+                      ) : (
+                        <a
+                          href="#"
+                          className="text-sm text-white/50 hover:text-white transition-colors"
+                        >
+                          {link}
+                        </a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
@@ -72,8 +102,8 @@ export const Footer = () => {
 
         {/* Bottom */}
         <div className="mt-12 pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground text-center">
-            © {new Date().getFullYear()} Helios AI. All rights reserved.
+          <p className="text-sm text-white/80 text-center">
+            © {new Date().getFullYear()} Helios Cloud, Inc. All rights reserved.
           </p>
         </div>
       </div>

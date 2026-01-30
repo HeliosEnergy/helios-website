@@ -6,6 +6,8 @@ import { Search } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useSanityQuery } from "@/hooks/useSanityData";
 import { useLocation, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ColorPanels } from '@paper-design/shaders-react';
 
 interface Model {
     _id: string;
@@ -107,68 +109,87 @@ const ModelLibraryPage = () => {
     }, [models, searchQuery, activeFilter]);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background solar-grain">
             <Navbar />
 
             <main>
-                {/* Hero Section */}
-                <section className="pt-24 pb-12 bg-surface border-b border-border">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold text-foreground mb-6">
-                            Model Library
-                        </h1>
-                        <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
-                            Search our library of open source models and deploy in seconds.
-                        </p>
+                {/* Hero Section - The Solar Entrance */}
+                <section className="relative pt-40 pb-20 border-b border-border/30 overflow-hidden">
+                    {/* Shader Background - Subtle Solar Wash */}
+                    <div className="absolute inset-0 z-0 opacity-[0.15]">
+                        <ColorPanels
+                            width="100%"
+                            height="100%"
+                            colors={["#ff9d00", "#fd4f30"]}
+                            colorBack="#fdfbf7"
+                            density={2}
+                            angle1={-0.64}
+                            angle2={-0.52}
+                            length={1.5}
+                            edges={false}
+                            blur={0.5}
+                            fadeIn={0.5}
+                            fadeOut={0.5}
+                            gradient={1}
+                            speed={0.4}
+                            scale={1.2}
+                            offsetX={-0.6}
+                            fit="cover"
+                        />
+                    </div>
 
-                        {/* Search Bar */}
-                        <div className="max-w-2xl mx-auto relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder="Search model library"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-base"
-                            />
+                    <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+                        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+                            <div className="max-w-3xl">
+                                <h1 className="text-6xl sm:text-7xl lg:text-8xl font-heading font-bold text-foreground tracking-[-0.04em] leading-[0.85]">
+                                    Model <br />Library
+                                </h1>
+                            </div>
+                            <div className="lg:w-1/3">
+                                <p className="text-lg text-muted-foreground font-light leading-relaxed mb-8">
+                                    A curated repository of state-of-the-art weights. 
+                                    Optimized for Helios infrastructure.
+                                </p>
+                                {/* Search Bar - Architectural Integration */}
+                                <div className="relative group">
+                                    <div className="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+                                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+                                    <input
+                                        type="text"
+                                        placeholder="Filter by name or provider..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-8 pr-4 py-4 bg-transparent border-b border-border/40 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary transition-all text-sm font-mono uppercase tracking-widest"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                 {/* Filters */}
+                 {/* Filters - The Precision Rail */}
                  <ModelFilters
                      activeFilter={activeFilter}
                      onFilterChange={handleFilterChange}
                  />
 
-                {/* Models Grid */}
-                <section className="py-16">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Models Grid - The Gallery Floor */}
+                <section className="py-24">
+                    <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
                         {isLoading ? (
-                            <div className="text-center py-20">
-                                <p className="text-muted-foreground">Loading models...</p>
+                            <div className="text-center py-40">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground animate-pulse">Synchronizing Archive...</p>
                             </div>
                         ) : filteredModels.length === 0 ? (
-                            <div className="text-center py-20">
-                                <p className="text-muted-foreground">No models found matching your criteria.</p>
+                            <div className="text-center py-40">
+                                <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">No specimens found in this sector.</p>
                             </div>
                         ) : (
-                            <>
-                                <div className="mb-8">
-                                    <h2 className="text-2xl font-heading font-bold text-foreground">
-                                        Models
-                                    </h2>
-                                    <p className="text-muted-foreground mt-2">
-                                        {filteredModels.length} {filteredModels.length === 1 ? 'model' : 'models'} found
-                                    </p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {filteredModels.map((model) => (
-                                        <ModelCard key={model._id} model={model} />
-                                    ))}
-                                </div>
-                            </>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/30">
+                                {filteredModels.map((model) => (
+                                    <ModelCard key={model._id} model={model} />
+                                ))}
+                            </div>
                         )}
                     </div>
                 </section>

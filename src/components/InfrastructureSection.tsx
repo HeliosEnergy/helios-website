@@ -39,7 +39,7 @@ export const InfrastructureSection = () => {
   })) || defaultFeatures;
 
   return (
-    <section className="bg-background py-20">
+    <section className="bg-background py-10">
       {/* Centered header */}
       <div className="text-center mb-12">
         <span className="text-sm font-mono uppercase tracking-widest text-primary">
@@ -48,7 +48,7 @@ export const InfrastructureSection = () => {
       </div>
 
       {/* Fixed width container */}
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-3 lg:px-6">
         <div className="grid lg:grid-cols-2 border border-border">
           {/* Left side - Image area */}
           <div className="relative bg-background p-12 flex items-center justify-center min-h-[400px] border-r border-border">
@@ -115,14 +115,19 @@ export const InfrastructureSection = () => {
           {/* Right side - Feature accordion */}
           <div className="flex flex-col">
             {features.map((feature, index) => (
-              <div
+              <button
                 key={feature.id}
-                className={`border-b border-border last:border-b-0 transition-all duration-300 cursor-pointer ${activeIndex === index
+                type="button"
+                aria-expanded={activeIndex === index}
+                aria-controls={`infra-feature-${feature.id || index}`}
+                className={`w-full text-left border-b border-border last:border-b-0 transition-all duration-300 ${activeIndex === index
                     ? "bg-primary text-primary-foreground"
                     : "bg-background text-foreground hover:bg-muted"
                   }`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
+                onFocus={() => setActiveIndex(index)}
+                onBlur={() => setActiveIndex(null)}
               >
                 <div className="p-8">
                   <div className="flex items-center justify-between">
@@ -137,6 +142,7 @@ export const InfrastructureSection = () => {
                   </div>
 
                   <div
+                    id={`infra-feature-${feature.id || index}`}
                     className={`overflow-hidden transition-all duration-300 ${activeIndex === index ? "max-h-40 mt-4 opacity-100" : "max-h-0 opacity-0"
                       }`}
                   >
@@ -145,7 +151,7 @@ export const InfrastructureSection = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { client } from '@/lib/sanity'
 
-export function useSanityQuery<T>(name: string, query: string, params: Record<string, any> = {}) {
+export function useSanityQuery<T>(name: string, query: string, params: Record<string, unknown> = {}) {
   return useQuery({
     queryKey: [name, params],
     queryFn: () => client.fetch<T>(query, params),
@@ -11,7 +11,13 @@ export function useSanityQuery<T>(name: string, query: string, params: Record<st
 export const QUERIES = {
   announcementBanner: `*[_type == "announcementBanner" && enabled == true][0]`,
   heroSection: `*[_type == "heroSection"][0]`,
-  useCasesSection: `*[_type == "useCasesSection"][0]`,
+  useCasesSection: `*[_type == "useCasesSection"][0] {
+    ...,
+    useCases[] {
+      ...,
+      "image": image.asset->url
+    }
+  }`,
   testimonialsSection: `*[_type == "testimonialsSection"][0]`,
   ctaSection: `*[_type == "ctaSection"][0]`,
   coreValueProposition: `*[_type == "coreValueProposition"][0]`,
@@ -44,5 +50,9 @@ export const QUERIES = {
     title,
     lastUpdated,
     content
-  }`
+  }`,
+  careersPage: `*[_type == "careersPage"][0]`,
+  contactPage: `*[_type == "contactPage"][0]`,
+  pressPage: `*[_type == "pressPage"][0]`,
+  eventsPage: `*[_type == "eventsPage"][0]`
 }
