@@ -28,6 +28,7 @@ import contactPage from './schemas/contactPage'
 import pressPage from './schemas/pressPage'
 import eventsPage from './schemas/eventsPage'
 import inferenceModel from './schemas/inferenceModel'
+import inferencePricing from './schemas/inferencePricing'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -53,6 +54,7 @@ export const schemaTypes = [
     pricingTier,
     pricingPageSection,
     inferenceModel,
+    inferencePricing,
 
     // Blog schemas
     author,

@@ -92,7 +92,7 @@ export const HeroSection = () => {
         <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
 
           {/* The Text Spine */}
-          <div className="lg:col-span-12 xl:col-span-5 flex flex-col">
+          <div className="lg:col-span-12 xl:col-span-8 flex flex-col">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -105,7 +105,7 @@ export const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-6xl sm:text-7xl lg:text-[88px] font-heading font-bold text-white tracking-tightest leading-[0.85]"
+                  className="text-7xl sm:text-8xl lg:text-[110px] xl:text-[130px] font-heading font-bold text-white tracking-tighter leading-[0.85] max-w-4xl"
                 >
                   {displayContent.title}
                 </motion.h2>
