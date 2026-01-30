@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Zap, 
-  Database, 
-  Network, 
-  Info, 
+import { Link } from "react-router-dom";
+import {
+  Zap,
+  Database,
+  Network,
+  Info,
   ChevronDown,
   Play,
   Maximize2,
@@ -34,9 +35,11 @@ const InferenceContent = () => (
         </p>
       </div>
       <div className="flex gap-4">
-        <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
-          Start Reasoning
-        </Button>
+        <Link to="/contact?service=inference">
+          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+            Start Reasoning
+          </Button>
+        </Link>
       </div>
     </div>
 
@@ -217,9 +220,11 @@ const ClustersContent = () => (
         </p>
       </div>
       <div className="flex gap-4">
-        <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
-          Provision Cluster
-        </Button>
+        <Link to="/contact?service=clusters">
+          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+            Provision Cluster
+          </Button>
+        </Link>
       </div>
     </div>
 
@@ -324,9 +329,11 @@ const TrainingContent = () => (
           for reliable and fast training.
         </p>
       </div>
-      <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
-        Contact us
-      </Button>
+      <Link to="/contact?service=clusters">
+        <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+          Contact us
+        </Button>
+      </Link>
     </div>
 
     <div className="bg-white/[0.02] border border-white/10 rounded-[40px] p-12 relative flex">

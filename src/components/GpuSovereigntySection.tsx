@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
@@ -6,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 const GPU_DATA = [
   {
     id: "b200",
+    clusterId: "b200", // matches ContactPage ClusterType
     name: "NVIDIA Blackwell B200",
     price: "2.80",
     description: "Optimized for large-scale foundation models and high-throughput inference clusters.",
@@ -16,6 +18,7 @@ const GPU_DATA = [
   },
   {
     id: "rtx6000",
+    clusterId: "rtx-6000-pro", // matches ContactPage ClusterType
     name: "NVIDIA RTX 6000 Pro",
     price: "0.85",
     description: "Dedicated performance for model fine-tuning, image generation, and professional visualization.",
@@ -101,13 +104,15 @@ export const GpuSovereigntySection = () => {
                     <motion.div
                       animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : -20 }}
                     >
-                      <Button
-                        size="lg"
-                        className="rounded-full bg-white text-black hover:bg-white/90 px-8 text-xs font-bold uppercase tracking-widest group/btn"
-                      >
-                        {gpu.cta}
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
+                      <Link to={`/contact?service=clusters&cluster=${gpu.clusterId}`}>
+                        <Button
+                          size="lg"
+                          className="rounded-full bg-white text-black hover:bg-white/90 px-8 text-xs font-bold uppercase tracking-widest group/btn"
+                        >
+                          {gpu.cta}
+                          <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+                        </Button>
+                      </Link>
                     </motion.div>
                   </div>
                 </div>

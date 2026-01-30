@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Loader2, Check } from 'lucide-react';
@@ -265,6 +266,7 @@ const serviceLabels: Record<ServiceInterest, string> = {
 };
 
 const ContactPage = () => {
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -285,6 +287,21 @@ const ContactPage = () => {
     'inferenceModels',
     QUERIES.inferenceModels
   );
+
+  // Handle URL parameters for prefilling form
+  useEffect(() => {
+    const service = searchParams.get('service') as ServiceInterest | null;
+    const cluster = searchParams.get('cluster') as ClusterType | null;
+
+    if (service && Object.keys(serviceLabels).includes(service)) {
+      setFormData(prev => ({
+        ...prev,
+        serviceInterest: service,
+        // If cluster param is provided and service is clusters, prefill cluster type
+        clusterTypes: service === 'clusters' && cluster ? [cluster] : []
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
