@@ -1,7 +1,0 @@
-name = "helios-contact-worker"
-main = "src/index.ts"
-compatibility_date = "2023-10-30"
-
-# Remove the placeholder URL since we're using secrets
-# [vars]
-# SLACK_WEBHOOK_URL = "placeholder_url"
