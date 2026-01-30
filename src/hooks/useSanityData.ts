@@ -54,5 +54,15 @@ export const QUERIES = {
   careersPage: `*[_type == "careersPage"][0]`,
   contactPage: `*[_type == "contactPage"][0]`,
   pressPage: `*[_type == "pressPage"][0]`,
-  eventsPage: `*[_type == "eventsPage"][0]`
+  eventsPage: `*[_type == "eventsPage"][0]`,
+  inferenceModels: `*[_type == "inferenceModel"] | order(displayOrder asc) {
+    _id,
+    id,
+    name,
+    category,
+    pricePerSecond,
+    estimationUnit,
+    description,
+    provider
+  }`
 }

@@ -9,6 +9,23 @@ interface ContactFormData {
     company?: string;
     message: string;
     inquiryType: string;
+    // Cluster inquiry details
+    clusterDetails?: {
+        types: string;
+        gpuCountMin: number;
+        gpuCountMax: number;
+    };
+    // Inference inquiry details
+    inferenceDetails?: {
+        models: Array<{
+            name: string;
+            category: string;
+            estimation: string;
+        }>;
+    };
+    // Partnership details
+    partnershipDetails?: string;
+    // Legacy GPU details (for backwards compatibility)
     gpuDetails?: {
         model: string;
         count: number;
@@ -35,7 +52,7 @@ const handleOptions = (request: Request) => {
 	) {
 		// Handle CORS preflight requests.
 		const respHeaders = {
-			"Access-Control-Allow-Origin": "*", // Be more specific in production
+			"Access-Control-Allow-Origin": "*",
 			"Access-Control-Allow-Methods": "POST, OPTIONS",
 			"Access-control-allow-headers": "Content-Type",
 		};
@@ -48,6 +65,19 @@ const handleOptions = (request: Request) => {
 			},
 		});
 	}
+};
+
+// Get emoji for inquiry type
+const getInquiryEmoji = (type: string): string => {
+	const emojiMap: Record<string, string> = {
+		'Clusters': '🖥️',
+		'Inference': '🤖',
+		'Baremetal': '🔧',
+		'Press': '📰',
+		'Partnership': '🤝',
+		'Others': '💬',
+	};
+	return emojiMap[type] || '📬';
 };
 
 // Main fetch handler
@@ -64,9 +94,9 @@ export default {
 		try {
 			const formData: ContactFormData = await request.json();
 
-			// Basic validation
-			if (!formData.email || !formData.message) {
-				return new Response(JSON.stringify({ error: "Email and message are required." }), {
+			// Basic validation - email is required, message can be optional for some inquiry types
+			if (!formData.email) {
+				return new Response(JSON.stringify({ error: "Email is required." }), {
 					status: 400,
 					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
 				});
@@ -75,12 +105,13 @@ export default {
 			// Check if SLACK_WEBHOOK_URL is properly configured
 			if (!env.SLACK_WEBHOOK_URL || env.SLACK_WEBHOOK_URL === "placeholder_url") {
 				console.error("SLACK_WEBHOOK_URL is not properly configured");
-				// Return success response even if Slack integration fails to avoid breaking the user experience
 				return new Response(JSON.stringify({ success: true }), {
 					status: 200,
 					headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
 				});
 			}
+
+			const inquiryEmoji = getInquiryEmoji(formData.inquiryType);
 
 			// Construct Slack message using Block Kit
 			const slackMessage: any = {
@@ -89,7 +120,7 @@ export default {
 						type: "header",
 						text: {
 							type: "plain_text",
-							text: "📬 New Contact Form Submission",
+							text: `${inquiryEmoji} New ${formData.inquiryType || 'Contact'} Inquiry`,
 						},
 					},
 					{
@@ -97,21 +128,80 @@ export default {
 						fields: [
 							{ type: "mrkdwn", text: `*Name:*\n${formData.name || "Not provided"}` },
 							{ type: "mrkdwn", text: `*Email:*\n<mailto:${formData.email}|${formData.email}>` },
-							{ type: "mrkdwn", text: `*Company:*\n${formData.company || "Not provided"}` },
-							{ type: "mrkdwn", text: `*Inquiry Type:*\n${formData.inquiryType || "General"}` },
+							{ type: "mrkdwn", text: `*Organization:*\n${formData.company || "Not provided"}` },
+							{ type: "mrkdwn", text: `*Interest:*\n${formData.inquiryType || "General"}` },
 						],
-					},
-					{
-						type: "section",
-						text: {
-							type: "mrkdwn",
-							text: `*Message:*\n>>>${formData.message}`,
-						},
 					},
 				],
 			};
 
-			// Add GPU details if they exist
+			// Add Cluster details if present
+			if (formData.clusterDetails) {
+				slackMessage.blocks.push({ type: "divider" });
+				slackMessage.blocks.push({
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: "*🖥️ Cluster Requirements*",
+					},
+				});
+				slackMessage.blocks.push({
+					type: "section",
+					fields: [
+						{ type: "mrkdwn", text: `*Cluster Types:*\n${formData.clusterDetails.types || "Not specified"}` },
+						{ type: "mrkdwn", text: `*GPU Range:*\n${formData.clusterDetails.gpuCountMin} - ${formData.clusterDetails.gpuCountMax} GPUs` },
+					],
+				});
+			}
+
+			// Add Inference details if present
+			if (formData.inferenceDetails && formData.inferenceDetails.models && formData.inferenceDetails.models.length > 0) {
+				slackMessage.blocks.push({ type: "divider" });
+				slackMessage.blocks.push({
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: "*🤖 Inference Requirements*",
+					},
+				});
+
+				// Add each model with its estimation
+				for (const model of formData.inferenceDetails.models) {
+					slackMessage.blocks.push({
+						type: "section",
+						fields: [
+							{ type: "mrkdwn", text: `*Model:*\n${model.name}` },
+							{ type: "mrkdwn", text: `*Estimated Usage:*\n${model.estimation}` },
+						],
+					});
+				}
+			}
+
+			// Add Partnership details if present
+			if (formData.partnershipDetails) {
+				slackMessage.blocks.push({ type: "divider" });
+				slackMessage.blocks.push({
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: `*🤝 Partnership Details:*\n>>>${formData.partnershipDetails}`,
+					},
+				});
+			}
+
+			// Add message if present and not a partnership inquiry (which uses partnershipDetails)
+			if (formData.message && formData.message !== "No message provided" && !formData.partnershipDetails) {
+				slackMessage.blocks.push({ type: "divider" });
+				slackMessage.blocks.push({
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: `*Additional Notes:*\n>>>${formData.message}`,
+					},
+				});
+			}
+
+			// Legacy GPU details support (for backwards compatibility)
 			if (formData.inquiryType === "GPU Rental Calculator" && formData.gpuDetails) {
 				slackMessage.blocks.push({ type: "divider" });
 

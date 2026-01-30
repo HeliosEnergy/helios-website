@@ -90,36 +90,28 @@ export const ModelsSection = () => {
   };
 const shaderConfigs = [
   {
-    // Molten Sunrise
-    colors: ["#FF6B35", "#FFE5B4", "#FF9F6B", "#FFFFFF"],
+    // Industrial Ember
+    colors: ["#333333", "#000000", "#FF6B35", "#FFFFFF"],
     waveX: 0.18,
-    rotation: 245,
-    mixing: 0.45,      // LOW mixing = distinct color bands like OpenAI
-    scale: 0.55
+    rotation: 245
   },
   {
-    // Peach Flare
-    colors: ["#FFAA80", "#FFFFFF", "#FF6B35", "#FFD4AA"],
+    // Titanium Orange
+    colors: ["#666666", "#FFFFFF", "#FF9500", "#111111"],
     waveX: 0.20,
-    rotation: 280,
-    mixing: 0.42,
-    scale: 0.52
+    rotation: 280
   },
   {
-    // Golden Plasma
-    colors: ["#FFB800", "#FFF5E0", "#FF8C00", "#FFFFFF"],
+    // Obsidian Forge
+    colors: ["#000000", "#111111", "#FF6B35", "#A0A0A0"],
     waveX: 0.17,
-    rotation: 260,
-    mixing: 0.48,
-    scale: 0.58
+    rotation: 260
   },
   {
-    // Ember Silk
-    colors: ["#FF7043", "#FFFFFF", "#FFAB91", "#FF5722"],
+    // Ghost Pulse
+    colors: ["#FFFFFF", "#A0A0A0", "#FF9500", "#000000"],
     waveX: 0.19,
-    rotation: 270,
-    mixing: 0.44,
-    scale: 0.54
+    rotation: 270
   }
 ];
 return (
@@ -134,10 +126,10 @@ return (
             </h2>
           </div>
           <div className="flex flex-col gap-6 lg:items-end">
-            <p className="text-2xl text-white/40 max-w-sm font-light leading-relaxed lg:text-right">
+            <p className="text-2xl text-white/70 max-w-sm font-light leading-relaxed lg:text-right">
               {sectionData?.description || 'The fastest AI cloud.'}
             </p>
-            <Link to="/model-library" className="text-xs font-mono uppercase tracking-[0.4em] text-white/60 hover:text-primary transition-colors flex items-center gap-4 group">
+            <Link to="/model-library" className="text-xs font-mono uppercase tracking-[0.4em] text-white/80 hover:text-primary transition-colors flex items-center gap-4 group">
               View Collection
               <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-500" />
             </Link>
@@ -176,29 +168,20 @@ return (
                   {/* The Background: Paper Shader */}
                   <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-1000">
 <StaticMeshGradient
-  width={800}
-  height={1200}
+  width={1280}
+  height={720}
   colors={shader.colors}
-  
-  // COLOR FLOW FIXES
-  positions={4}              // was 2 — more positions = smoother color distribution
-  mixing={0.75}              // was 0.58 — higher = colors blend into each other more
-  
-  // WAVE SMOOTHNESS
-  waveX={shader.waveX}
-  waveXShift={0.25}          // was 0.43 — lower = gentler wave offset
-  waveY={0.45}               // was 0.63 — soften the Y wave
-  waveYShift={0.35}          // was 0.65 — less aggressive shift
-  
-  // SCALE & MOVEMENT
-  scale={0.65}               // was 0.46 — larger scale = smoother, less busy
+  positions={42}
+  mixing={0.38}
+  waveX={0.49}
+  waveXShift={0}
+  waveY={1}
+  waveYShift={0}
+  scale={0.68}
   rotation={shader.rotation}
-  offsetX={-0.2}             // was -0.4 — less extreme offset
-  offsetY={-0.15}            // was -0.26
-  
-  // GRAIN (keep subtle)
-  grainMixer={0.015}         // was 0.02 — slightly less
-  grainOverlay={0.04}        // was 0.05
+  grainMixer={0}
+  grainOverlay={0.78}
+  offsetX={-0.28}
 />
                   </div>
 

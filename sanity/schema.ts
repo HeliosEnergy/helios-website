@@ -27,6 +27,7 @@ import careersPage from './schemas/careersPage'
 import contactPage from './schemas/contactPage'
 import pressPage from './schemas/pressPage'
 import eventsPage from './schemas/eventsPage'
+import inferenceModel from './schemas/inferenceModel'
 
 export const schemaTypes = [
     // Landing page schemas
@@ -51,6 +52,7 @@ export const schemaTypes = [
     gpuModel,
     pricingTier,
     pricingPageSection,
+    inferenceModel,
 
     // Blog schemas
     author,

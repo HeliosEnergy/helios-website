@@ -2,17 +2,20 @@
  * HIDDEN SECTIONS - Temporarily disabled until content/partners are ready:
  * - LogoBar (Validated Infrastructure Partners) - waiting for 5-6 confirmed partners
  * - WhyHeliosSection (Why Teams Choose Helios)
+ * - CoreValueProposition (Why teams choose Helios - similar content)
  * - LifecycleSection (Complete AI Model Life Cycle Management)
  * - CaseStudySection (Case study deep-dive, testimonial quotes kept in TestimonialsSection)
  * - BlogSection (Blog navigation and page, waiting for content)
+ * - InfrastructureSection (Services tabs section)
  */
 
+import React from "react";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { UseCasesSection } from "@/components/UseCasesSection";
 import { ModelsSection } from "@/components/ModelsSection";
-import { InfrastructureSection } from "@/components/InfrastructureSection";
+// import { InfrastructureSection } from "@/components/InfrastructureSection"; // HIDDEN
 // import { LifecycleSection } from "@/components/LifecycleSection"; // HIDDEN
 // import { WhyHeliosSection } from "@/components/WhyHeliosSection"; // HIDDEN
 // import { LogoBar } from "@/components/LogoBar"; // HIDDEN
@@ -20,7 +23,8 @@ import { TestimonialsSection } from "@/components/TestimonialsSection";
 // import { CaseStudySection } from "@/components/CaseStudySection"; // HIDDEN
 // import { BlogSection } from "@/components/BlogSection"; // HIDDEN
 import { CTASection } from "@/components/CTASection";
-import { CoreValueProposition } from "@/components/CoreValueProposition";
+// import { CoreValueProposition } from "@/components/CoreValueProposition"; // HIDDEN
+import { GpuSovereigntySection } from "@/components/GpuSovereigntySection";
 import { Footer } from "@/components/Footer";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 
@@ -33,11 +37,12 @@ const sectionMap: Record<string, React.ComponentType<any>> = {
   // blogSection: BlogSection, // HIDDEN
   // logoBar: LogoBar, // HIDDEN
   modelsSection: ModelsSection,
-  infrastructureSection: InfrastructureSection,
+  // infrastructureSection: InfrastructureSection, // HIDDEN
   // lifecycleSection: LifecycleSection, // HIDDEN
   // whyHeliosSection: WhyHeliosSection, // HIDDEN
   // caseStudySection: CaseStudySection, // HIDDEN
-  coreValueProposition: CoreValueProposition,
+  // coreValueProposition: CoreValueProposition, // HIDDEN
+  gpuSovereigntySection: GpuSovereigntySection,
 };
 
 const Index = () => {
@@ -52,8 +57,9 @@ const Index = () => {
           {/* <LogoBar /> HIDDEN - waiting for 5-6 confirmed partners */}
           <UseCasesSection />
           <ModelsSection />
-          <InfrastructureSection />
-          <CoreValueProposition />
+          <GpuSovereigntySection />
+          {/* <InfrastructureSection /> HIDDEN */}
+          {/* <CoreValueProposition /> HIDDEN */}
           {/* <LifecycleSection /> HIDDEN */}
           {/* <WhyHeliosSection /> HIDDEN */}
           <TestimonialsSection />
@@ -64,10 +70,20 @@ const Index = () => {
       );
     }
 
-    return pageData.sections.map((section: any, index: number) => {
+    const sections = [...pageData.sections];
+    const hasSovereignty = sections.some(s => s._type === 'gpuSovereigntySection');
+    
+    const renderedSections = sections.map((section: any, index: number) => {
       const SectionComponent = sectionMap[section._type];
       return SectionComponent ? <SectionComponent key={section._id || index} /> : null;
     });
+
+    // Inject at 4th position (index 3) if missing
+    if (!hasSovereignty) {
+      renderedSections.splice(3, 0, <GpuSovereigntySection key="manual-sovereignty" />);
+    }
+
+    return <>{renderedSections}</>;
   };
 
   return (

@@ -22,7 +22,6 @@ export const Footer = () => {
                 className="h-6 w-auto"
                 alt="Helios Cloud Logo"
               />
-              <span className="text-base font-semibold text-foreground">Helios Cloud, Inc.</span>
             </div>
             <p className="text-sm text-white/80 mb-4">
               The fastest inference platform for generative AI.
