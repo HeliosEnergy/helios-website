@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { StaticMeshGradient } from '@paper-design/shaders-react';
 import {
     Zap,
     Terminal,
@@ -49,6 +50,24 @@ def generate_text(prompt: str):
 
 # Deploy with one command
 # $ helios deploy main.py`;
+
+const shaderConfigs = [
+    {
+        colors: ["#333333", "#000000", "#FF6B35", "#FFFFFF"],
+        waveX: 0.18,
+        rotation: 245
+    },
+    {
+        colors: ["#666666", "#FFFFFF", "#FF9500", "#111111"],
+        waveX: 0.20,
+        rotation: 280
+    },
+    {
+        colors: ["#000000", "#111111", "#FF6B35", "#A0A0A0"],
+        waveX: 0.17,
+        rotation: 260
+    }
+];
 
 const ServerlessPage = () => {
     const [copied, setCopied] = useState(false);
@@ -121,7 +140,7 @@ const ServerlessPage = () => {
                                 className="flex items-center gap-8 text-sm"
                             >
                                 <div>
-                                    <p className="text-2xl font-bold text-white mb-1">&lt; 200ms</p>
+                                    <p className="text-2xl font-bold text-white mb-1">&lt; 30s</p>
                                     <p className="text-white/40 font-mono uppercase text-[10px] tracking-wider">Cold Start</p>
                                 </div>
                                 <div className="w-[1px] h-8 bg-white/10" />
@@ -167,19 +186,6 @@ const ServerlessPage = () => {
                                     </pre>
                                 </div>
                             </div>
-
-                            {/* Floating Badge */}
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute -bottom-6 -left-6 bg-[#1A1A1A] border border-white/10 p-4 rounded-xl shadow-xl flex items-center gap-3"
-                            >
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                <div>
-                                    <p className="text-xs font-bold text-white">System Ready</p>
-                                    <p className="text-[10px] text-white/40">Waiting for requests...</p>
-                                </div>
-                            </motion.div>
                         </motion.div>
                     </div>
                 </div>
@@ -193,7 +199,7 @@ const ServerlessPage = () => {
                             {
                                 icon: Zap,
                                 title: "Instant Cold Starts",
-                                description: "Our FlashBoot technology restores snapshot states in under 200ms. No more warming up endpoints."
+                                description: "Our FlashBoot technology restores snapshot states in under 30s. No more warming up endpoints."
                             },
                             {
                                 icon: Terminal,
@@ -205,22 +211,58 @@ const ServerlessPage = () => {
                                 title: "Millisecond Billing",
                                 description: "Stop paying for idle GPUs. We bill strictly for execution time, down to the millisecond."
                             }
-                        ].map((feature, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                                className="bg-[#0A0A0A] border border-white/5 rounded-2xl p-8 hover:border-[#FF6B35]/30 transition-colors group"
-                            >
-                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6 group-hover:bg-[#FF6B35]/10 transition-colors">
-                                    <feature.icon className="w-6 h-6 text-[#FF6B35]" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                                <p className="text-white/50 leading-relaxed text-sm">{feature.description}</p>
-                            </motion.div>
-                        ))}
+                        ].map((feature, i) => {
+                            const shader = shaderConfigs[i % shaderConfigs.length];
+                            return (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="relative block h-[400px] w-full bg-[#0A0A0A] rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-700 ease-out group"
+                                >
+                                    {/* Paper Shader Background */}
+                                    <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-1000">
+                                        <StaticMeshGradient
+                                            width={1280}
+                                            height={720}
+                                            colors={shader.colors}
+                                            positions={42}
+                                            mixing={0.38}
+                                            waveX={0.49}
+                                            waveXShift={0}
+                                            waveY={1}
+                                            waveYShift={0}
+                                            scale={0.68}
+                                            rotation={shader.rotation}
+                                            grainMixer={0}
+                                            grainOverlay={0.78}
+                                            offsetX={-0.28}
+                                        />
+                                    </div>
+
+                                    <div className="relative z-10 p-8 h-full flex flex-col justify-between">
+                                        <div className="w-12 h-12 flex items-start justify-start group-hover:scale-110 transition-transform duration-500 bg-black/20 rounded-xl backdrop-blur-sm flex items-center justify-center border border-white/10">
+                                            <feature.icon className="w-6 h-6 text-white" />
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h3 className="text-3xl font-heading font-bold text-white tracking-tight leading-none">
+                                                    {feature.title}
+                                                </h3>
+                                            </div>
+                                            <div className="pt-2">
+                                                <p className="text-sm font-light text-white/90 leading-relaxed">
+                                                    {feature.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>

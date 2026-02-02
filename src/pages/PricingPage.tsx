@@ -466,6 +466,11 @@ const ComparisonTable: React.FC<{
                 </table>
             </div>
 
+            {/* Pricing Note */}
+            <p className="mt-3 text-[10px] text-black/40 leading-relaxed">
+                * AWS = EC2 Capacity Blocks rate · GCP = On-Demand VM · CoreWeave = Classic pricing · Lambda = Per-GPU list price
+            </p>
+
             {/* Metrics */}
             <div className="mt-4 grid grid-cols-4 gap-3">
                 {[

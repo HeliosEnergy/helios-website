@@ -1,5 +1,4 @@
-import { ArrowRight, Code, MessageSquare, Bot, Search, Play, Building } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, Bot, Building, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const PlatformDropdown = () => {

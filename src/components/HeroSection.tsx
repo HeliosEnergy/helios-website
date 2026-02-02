@@ -66,11 +66,9 @@ export const HeroSection = () => {
       {/* Alchemy Background Stack */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
         <SimplexNoise
-          animate={true}
           opacity={0.1}
         />
         <PaperTexture
-          animate={true}
           opacity={0.15}
         />
       </div>
@@ -78,7 +76,6 @@ export const HeroSection = () => {
       {/* celestial Aura Refined */}
       <div className="absolute top-0 right-0 w-[1200px] h-[1200px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0">
         <MeshGradient
-          animate={true}
           speed={0.2}
           color1="#FFB800"
           color2="#FF6B35"

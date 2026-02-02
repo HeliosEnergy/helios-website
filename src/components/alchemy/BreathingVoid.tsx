@@ -7,13 +7,11 @@ export const BreathingVoid = () => {
             <div className="absolute inset-0">
                 <SimplexNoise
                     opacity={0.05}
-                    animate={true}
                 />
             </div>
             <div className="absolute inset-0">
                 <PaperTexture
                     opacity={0.08}
-                    animate={true}
                 />
             </div>
 

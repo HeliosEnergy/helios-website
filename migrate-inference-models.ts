@@ -21,8 +21,7 @@ const client = createClient({
     apiVersion: '2024-12-19',
 })
 
-// Inference models with pricing based on RTX 6000 Pro benchmarks
-// Prices are per second of GPU runtime
+// Inference models with pricing (per second where applicable)
 const inferenceModels = [
     {
         _id: 'inference-whisper-faster',
@@ -30,7 +29,7 @@ const inferenceModels = [
         id: 'whisper-faster',
         name: 'Whisper Faster',
         category: 'audio-input',
-        pricePerSecond: 0.00004, // Per second of audio processed (50-60x realtime factor)
+        pricePerSecond: 0.00034, // Per second of audio processed
         estimationUnit: 'voice-mins',
         description: 'Optimized speech-to-text with 50-60x realtime speed. Processes 1 hour of audio in ~1 minute.',
         provider: 'SYSTRAN',
@@ -40,9 +39,9 @@ const inferenceModels = [
         _id: 'inference-whisper-large',
         _type: 'inferenceModel',
         id: 'whisper-large',
-        name: 'Whisper Large V3',
+        name: 'Whisper Large',
         category: 'audio-input',
-        pricePerSecond: 0.00006, // Per second of audio processed (25-30x realtime factor)
+        pricePerSecond: 0.0005, // Per second of audio processed
         estimationUnit: 'voice-mins',
         description: 'OpenAI Whisper Large v3 for high-accuracy transcription. Best-in-class accuracy for difficult audio.',
         provider: 'OpenAI',
@@ -52,9 +51,9 @@ const inferenceModels = [
         _id: 'inference-flux',
         _type: 'inferenceModel',
         id: 'flux',
-        name: 'Flux.1',
+        name: 'Flux',
         category: 'image',
-        pricePerSecond: 0.008, // Per image (approximately 5 seconds GPU time)
+        pricePerSecond: 0.00034, // Per image (approximately 5 seconds GPU time)
         estimationUnit: 'images',
         description: 'State-of-the-art image generation from Black Forest Labs. 1024x1024 images in ~5 seconds.',
         provider: 'Black Forest Labs',
@@ -66,7 +65,7 @@ const inferenceModels = [
         id: 'bark',
         name: 'Bark',
         category: 'audio-output',
-        pricePerSecond: 0.0012, // Per second of generated audio (1x realtime)
+        pricePerSecond: 0.00031, // Per second of generated audio
         estimationUnit: 'voice-mins',
         description: 'High-quality text-to-speech with natural prosody and emotion. Supports multiple voices and languages.',
         provider: 'Suno',
@@ -78,7 +77,7 @@ const inferenceModels = [
         id: 'qwen3-vl',
         name: 'Qwen3 VL',
         category: 'vision',
-        pricePerSecond: 0.00004, // Per token (approximately 40-60 tokens/second)
+        pricePerSecond: 0.00116, // Per token (approximately 40-60 tokens/second)
         estimationUnit: 'video-mins',
         description: 'Vision-language model for video understanding and analysis. Processes video frames with natural language.',
         provider: 'Alibaba',
@@ -91,6 +90,16 @@ async function migrateInferenceModels() {
 
     try {
         const transaction = client.transaction()
+        const keepIds = new Set(inferenceModels.map(model => model._id))
+
+        console.log('  Removing inference models not in the keep list...')
+        const existingIds = await client.fetch<string[]>(`*[_type == "inferenceModel"]._id`)
+        existingIds
+            .filter(id => !keepIds.has(id))
+            .forEach(id => {
+                console.log(`    - Deleting ${id}`)
+                transaction.delete(id)
+            })
 
         console.log('  Creating inference models...')
         inferenceModels.forEach(model => {
