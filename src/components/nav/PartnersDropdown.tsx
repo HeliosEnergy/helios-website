@@ -1,4 +1,5 @@
 import { Cloud, Users, Settings, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const PartnersDropdown = () => {
   return (
@@ -16,17 +17,17 @@ export const PartnersDropdown = () => {
         
         <div className="space-y-6">
           {[
-            { icon: Cloud, label: "Cloud & Infrastructure" },
-            { icon: Users, label: "Consulting & Services" },
-            { icon: Settings, label: "Technology Partners" },
+            { icon: Cloud, label: "Cloud & Infrastructure", page: "cloud-infrastructure" },
+            { icon: Users, label: "Consulting & Services", page: "consulting-services" },
+            { icon: Settings, label: "Technology Partners", page: "technology-partners" },
           ].map((item) => (
-            <a key={item.label} href="#" className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
+            <Link key={item.label} to={`/coming-soon?page=${item.page}`} className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
               <div className="flex items-center gap-4">
                 <item.icon className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
                 {item.label}
               </div>
               <ArrowRight className="w-4 h-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -43,9 +44,9 @@ export const PartnersDropdown = () => {
               Exclusive credits, technical support, and architectural guidance for the next generation of AI pioneers.
             </p>
           </div>
-          <a href="#" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary hover:text-white transition-colors ml-2">
+          <Link to="/startups" className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-primary hover:text-white transition-colors ml-2">
             Apply for the program <ArrowRight className="w-3 h-3" />
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -61,12 +62,12 @@ export const PartnersDropdown = () => {
           </div>
         </div>
         
-        <a
-          href="#"
+        <Link
+          to="/coming-soon?page=become-partner"
           className="mt-12 block w-full py-4 bg-white text-black text-center text-[10px] font-mono font-bold uppercase tracking-[0.3em] rounded-full hover:bg-white/90 transition-all hover:scale-[1.02]"
         >
           Become a Partner
-        </a>
+        </Link>
       </div>
     </div>
   );

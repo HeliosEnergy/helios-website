@@ -9,7 +9,7 @@ const GPU_DATA = [
     id: "b200",
     clusterId: "b200", // matches ContactPage ClusterType
     name: "NVIDIA Blackwell B200",
-    price: "2.80",
+    price: "3.10",
     description: "Optimized for large-scale foundation models and high-throughput inference clusters.",
     specs: ["20 PFLOPS", "900GB/s NVLink", "192GB HBM3e"],
     image: "/gpus/dgx-b200.jpg",
@@ -20,7 +20,7 @@ const GPU_DATA = [
     id: "rtx6000",
     clusterId: "rtx-6000-pro", // matches ContactPage ClusterType
     name: "NVIDIA RTX 6000 Pro",
-    price: "0.85",
+    price: "1.10",
     description: "Dedicated performance for model fine-tuning, image generation, and professional visualization.",
     specs: ["48GB GDDR6", "142 TFLOPS", "Pro Series"],
     image: "/gpus/NVIDIA-RTX-PRO-6000-BLACKWELL-SERVER-HERO.jpg",

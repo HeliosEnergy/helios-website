@@ -18,6 +18,13 @@ import PressPage from "./pages/PressPage";
 import EventsPage from "./pages/EventsPage";
 import PartnerPage from "./pages/PartnerPage";
 import EnergyPage from "./pages/EnergyPage";
+import InferencePage from "./pages/InferencePage";
+import ClustersPage from "./pages/ClustersPage";
+import ServerlessPage from "./pages/ServerlessPage";
+import ModelApisPage from "./pages/ModelApisPage";
+import TrainingPage from "./pages/TrainingPage";
+import StartupsPage from "./pages/StartupsPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +50,13 @@ const App = () => (
           <Route path="/events" element={<EventsPage />} />
           <Route path="/partner" element={<PartnerPage />} />
           <Route path="/energy" element={<EnergyPage />} />
+          <Route path="/inference" element={<InferencePage />} />
+          <Route path="/clusters" element={<ClustersPage />} />
+          <Route path="/serverless" element={<ServerlessPage />} />
+          <Route path="/models" element={<ModelApisPage />} />
+          <Route path="/training" element={<TrainingPage />} />
+          <Route path="/startups" element={<StartupsPage />} />
+          <Route path="/coming-soon" element={<ComingSoonPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

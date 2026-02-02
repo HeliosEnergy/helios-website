@@ -1,4 +1,5 @@
 import { Sparkles, Server, Brain, Image, AudioLines, Eye, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const ModelsDropdown = () => {
   return (
@@ -16,17 +17,17 @@ export const ModelsDropdown = () => {
         
         <div className="grid grid-cols-2 gap-y-6 gap-x-8">
            {[
-             { icon: Sparkles, label: "Featured" },
-             { icon: Server, label: "Serverless" },
-             { icon: Brain, label: "Language" },
-             { icon: Image, label: "Vision" },
-             { icon: AudioLines, label: "Audio" },
-             { icon: Eye, label: "Multimodal" },
+             { icon: Sparkles, label: "Featured", filter: "featured" },
+             { icon: Brain, label: "LLM", filter: "LLM" },
+             { icon: Eye, label: "Vision", filter: "Vision" },
+             { icon: Image, label: "Image", filter: "Image" },
+             { icon: AudioLines, label: "Audio", filter: "Audio" },
+             { icon: Server, label: "Serverless", filter: "serverless" },
            ].map((item) => (
-             <a key={item.label} href={`/model-library?filter=${item.label}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-white transition-colors group">
+             <Link key={item.label} to={`/model-library?filter=${item.filter}`} className="flex items-center gap-3 text-sm text-white/70 hover:text-white transition-colors group">
                <item.icon className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
                {item.label}
-             </a>
+             </Link>
            ))}
         </div>
       </div>
@@ -39,16 +40,16 @@ export const ModelsDropdown = () => {
         <div className="grid grid-cols-2 gap-y-6 gap-x-8">
            {[
              { symbol: "✦", label: "Qwen" },
-             { symbol: "⬡", label: "OpenAI" },
-             { symbol: "☾", label: "Moonshot" },
-             { symbol: "∞", label: "Meta" },
              { symbol: "◇", label: "DeepSeek" },
-             { symbol: "Z", label: "Z.ai" },
+             { symbol: "∞", label: "Meta" },
+             { symbol: "⬡", label: "OpenAI" },
+             { symbol: "G", label: "Google" },
+             { symbol: "A", label: "Anthropic" },
            ].map((item) => (
-             <a key={item.label} href={`/model-library?filter=provider:${item.label}`} className="flex items-center gap-3 text-sm text-white hover:text-white group">
+             <Link key={item.label} to={`/model-library?filter=provider:${item.label}`} className="flex items-center gap-3 text-sm text-white hover:text-white group">
                <span className="w-5 h-5 flex items-center justify-center text-white/50 group-hover:text-primary transition-colors">{item.symbol}</span>
                {item.label}
-             </a>
+             </Link>
            ))}
         </div>
       </div>
@@ -66,14 +67,14 @@ export const ModelsDropdown = () => {
           
           <div className="space-y-4 pt-4 border-t border-white/5">
             {[
-              "GLM-4.6",
-              "DeepSeek V3",
-              "Kimi K2 Instruct"
+              { name: "GLM-4.6", slug: "glm-4-6" },
+              { name: "DeepSeek V3", slug: "deepseek-v3" },
+              { name: "Kimi K2 Instruct", slug: "kimi-k2-instruct" }
             ].map(model => (
-              <a key={model} href="#" className="flex items-center justify-between text-xs text-white/80 hover:text-white group transition-colors">
-                {model}
+              <Link key={model.slug} to={`/model-library/${model.slug}`} className="flex items-center justify-between text-xs text-white/80 hover:text-white group transition-colors">
+                {model.name}
                 <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-              </a>
+              </Link>
             ))}
           </div>
         </div>

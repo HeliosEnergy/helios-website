@@ -65,6 +65,12 @@ export default defineType({
             description: 'Lambda Labs price - can be a number or "Not listed"',
         }),
         defineField({
+            name: 'coreweavePrice',
+            title: 'CoreWeave Price (USD/hr)',
+            type: 'string',
+            description: 'CoreWeave price - can be a number or "N/A"',
+        }),
+        defineField({
             name: 'modalPrice',
             title: 'Modal Price (USD/hr)',
             type: 'string',
