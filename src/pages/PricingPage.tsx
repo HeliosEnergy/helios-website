@@ -409,6 +409,7 @@ const ComparisonTable: React.FC<{
                         <tr className="border-b border-black/10 bg-black/[0.02]">
                             <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black/40">GPU</th>
                             <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black bg-green-50">Helios</th>
+                            <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black/40">CoreWeave</th>
                             <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black/40">AWS</th>
                             <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black/40">GCP</th>
                             <th className="py-3 px-4 text-[10px] font-semibold uppercase tracking-wider text-black/40">Lambda</th>
@@ -417,8 +418,15 @@ const ComparisonTable: React.FC<{
                     <tbody className="divide-y divide-black/5">
                         {sortedModels.map((gpu) => {
                             const heliosPrice = getHeliosPrice(gpu.heliosPrice);
-                            const awsPriceNum = parseProviderPrice(gpu.awsPrice || '');
-                            const savings = awsPriceNum ? Math.round(((awsPriceNum - heliosPrice) / awsPriceNum) * 100) : null;
+                            // Find the lowest competitor price for savings calculation
+                            const competitorPrices = [
+                                parseProviderPrice(gpu.coreweavePrice || ''),
+                                parseProviderPrice(gpu.awsPrice || ''),
+                                parseProviderPrice(gpu.googleCloudPrice || ''),
+                                parseProviderPrice(gpu.lambdaPrice || ''),
+                            ].filter(p => p && p > 0);
+                            const lowestCompetitor = competitorPrices.length > 0 ? Math.min(...competitorPrices) : null;
+                            const savings = lowestCompetitor ? Math.round(((lowestCompetitor - heliosPrice) / lowestCompetitor) * 100) : null;
 
                             return (
                                 <tr key={gpu.id} className="hover:bg-black/[0.01]">
@@ -438,6 +446,9 @@ const ComparisonTable: React.FC<{
                                         {selectedTier.discount > 0 && (
                                             <p className="text-[10px] text-black/30 line-through">${gpu.heliosPrice.toFixed(2)}</p>
                                         )}
+                                    </td>
+                                    <td className="py-3 px-4 text-black/50">
+                                        {gpu.coreweavePrice && parseProviderPrice(gpu.coreweavePrice) ? `$${gpu.coreweavePrice}` : '—'}
                                     </td>
                                     <td className="py-3 px-4 text-black/50">
                                         {gpu.awsPrice && parseProviderPrice(gpu.awsPrice) ? `$${gpu.awsPrice}` : '—'}

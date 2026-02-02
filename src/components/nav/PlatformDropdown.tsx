@@ -15,7 +15,7 @@ export const PlatformDropdown = () => {
             Fast prototyping to <br />production scale.
           </p>
         </div>
-        
+
         <div className="space-y-6">
           <Link to="/model-library" className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
             For AI Natives
@@ -33,20 +33,30 @@ export const PlatformDropdown = () => {
         <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
           Capabilities
         </h3>
-        <div className="grid grid-cols-2 gap-x-12 gap-y-8">
-          {[
-            { icon: Code, label: "Code Assistance" },
-            { icon: MessageSquare, label: "Conversational AI" },
-            { icon: Bot, label: "Agentic Systems" },
-            { icon: Search, label: "Semantic Search" },
-            { icon: Play, label: "Multimedia" },
-            { icon: Building, label: "Enterprise RAG" },
-          ].map((item) => (
-            <a key={item.label} href="#" className="flex items-center gap-4 text-sm text-white/70 hover:text-white transition-colors group">
-              <item.icon className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity" />
-              {item.label}
-            </a>
-          ))}
+        <div className="flex flex-col gap-4">
+          <Link to="/clusters" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
+            <div className="flex items-center gap-3 mb-1">
+              <Building className="w-4 h-4 text-[#FF6B35]" />
+              <span className="text-sm font-bold text-white">GPU Clusters</span>
+            </div>
+            <p className="text-xs text-white/50 pl-7">Dedicate H100s & Slurm</p>
+          </Link>
+
+          <Link to="/serverless" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
+            <div className="flex items-center gap-3 mb-1">
+              <Zap className="w-4 h-4 text-[#FF6B35]" />
+              <span className="text-sm font-bold text-white">Serverless Inference</span>
+            </div>
+            <p className="text-xs text-white/50 pl-7">Scale to Zero</p>
+          </Link>
+
+          <Link to="/models" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
+            <div className="flex items-center gap-3 mb-1">
+              <Bot className="w-4 h-4 text-[#FF6B35]" />
+              <span className="text-sm font-bold text-white">Model APIs</span>
+            </div>
+            <p className="text-xs text-white/50 pl-7">Unified LLM Interface</p>
+          </Link>
         </div>
       </div>
 

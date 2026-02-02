@@ -11,6 +11,7 @@ export interface GPUModel {
     heliosPrice: number;
     awsPrice?: string;
     googleCloudPrice?: string;
+    coreweavePrice?: string;
     lambdaPrice?: string;
     modalPrice?: string;
     displayOrder?: number;
@@ -66,17 +67,29 @@ export const usePricingData = () => {
             try {
                 setLoading(true);
 
-                // Fetch GPU models
+                // Fetch GPU models and deduplicate by id (keep first occurrence)
                 const gpusQuery = `*[_type == "gpuModel"] | order(displayOrder asc)`;
-                const gpus = await client.fetch<GPUModel[]>(gpusQuery);
+                const gpusRaw = await client.fetch<GPUModel[]>(gpusQuery);
+                const gpusSeen = new Set<string>();
+                const gpus = gpusRaw.filter(gpu => {
+                    if (gpusSeen.has(gpu.id)) return false;
+                    gpusSeen.add(gpu.id);
+                    return true;
+                });
 
                 // Fetch inference models (same as contact page - Whisper, Flux, Bark, Qwen3 VL)
                 const inferenceQuery = `*[_type == "inferenceModel"] | order(displayOrder asc)`;
                 const inference = await client.fetch<InferenceModel[]>(inferenceQuery);
 
-                // Fetch pricing tiers
+                // Fetch pricing tiers and deduplicate by id (keep first occurrence)
                 const tiersQuery = `*[_type == "pricingTier"] | order(displayOrder asc)`;
-                const tiers = await client.fetch<PricingTier[]>(tiersQuery);
+                const tiersRaw = await client.fetch<PricingTier[]>(tiersQuery);
+                const tiersSeen = new Set<string>();
+                const tiers = tiersRaw.filter(tier => {
+                    if (tiersSeen.has(tier.id)) return false;
+                    tiersSeen.add(tier.id);
+                    return true;
+                });
 
                 // Fetch page config (get the first one)
                 const configQuery = `*[_type == "pricingPageSection"][0]`;
