@@ -243,14 +243,14 @@ const ModelDetailsPage = () => {
                             </div>
 
                             {/* Pricing Bar */}
-                            <div className="flex items-center justify-between p-4 bg-surface rounded-lg border border-border">
-                                <div>
-                                    <p className="font-semibold text-foreground">Available Serverless</p>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 bg-surface hover:bg-surface-elevated/50 transition-colors rounded-2xl border border-white/5 group">
+                                <div className="mb-4 sm:mb-0">
+                                    <p className="font-semibold text-foreground text-lg">Available Serverless</p>
                                     <p className="text-sm text-muted-foreground">Pay only for what you use</p>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-2xl font-bold text-foreground">{getPricingText()}</span>
-                                    <p className="text-sm text-muted-foreground">Per 1M Tokens</p>
+                                <div className="text-left sm:text-right">
+                                    <span className="text-3xl font-bold text-foreground tracking-tight">{getPricingText()}</span>
+                                    <p className="text-sm text-muted-foreground mt-1">Per 1M Tokens</p>
                                 </div>
                             </div>
 

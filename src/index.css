@@ -39,10 +39,10 @@
     --yellow-light: 48 95% 63%;
     --yellow-dark: 48 95% 43%;
     --yellow-dark-foreground: 0 0% 0%;
-    --surface: 45 10% 95%;
-    --surface-elevated: 45 10% 97%;
-    --text-secondary: 45 5% 40%;
-    --text-tertiary: 45 5% 60%;
+    --surface: 0 0% 4%;
+    --surface-elevated: 0 0% 7%;
+    --text-secondary: 0 0% 63%;
+    --text-tertiary: 0 0% 40%;
     --banner-bg: 48 95% 53%;
 
     --sidebar-background: 45 15% 98%;
@@ -76,6 +76,8 @@
     --input: 0 0% 12%;
     --ring: 48 96% 53%;
     --radius: 24px;
+    --surface: 0 0% 4%;
+    --surface-elevated: 0 0% 7%;
   }
 }
 
