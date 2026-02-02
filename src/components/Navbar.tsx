@@ -24,8 +24,9 @@ const navItems = [
   { label: "Developers", hasDropdown: true, dropdown: DevelopersDropdown, dropdownMobile: DevelopersDropdownMobile },
   { label: "Pricing", hasDropdown: false, href: "/pricing" },
   { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown, dropdownMobile: PartnersDropdownMobile },
-  { label: "Resources", hasDropdown: true, dropdown: ResourcesDropdown, dropdownMobile: ResourcesDropdownMobile },
-  { label: "Company", hasDropdown: true, dropdownMobile: CompanyDropdownMobile },
+  // TODO: Unhide Resources when we have blog/docs content
+  // { label: "Resources", hasDropdown: true, dropdown: ResourcesDropdown, dropdownMobile: ResourcesDropdownMobile },
+  // { label: "Company", hasDropdown: true, dropdownMobile: CompanyDropdownMobile },
 ];
 
 export const Navbar = () => {
