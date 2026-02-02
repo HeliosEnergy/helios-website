@@ -5,12 +5,10 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlatformDropdown } from "./nav/PlatformDropdown";
 import { ModelsDropdown } from "./nav/ModelsDropdown";
-import { DevelopersDropdown } from "./nav/DevelopersDropdown";
 import { PartnersDropdown } from "./nav/PartnersDropdown";
 import { ResourcesDropdown } from "./nav/ResourcesDropdown";
 import { PlatformDropdownMobile } from "./nav/PlatformDropdown.mobile";
 import { ModelsDropdownMobile } from "./nav/ModelsDropdown.mobile";
-import { DevelopersDropdownMobile } from "./nav/DevelopersDropdown.mobile";
 import { PartnersDropdownMobile } from "./nav/PartnersDropdown.mobile";
 import { ResourcesDropdownMobile } from "./nav/ResourcesDropdown.mobile";
 import { CompanyDropdownMobile } from "./nav/CompanyDropdown.mobile";
@@ -21,7 +19,6 @@ const DASHBOARD_SIGNUP_URL = "https://console.heliosenergy.io/login?tab=signup";
 const navItems = [
   { label: "Platform", hasDropdown: true, dropdown: PlatformDropdown, dropdownMobile: PlatformDropdownMobile },
   { label: "Models", hasDropdown: true, dropdown: ModelsDropdown, dropdownMobile: ModelsDropdownMobile },
-  { label: "Developers", hasDropdown: true, dropdown: DevelopersDropdown, dropdownMobile: DevelopersDropdownMobile },
   { label: "Pricing", hasDropdown: false, href: "/pricing" },
   { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown, dropdownMobile: PartnersDropdownMobile },
   // TODO: Unhide Resources when we have blog/docs content
