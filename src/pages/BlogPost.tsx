@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 import { urlFor } from "@/lib/sanity";
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Breadcrumb } from "@/components/blog/Breadcrumb";
 import { BlogPostLayout } from "@/components/blog/BlogPostLayout";
@@ -18,7 +18,7 @@ const BlogPost = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
+            <Navigation />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 lg:pt-16">
                 <Breadcrumb

@@ -1,4 +1,4 @@
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { ModelCard } from "@/components/ModelCard";
 import { ModelFilters } from "@/components/ModelFilters";
@@ -110,7 +110,7 @@ const ModelLibraryPage = () => {
 
     return (
         <div className="min-h-screen bg-background solar-grain">
-            <Navbar />
+            <Navigation />
 
             <main>
                 {/* Hero Section - The Solar Entrance */}

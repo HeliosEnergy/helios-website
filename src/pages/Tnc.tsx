@@ -1,10 +1,10 @@
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
 const Tnc = () => {
   return (
     <div className="min-h-screen bg-black">
-      <Navbar />
+      <Navigation />
       <main className="min-h-screen bg-black text-white pt-32 pb-16">
         <div className="max-w-4xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-8">

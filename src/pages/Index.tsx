@@ -11,7 +11,7 @@
 
 import React from "react";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { HeroSection } from "@/components/HeroSection";
 import { UseCasesSection } from "@/components/UseCasesSection";
 import { ModelsSection } from "@/components/ModelsSection";
@@ -89,7 +89,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <AnnouncementBanner />
-      <Navbar />
+      <Navigation />
       <main>
         {renderSections()}
       </main>

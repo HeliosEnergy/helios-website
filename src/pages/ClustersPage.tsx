@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Navbar } from '@/components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,7 @@ const ClustersPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-[#FF6B35] selection:text-white">
-      <Navbar />
+      <Navigation />
 
       {/* Hero Section - Heavy Metal Aesthetic */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">

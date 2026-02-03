@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '../components/Footer';
 import { Construction, ArrowLeft, Bell } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -21,7 +21,7 @@ const ComingSoonPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <Navbar />
+      <Navigation />
 
       <main className="flex-grow flex items-center justify-center px-6 py-24">
         <div className="max-w-2xl mx-auto text-center">

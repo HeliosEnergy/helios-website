@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useSanityQuery } from "@/hooks/useSanityData";
 import { urlFor } from "@/lib/sanity";
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Breadcrumb } from "@/components/blog/Breadcrumb";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,7 @@ const ModelDetailsPage = () => {
     if (!model) {
         return (
             <div className="min-h-screen bg-background">
-                <Navbar />
+                <Navigation />
                 <div className="flex items-center justify-center min-h-[60vh]">
                     <div className="text-center">
                         <h1 className="text-4xl font-heading font-bold text-foreground mb-4">Model Not Found</h1>
@@ -146,7 +146,7 @@ const ModelDetailsPage = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
+            <Navigation />
 
             <main className="pt-24 pb-16">
                 <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">

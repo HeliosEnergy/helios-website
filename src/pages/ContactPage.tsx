@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
-import { Navbar } from '../components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '../components/Footer';
 import { Loader2, Check } from 'lucide-react';
 import { DualRangeSlider } from '../components/ui/dual-range-slider';
@@ -501,7 +501,7 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-[#FF6B35] selection:text-white overflow-hidden flex flex-col">
-      <Navbar />
+      <Navigation />
 
       <main className="flex-grow relative flex items-center justify-center py-32 px-6">
 

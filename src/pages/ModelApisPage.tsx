@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,7 +39,7 @@ const ModelApisPage = () => {
 
     return (
         <div className="min-h-screen bg-black text-white selection:bg-[#FF6B35] selection:text-white">
-            <Navbar />
+            <Navigation />
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-24 overflow-hidden">

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { CursorGlow } from "@/components/alchemy/CursorGlow";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
@@ -17,7 +17,7 @@ const PressPage = () => {
     return (
         <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black relative overflow-hidden">
             <CursorGlow />
-            <Navbar />
+            <Navigation />
 
             <main className="relative z-10 pt-48 pb-64 px-6 lg:px-12 max-w-7xl mx-auto">
                 {/* Hero */}

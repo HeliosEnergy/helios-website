@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { usePricingData, PricingTier, GPUModel, InferenceModel } from '@/hooks/usePricingData';
-import { Navbar } from '@/components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { parseProviderPrice } from '@/lib/pricingCalculations';
@@ -596,7 +596,7 @@ const PricingPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] text-black">
-            <Navbar />
+            <Navigation />
 
             <main className="pt-20">
                 {/* Hero */}

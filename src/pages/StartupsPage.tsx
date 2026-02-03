@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navbar } from '../components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '../components/Footer';
 import { Button } from '../components/ui/button';
 import { StaticMeshGradient } from '@paper-design/shaders-react';
@@ -352,7 +352,7 @@ ${formData.additionalInfo || 'None'}
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-[#FF6B35] selection:text-white">
-      <Navbar />
+      <Navigation />
 
       {/* ============================================ */}
       {/* HERO + QUICK QUALIFIER                      */}

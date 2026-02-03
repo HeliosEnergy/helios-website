@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
+import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { StaticMeshGradient } from '@paper-design/shaders-react';
@@ -80,7 +80,7 @@ const ServerlessPage = () => {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <Navbar />
+            <Navigation />
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 overflow-hidden">

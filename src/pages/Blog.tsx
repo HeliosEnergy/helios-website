@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 import { urlFor } from "@/lib/sanity";
 import { format } from "date-fns";
-import { Navbar } from "@/components/Navbar";
+import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 
@@ -14,7 +14,7 @@ const Blog = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Navbar />
+            <Navigation />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
                 <div className="mb-16">
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold text-foreground tracking-tight mb-6">
