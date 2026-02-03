@@ -33,9 +33,9 @@ export const GpuSovereigntySection = () => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <section className="bg-black py-24 px-6 border-y border-white/5 overflow-hidden">
+    <section className="bg-black py-12 lg:py-24 px-4 lg:px-6 border-y border-white/5 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-4 h-[600px]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:h-[600px]">
           {GPU_DATA.map((gpu) => {
             const isHovered = hoveredId === gpu.id;
             const isOtherHovered = hoveredId !== null && hoveredId !== gpu.id;
@@ -49,71 +49,58 @@ export const GpuSovereigntySection = () => {
                   flex: isHovered ? 2 : isOtherHovered ? 0.5 : 1,
                 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="relative group cursor-pointer overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/5 flex flex-col"
+                className="relative group cursor-pointer overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/5 flex flex-col min-h-[400px] lg:min-h-0"
               >
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
-                  <motion.img
+                  <img
                     src={gpu.image}
                     alt={gpu.name}
-                    animate={{
-                      scale: isHovered ? 1.1 : 1,
-                      opacity: isHovered ? 0.2 : 0.6,
-                    }}
-                    transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-full h-full object-contain p-12 lg:p-24"
+                    className="w-full h-full object-cover opacity-40 lg:opacity-60 lg:group-hover:opacity-20 lg:group-hover:scale-110 transition-all duration-700"
                   />
-                  <motion.div 
-                    animate={{
-                      opacity: isHovered ? 0.8 : 0
-                    }}
-                    className="absolute inset-0 bg-black z-10" 
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
                 </div>
 
                 {/* Content */}
-                <div className="relative z-10 h-full p-10 flex flex-col justify-between">
-                  <div className="space-y-8">
+                <div className="relative z-10 h-full p-6 lg:p-10 flex flex-col justify-between">
+                  <div className="space-y-4 lg:space-y-8">
                     <div className="space-y-2">
                       <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.4em]">Infrastructure</p>
-                      <h3 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                      <h3 className="text-2xl lg:text-4xl font-bold text-white tracking-tight">
                         {gpu.name}
                       </h3>
                     </div>
 
-                    <motion.div 
-                      animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
-                      className="max-w-md"
-                    >
-                      <p className="text-white/80 text-lg font-light leading-relaxed">
+                    {/* Description - always visible on mobile, hover on desktop */}
+                    <div className="max-w-md lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500">
+                      <p className="text-white/70 lg:text-white/80 text-sm lg:text-lg font-light leading-relaxed">
                         {gpu.description}
                       </p>
-                    </motion.div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                  <div className="flex flex-col gap-4 lg:gap-8 mt-6 lg:mt-0">
                     <div className="space-y-1">
                       <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.2em]">Starting at</p>
                       <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-bold text-white tracking-tighter">${gpu.price}</span>
+                        <span className="text-4xl lg:text-5xl font-bold text-white tracking-tighter">${gpu.price}</span>
                         <span className="text-white/60 text-sm font-light">/ hour</span>
                       </div>
-                      <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.1em] pt-2">36 Month Reserved</p>
+                      <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.1em] pt-1">36 Month Reserved</p>
                     </div>
 
-                    <motion.div
-                      animate={{ opacity: isHovered ? 1 : 0, x: isHovered ? 0 : -20 }}
-                    >
+                    {/* CTA - always visible on mobile */}
+                    <div className="lg:opacity-0 lg:group-hover:opacity-100 lg:-translate-x-4 lg:group-hover:translate-x-0 transition-all duration-500">
                       <Link to={`/contact?service=clusters&cluster=${gpu.clusterId}`}>
                         <Button
                           size="lg"
-                          className="rounded-full bg-white text-black hover:bg-white/90 px-8 text-xs font-bold uppercase tracking-widest group/btn"
+                          className="rounded-full bg-white text-black hover:bg-white/90 px-6 lg:px-8 text-xs font-bold uppercase tracking-widest group/btn w-full lg:w-auto"
                         >
                           {gpu.cta}
                           <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
                         </Button>
                       </Link>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
