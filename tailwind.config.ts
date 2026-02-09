@@ -69,6 +69,11 @@ export default {
           DEFAULT: "hsl(var(--surface))",
           elevated: "hsl(var(--surface-elevated))",
         },
+        "primary-warm": "hsl(var(--primary-warm))",
+        burgundy: {
+          DEFAULT: "hsl(var(--burgundy))",
+          foreground: "hsl(var(--burgundy-foreground))",
+        },
       },
       fontFamily: {
         sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],

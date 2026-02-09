@@ -7,7 +7,7 @@ export const PlatformDropdown = () => {
       {/* Virtual Cloud Infrastructure */}
       <div className="flex-1 p-12 space-y-10">
         <div>
-          <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-6">
+          <h3 className="text-white/70 font-mono text-[10px] uppercase tracking-[0.4em] mb-6">
             Infrastructure
           </h3>
           <p className="text-xl text-white/80 leading-relaxed font-light">
@@ -18,18 +18,18 @@ export const PlatformDropdown = () => {
         <div className="space-y-6">
           <Link to="/model-library" className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
             For AI Natives
-            <ArrowRight className="w-4 h-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
           </Link>
           <Link to="/contact" className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
             For Enterprises
-            <ArrowRight className="w-4 h-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
           </Link>
         </div>
       </div>
 
       {/* Use Cases */}
       <div className="flex-[1.2] p-12 bg-white/[0.02]">
-        <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
+        <h3 className="text-white/70 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
           Capabilities
         </h3>
         <div className="flex flex-col gap-4">
@@ -38,7 +38,7 @@ export const PlatformDropdown = () => {
               <Building className="w-4 h-4 text-[#FF6B35]" />
               <span className="text-sm font-bold text-white">GPU Clusters</span>
             </div>
-            <p className="text-xs text-white/50 pl-7">Dedicate H100s & Slurm</p>
+            <p className="text-xs text-white/70 pl-7">Dedicate H100s & Slurm</p>
           </Link>
 
           <Link to="/serverless" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
@@ -46,7 +46,7 @@ export const PlatformDropdown = () => {
               <Zap className="w-4 h-4 text-[#FF6B35]" />
               <span className="text-sm font-bold text-white">Serverless Inference</span>
             </div>
-            <p className="text-xs text-white/50 pl-7">Scale to Zero</p>
+            <p className="text-xs text-white/70 pl-7">Scale to Zero</p>
           </Link>
 
           <Link to="/models" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
@@ -54,7 +54,7 @@ export const PlatformDropdown = () => {
               <Bot className="w-4 h-4 text-[#FF6B35]" />
               <span className="text-sm font-bold text-white">Model APIs</span>
             </div>
-            <p className="text-xs text-white/50 pl-7">Unified LLM Interface</p>
+            <p className="text-xs text-white/70 pl-7">Unified LLM Interface</p>
           </Link>
         </div>
       </div>
@@ -74,7 +74,7 @@ export const PlatformDropdown = () => {
           </div>
           <div>
             <p className="text-xs font-bold text-white">AI Infrastructure Lead</p>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-white/60">Fortune 500 Company</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-white/70">Fortune 500 Company</p>
           </div>
         </div>
       </div>

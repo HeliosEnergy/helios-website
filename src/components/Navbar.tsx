@@ -110,31 +110,32 @@ export const Navbar = () => {
                     </button>
                   )}
                 </div>
-                
-                {/* Dropdown Container */}
-                <AnimatePresence>
-                  {item.hasDropdown && item.dropdown && openDropdown === item.label && (
-                    <div 
-                      id={`nav-dropdown-${item.label.toLowerCase()}`}
-                      className={`absolute top-full pt-4 z-50 ${
-                        item.label === "Partners" || item.label === "Resources" ? "right-0" : "left-0"
-                      }`}
-                      onMouseEnter={() => handleMouseEnter(item.label, index)}
-                    >
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(10px)" }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="bg-[#0A0A0A] border border-white/10 rounded-[32px] overflow-hidden backdrop-blur-3xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)]"
-                      >
-                        <item.dropdown />
-                      </motion.div>
-                    </div>
-                  )}
-                </AnimatePresence>
               </div>
             ))}
+
+            {/* Dropdown Container — positioned relative to the nav bar, not individual items */}
+            <AnimatePresence>
+              {navItems.map((item, index) =>
+                item.hasDropdown && item.dropdown && openDropdown === item.label ? (
+                  <div
+                    key={`dropdown-${item.label}`}
+                    id={`nav-dropdown-${item.label.toLowerCase()}`}
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-4 z-50"
+                    onMouseEnter={() => handleMouseEnter(item.label, index)}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(10px)" }}
+                      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                      exit={{ opacity: 0, y: 10, scale: 0.98, filter: "blur(10px)" }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      className="bg-[#0A0A0A] border border-white/10 rounded-[32px] overflow-hidden backdrop-blur-3xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)]"
+                    >
+                      <item.dropdown />
+                    </motion.div>
+                  </div>
+                ) : null
+              )}
+            </AnimatePresence>
           </div>
 
           {/* CTA Buttons */}

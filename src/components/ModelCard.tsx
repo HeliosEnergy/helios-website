@@ -56,22 +56,32 @@ export const ModelCard = ({ model }: ModelCardProps) => {
     return (
         <Link 
             to={`/model-library/${model.slug.current}`} 
-            className="group relative block bg-card border border-border/40 p-10 transition-all duration-500 hover:bg-card/80 overflow-hidden"
+            className="group relative block bg-[#0A0A0A] border border-white/[0.08] p-10 transition-all duration-500 hover:bg-[#0F0F0F] hover:border-white/20 overflow-hidden"
         >
             {/* Active Aura Background */}
-            <div className="absolute inset-0 bg-primary/[0.02] group-hover:bg-primary/[0.04] transition-colors duration-500" />
+            <div className="absolute inset-0 bg-primary/[0.03] group-hover:bg-primary/[0.08] transition-colors duration-500" />
             
             {/* The Showcase Plinth */}
             <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="w-20 h-20 mb-8 p-4 bg-background shadow-[inset_0_2px_10px_rgba(0,0,0,0.03)] border border-border/40 flex items-center justify-center relative group-hover:border-primary/40 transition-all duration-500">
                     {iconUrl ? (
-                        <img
-                            src={iconUrl}
-                            alt={`${model.provider} logo`}
-                            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                        />
+                        <>
+                            <img
+                                src={iconUrl}
+                                alt={`${model.provider} logo`}
+                                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                                onError={(e) => {
+                                    const target = e.currentTarget;
+                                    target.style.display = 'none';
+                                    target.nextElementSibling?.classList.remove('hidden');
+                                }}
+                            />
+                            <div className="hidden w-full h-full flex items-center justify-center text-xl font-heading font-bold text-foreground/80">
+                                {model.initial || model.name.charAt(0)}
+                            </div>
+                        </>
                     ) : (
-                        <div className={`w-full h-full flex items-center justify-center text-xl font-heading font-bold text-foreground/80`}>
+                        <div className="w-full h-full flex items-center justify-center text-xl font-heading font-bold text-foreground/80">
                             {model.initial || model.name.charAt(0)}
                         </div>
                     )}
@@ -89,17 +99,17 @@ export const ModelCard = ({ model }: ModelCardProps) => {
                 {/* Integral Specifications - The Technical Bold */}
                 <div className="w-full pt-8 border-t border-border/60 flex flex-col gap-5">
                     <div className="flex justify-between items-center text-[10px] font-mono font-bold uppercase tracking-[0.1em]">
-                        <span className="text-white/80">Type</span>
+                        <span className="text-white/90">Type</span>
                         <span className="text-foreground border-b border-foreground/10 pb-0.5">{model.modelType}</span>
                     </div>
                     {model.contextWindow && (
                         <div className="flex justify-between items-center text-[10px] font-mono font-bold uppercase tracking-[0.1em]">
-                            <span className="text-white/80">Context</span>
+                            <span className="text-white/90">Context</span>
                             <span className="text-foreground border-b border-foreground/10 pb-0.5">{parseInt(model.contextWindow).toLocaleString()}</span>
                         </div>
                     )}
                     <div className="flex justify-between items-center text-[10px] font-mono font-bold uppercase tracking-[0.1em]">
-                        <span className="text-white/80">Pricing</span>
+                        <span className="text-white/90">Pricing</span>
                         <span className="text-primary bg-primary/5 px-2 py-0.5">{getPricingText()}</span>
                     </div>
                 </div>

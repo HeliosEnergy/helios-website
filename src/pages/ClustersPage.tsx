@@ -45,7 +45,7 @@ const ClustersPage = () => {
           >
             <h1 className="text-7xl md:text-9xl font-heading font-bold tracking-tightest mb-8 leading-none">
               Sovereign<br />
-              <span className="text-white/20">Compute.</span>
+              <span className="text-white/50">Compute.</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/70 max-w-3xl mx-auto font-light leading-relaxed mb-12">
               Dedicated NVIDIA H100 clusters with 3.2Tbps InfiniBand interconnects.
@@ -69,15 +69,15 @@ const ClustersPage = () => {
           <div className="max-w-[1400px] mx-auto px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
             <div>
               <p className="text-[#FF6B35] font-bold text-lg">3.2 Tbps</p>
-              <p className="text-xs text-white/40 uppercase tracking-widest font-mono">InfiniBand</p>
+              <p className="text-xs text-white/60 uppercase tracking-widest font-mono">InfiniBand</p>
             </div>
             <div>
               <p className="text-white font-bold text-lg">H100 / H200</p>
-              <p className="text-xs text-white/40 uppercase tracking-widest font-mono">NVIDIA HGX</p>
+              <p className="text-xs text-white/60 uppercase tracking-widest font-mono">NVIDIA HGX</p>
             </div>
             <div>
               <p className="text-white font-bold text-lg">Slurm / K8s</p>
-              <p className="text-xs text-white/40 uppercase tracking-widest font-mono">Orchestration</p>
+              <p className="text-xs text-white/60 uppercase tracking-widest font-mono">Orchestration</p>
             </div>
 
           </div>

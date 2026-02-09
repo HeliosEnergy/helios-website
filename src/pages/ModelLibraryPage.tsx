@@ -152,14 +152,14 @@ const ModelLibraryPage = () => {
                                 </p>
                                 {/* Search Bar - Architectural Integration */}
                                 <div className="relative group">
-                                    <div className="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
-                                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
+                                    <div className="absolute inset-0 bg-primary/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                                    <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none" />
                                     <input
                                         type="text"
                                         placeholder="Filter by name or provider..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-8 pr-4 py-4 bg-transparent border-b border-border/40 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary transition-all text-sm font-mono uppercase tracking-widest"
+                                        className="relative z-10 w-full pl-8 pr-4 py-4 bg-transparent border-b border-border/40 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary transition-all text-sm font-mono uppercase tracking-widest"
                                     />
                                 </div>
                             </div>

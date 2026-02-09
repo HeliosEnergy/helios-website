@@ -20,23 +20,23 @@ const tabs = [
 ];
 
 const InferenceContent = () => (
-  <div className="relative h-[600px] w-full rounded-[24px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col md:flex-row">
+  <div className="relative h-auto lg:h-[600px] w-full rounded-[24px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col lg:flex-row">
     {/* Left Side: Content & CTA */}
-    <div className="relative z-20 w-full md:w-2/5 p-12 flex flex-col justify-center space-y-8 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A] to-transparent">
-      <h3 className="text-5xl font-heading font-bold text-white tracking-tightest leading-[0.9]">
-        Reasoning <br /> <span className="text-white/40">Engine.</span>
+    <div className="relative z-20 w-full lg:w-2/5 p-6 lg:p-12 flex flex-col justify-center space-y-8 lg:bg-gradient-to-r lg:from-[#0A0A0A] lg:via-[#0A0A0A] lg:to-transparent">
+      <h3 className="text-3xl lg:text-5xl font-heading font-bold text-white tracking-tightest leading-[0.9]">
+        Reasoning <br /> <span className="text-white/60">Engine.</span>
       </h3>
-      <div className="space-y-6 text-lg text-white/60 font-light leading-relaxed">
+      <div className="space-y-6 text-base lg:text-lg text-white/60 font-light leading-relaxed">
         <p>
           Beyond simple inference. Deploy reasoning models that think before they speak.
         </p>
-        <p className="text-sm text-white/30 font-mono uppercase tracking-widest">
+        <p className="text-sm text-white/50 font-mono uppercase tracking-widest">
           Featuring Kimi k2.5 & DeepSeek R1
         </p>
       </div>
       <div className="flex gap-4">
         <Link to="/contact?service=inference">
-          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-6 py-4 text-base lg:px-8 lg:py-6 lg:text-lg transition-transform hover:scale-105">
             Start Reasoning
           </Button>
         </Link>
@@ -44,7 +44,7 @@ const InferenceContent = () => (
     </div>
 
     {/* Right Side: Off-Center Playground Visual (AI Studio Style) */}
-    <div className="absolute top-0 right-0 w-full md:w-[65%] h-full pointer-events-none select-none">
+    <div className="hidden lg:block absolute top-0 right-0 w-full lg:w-[65%] h-full pointer-events-none select-none">
       {/* The Playground Card */}
       <motion.div 
         initial={{ x: 100, opacity: 0 }}
@@ -58,10 +58,10 @@ const InferenceContent = () => (
             <div className="flex items-center gap-2 px-3 py-1 bg-[#252525] rounded-md border border-white/5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span className="text-xs font-mono text-white/90">kimi-k2.5-thinking</span>
-              <ChevronDown className="w-3 h-3 text-white/40" />
+              <ChevronDown className="w-3 h-3 text-white/60" />
             </div>
             <div className="h-4 w-[1px] bg-white/10" />
-            <div className="flex items-center gap-2 text-white/40">
+            <div className="flex items-center gap-2 text-white/60">
               <TerminalSquare className="w-3 h-3" />
               <span className="text-xs font-medium">Playground</span>
             </div>
@@ -71,7 +71,7 @@ const InferenceContent = () => (
                 <Play className="w-3 h-3 text-white fill-current" />
                 <span className="text-xs text-white font-medium tracking-wide">RUN</span>
              </div>
-             <Maximize2 className="w-4 h-4 text-white/20" />
+             <Maximize2 className="w-4 h-4 text-white/50" />
           </div>
         </div>
 
@@ -81,7 +81,7 @@ const InferenceContent = () => (
           <div className="flex-1 p-6 flex flex-col gap-6 relative bg-[#141414]">
             {/* System/User Prompt Block */}
             <div className="space-y-2">
-              <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider ml-1">Input</span>
+              <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider ml-1">Input</span>
               <div className="bg-[#1A1A1A] border border-white/5 rounded-lg p-4">
                 <p className="text-sm font-mono text-white/70 leading-relaxed">
                   Analyze the implications of quantum supremacy on current encryption standards.
@@ -92,14 +92,14 @@ const InferenceContent = () => (
             {/* Output Block */}
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider ml-1">Output</span>
+                <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider ml-1">Output</span>
                 <span className="text-[10px] font-mono text-emerald-500/80">0.4s latency</span>
               </div>
               
               <div className="h-full border-l border-white/10 pl-4 pt-1 space-y-4">
                 {/* Thinking Process (Collapsible style) */}
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white/40">
+                  <div className="flex items-center gap-2 text-white/60">
                     <ChevronDown className="w-3 h-3" />
                     <span className="text-xs font-mono">Thinking Process</span>
                   </div>
@@ -108,7 +108,7 @@ const InferenceContent = () => (
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.5 }}
-                      className="text-[11px] font-mono text-white/30"
+                      className="text-[11px] font-mono text-white/50"
                     >
                       &gt; parsing_protocol(RSA, ECC)
                     </motion.div>
@@ -116,7 +116,7 @@ const InferenceContent = () => (
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 1.0 }}
-                      className="text-[11px] font-mono text-white/30"
+                      className="text-[11px] font-mono text-white/50"
                     >
                       &gt; simulating_shor_algorithm(qubits=1000)
                     </motion.div>
@@ -149,7 +149,7 @@ const InferenceContent = () => (
           {/* Right Sidebar (Parameters) - Dense & Technical */}
           <div className="w-64 border-l border-white/10 bg-[#111111] p-5 space-y-6 hidden lg:block">
             <div className="space-y-3">
-              <label className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Parameters</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/50 font-semibold">Parameters</label>
               
               <div className="space-y-4 pt-2">
                 <div className="space-y-2">
@@ -187,10 +187,10 @@ const InferenceContent = () => (
             <div className="h-[1px] bg-white/5" />
 
             <div className="space-y-3">
-              <label className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">Safety Settings</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/50 font-semibold">Safety Settings</label>
               <div className="flex items-center justify-between p-2 bg-white/5 rounded-md border border-white/5">
                 <span className="text-xs text-white/60">Filter</span>
-                <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/40">MED</span>
+                <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-white/60">MED</span>
               </div>
             </div>
           </div>
@@ -204,24 +204,24 @@ const InferenceContent = () => (
 );
 
 const ClustersContent = () => (
-  <div className="relative h-[600px] w-full rounded-[24px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col md:flex-row">
+  <div className="relative h-auto lg:h-[600px] w-full rounded-[24px] bg-[#0A0A0A] border border-white/10 overflow-hidden flex flex-col lg:flex-row">
     {/* Left Side: Content & CTA */}
-    <div className="relative z-20 w-full md:w-2/5 p-12 flex flex-col justify-center space-y-8 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A] to-transparent">
-      <h3 className="text-5xl font-heading font-bold text-white tracking-tightest leading-[0.9]">
-        Sovereign <br /> <span className="text-white/40">Compute.</span>
+    <div className="relative z-20 w-full lg:w-2/5 p-6 lg:p-12 flex flex-col justify-center space-y-8 lg:bg-gradient-to-r lg:from-[#0A0A0A] lg:via-[#0A0A0A] lg:to-transparent">
+      <h3 className="text-3xl lg:text-5xl font-heading font-bold text-white tracking-tightest leading-[0.9]">
+        Sovereign <br /> <span className="text-white/60">Compute.</span>
       </h3>
-      <div className="space-y-6 text-lg text-white/60 font-light leading-relaxed">
+      <div className="space-y-6 text-base lg:text-lg text-white/60 font-light leading-relaxed">
         <p>
-          Bare-metal performance for your most demanding workloads. 
+          Bare-metal performance for your most demanding workloads.
           Orchestrate massive H100 clusters with Slurm or Kubernetes.
         </p>
-        <p className="text-sm text-white/30 font-mono uppercase tracking-widest">
+        <p className="text-sm text-white/50 font-mono uppercase tracking-widest">
           NVSwitch / InfiniBand / Bare Metal
         </p>
       </div>
       <div className="flex gap-4">
         <Link to="/contact?service=clusters">
-          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+          <Button className="rounded-full bg-white text-black hover:bg-white/90 px-6 py-4 text-base lg:px-8 lg:py-6 lg:text-lg transition-transform hover:scale-105">
             Provision Cluster
           </Button>
         </Link>
@@ -229,7 +229,7 @@ const ClustersContent = () => (
     </div>
 
     {/* Right Side: Technical Dashboard Visual */}
-    <div className="absolute top-0 right-0 w-full md:w-[65%] h-full pointer-events-none select-none">
+    <div className="hidden lg:block absolute top-0 right-0 w-full lg:w-[65%] h-full pointer-events-none select-none">
       <motion.div 
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -245,7 +245,7 @@ const ClustersContent = () => (
             { label: "PUE", value: "1.08", color: "text-white/60" }
           ].map((metric, i) => (
             <div key={i} className="flex flex-col justify-center px-6">
-              <span className="text-[10px] font-mono text-white/30 tracking-wider">{metric.label}</span>
+              <span className="text-[10px] font-mono text-white/50 tracking-wider">{metric.label}</span>
               <span className={`text-sm font-mono font-bold ${metric.color}`}>{metric.value}</span>
             </div>
           ))}
@@ -253,7 +253,7 @@ const ClustersContent = () => (
 
         {/* Main Visualization: Node Topology Grid */}
         <div className="flex-1 bg-[#0F0F0F] p-8 relative overflow-hidden">
-          <div className="absolute top-4 left-4 text-[10px] font-mono text-white/20 uppercase tracking-widest">
+          <div className="absolute top-4 left-4 text-[10px] font-mono text-white/50 uppercase tracking-widest">
             HGX H100 Node Topology • NVLink Fabric
           </div>
           
@@ -268,7 +268,7 @@ const ClustersContent = () => (
                    className="aspect-square bg-[#1A1A1A] rounded-lg border border-white/5 p-4 flex flex-col justify-between relative group hover:border-white/20 transition-colors"
                  >
                    <div className="flex justify-between items-start">
-                     <span className="text-[10px] font-mono text-white/40">GPU-{i}</span>
+                     <span className="text-[10px] font-mono text-white/60">GPU-{i}</span>
                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
                    </div>
                    
@@ -298,9 +298,9 @@ const ClustersContent = () => (
         <div className="h-32 border-t border-white/10 bg-[#0A0A0A] p-4 font-mono text-[10px] space-y-1.5 overflow-hidden relative">
           <div className="absolute top-2 right-2 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-white/30 uppercase tracking-wider">Live Log</span>
+            <span className="text-white/50 uppercase tracking-wider">Live Log</span>
           </div>
-          <div className="opacity-40 space-y-1.5">
+          <div className="opacity-60 space-y-1.5">
              <p>[SLURM] Job #49221 allocated (128x H100) - Training_LLAMA3_405B</p>
              <p>[K8S] Pod 'inference-worker-xyz' scheduled on node-04</p>
              <p>[SYS] NVLink training topology verified. Bandwidth: 900GB/s</p>
@@ -319,10 +319,10 @@ const ClustersContent = () => (
 );
 
 const TrainingContent = () => (
-  <div className="grid lg:grid-cols-2 gap-12 items-start">
-    <div className="space-y-8">
-      <h3 className="text-5xl font-heading font-bold text-white tracking-tightest">Training</h3>
-      <div className="space-y-6 text-lg text-white/40 font-light leading-relaxed max-w-xl">
+  <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+    <div className="space-y-6 lg:space-y-8">
+      <h3 className="text-3xl lg:text-5xl font-heading font-bold text-white tracking-tightest">Training</h3>
+      <div className="space-y-6 text-base lg:text-lg text-white/60 font-light leading-relaxed max-w-xl">
         <p>
           Securely and cost effectively train your own models from the ground up, 
           leveraging research breakthroughs such as Together Kernel Collection (TKC) 
@@ -330,26 +330,26 @@ const TrainingContent = () => (
         </p>
       </div>
       <Link to="/contact?service=clusters">
-        <Button className="rounded-full bg-white text-black hover:bg-white/90 px-8 py-6 text-lg transition-transform hover:scale-105">
+        <Button className="rounded-full bg-white text-black hover:bg-white/90 px-6 py-4 text-base lg:px-8 lg:py-6 lg:text-lg transition-transform hover:scale-105">
           Contact us
         </Button>
       </Link>
     </div>
 
-    <div className="bg-white/[0.02] border border-white/10 rounded-[40px] p-12 relative flex">
+    <div className="bg-white/[0.02] border border-white/10 rounded-[24px] lg:rounded-[40px] p-6 lg:p-12 relative flex flex-col lg:flex-row">
       <div className="flex-1 space-y-4">
-        <div className="flex items-center gap-6">
-          <div className="w-32 text-right">
-            <span className="text-xs font-mono uppercase tracking-widest text-white/20">Customer Software</span>
+        <div className="flex items-center gap-4 lg:gap-6">
+          <div className="hidden lg:block w-32 text-right">
+            <span className="text-xs font-mono uppercase tracking-widest text-white/50">Customer Software</span>
           </div>
           <div className="flex-1 h-16 border border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.03]">
             <span className="font-medium text-white">AI Model</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="w-32 text-right">
-            <span className="text-xs font-mono uppercase tracking-widest text-white/20">User-facing APIs</span>
+        <div className="flex items-center gap-4 lg:gap-6">
+          <div className="hidden lg:block w-32 text-right">
+            <span className="text-xs font-mono uppercase tracking-widest text-white/50">User-facing APIs</span>
           </div>
           <div className="flex-1 h-16 border border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.03] relative overflow-hidden group">
             <div className="absolute inset-0 bg-blue-500/5 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
@@ -357,9 +357,9 @@ const TrainingContent = () => (
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="w-32 text-right">
-            <span className="text-xs font-mono uppercase tracking-widest text-white/20">Low-level Libraries</span>
+        <div className="flex items-center gap-4 lg:gap-6">
+          <div className="hidden lg:block w-32 text-right">
+            <span className="text-xs font-mono uppercase tracking-widest text-white/50">Low-level Libraries</span>
           </div>
           <div className="flex-1 space-y-2">
             <div className="h-16 border border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.03]">
@@ -371,9 +371,9 @@ const TrainingContent = () => (
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="w-32 text-right">
-            <span className="text-xs font-mono uppercase tracking-widest text-white/20">Hardware</span>
+        <div className="flex items-center gap-4 lg:gap-6">
+          <div className="hidden lg:block w-32 text-right">
+            <span className="text-xs font-mono uppercase tracking-widest text-white/50">Hardware</span>
           </div>
           <div className="flex-1 h-16 border border-white/10 rounded-2xl flex items-center justify-center bg-white/[0.03]">
             <span className="font-medium text-white">GPU</span>
@@ -381,9 +381,9 @@ const TrainingContent = () => (
         </div>
       </div>
 
-      <div className="w-24 ml-4 flex flex-col justify-center">
-        <div className="h-[260px] w-full bg-blue-600 rounded-2xl flex items-center justify-center relative shadow-[0_0_30px_rgba(37,99,235,0.4)]">
-          <span className="font-bold text-white text-xl tracking-tighter rotate-[-90deg]">TKC</span>
+      <div className="w-full lg:w-24 mt-4 lg:mt-0 lg:ml-4 flex flex-row lg:flex-col justify-center">
+        <div className="h-16 lg:h-[260px] w-full bg-blue-600 rounded-2xl flex items-center justify-center relative shadow-[0_0_30px_rgba(37,99,235,0.4)]">
+          <span className="font-bold text-white text-xl tracking-tighter lg:rotate-[-90deg]">TKC</span>
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent rounded-2xl" />
         </div>
       </div>
@@ -404,13 +404,13 @@ export const UseCasesSection = () => {
   };
 
   return (
-    <section id="use-cases" className="py-24 bg-black">
+    <section id="use-cases" className="py-12 lg:py-24 bg-black">
       <div className="max-w-[1400px] mx-auto px-4">
         {/* Adjusted border radius to 32px (was 48px) */}
-        <div className="bg-[#050505] border border-white/[0.03] rounded-[32px] p-12 lg:p-20 overflow-hidden relative">
+        <div className="bg-[#050505] border border-white/[0.03] rounded-[32px] p-6 lg:p-20 overflow-hidden relative">
           
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-24">
+          <div className="flex justify-center mb-12 lg:mb-24">
             <div className="inline-flex p-1.5 bg-white/5 rounded-full border border-white/10 backdrop-blur-xl">
               {tabs.map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -419,8 +419,8 @@ export const UseCasesSection = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`relative flex items-center gap-3 px-6 py-3 text-sm font-medium transition-all duration-300 rounded-full ${
-                      isActive ? "text-black" : "text-white/40 hover:text-white/60"
+                    className={`relative flex items-center gap-2 lg:gap-3 px-4 lg:px-6 py-2.5 lg:py-3 text-xs lg:text-sm font-medium transition-all duration-300 rounded-full ${
+                      isActive ? "text-black" : "text-white/60 hover:text-white/60"
                     }`}
                   >
                     {isActive && (

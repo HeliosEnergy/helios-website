@@ -47,7 +47,7 @@ export const ModelsDropdown = () => {
              { symbol: "A", label: "Anthropic" },
            ].map((item) => (
              <Link key={item.label} to={`/model-library?filter=provider:${item.label}`} className="flex items-center gap-3 text-sm text-white hover:text-white group">
-               <span className="w-5 h-5 flex items-center justify-center text-white/50 group-hover:text-primary transition-colors">{item.symbol}</span>
+               <span className="w-5 h-5 flex items-center justify-center text-white/70 group-hover:text-primary transition-colors">{item.symbol}</span>
                {item.label}
              </Link>
            ))}

@@ -90,26 +90,26 @@ export const ModelsSection = () => {
   };
 const shaderConfigs = [
   {
-    // Industrial Ember
-    colors: ["#333333", "#000000", "#FF6B35", "#FFFFFF"],
+    // Industrial Ember + Burgundy bridge
+    colors: ["#333333", "#000000", "#FF7A45", "#6B1D2A"],
     waveX: 0.18,
     rotation: 245
   },
   {
-    // Titanium Orange
-    colors: ["#666666", "#FFFFFF", "#FF9500", "#111111"],
+    // Warm Orange Titanium
+    colors: ["#666666", "#FFFFFF", "#FF9F0A", "#111111"],
     waveX: 0.20,
     rotation: 280
   },
   {
-    // Obsidian Forge
-    colors: ["#000000", "#111111", "#FF6B35", "#A0A0A0"],
+    // Obsidian Forge + Deep Maroon
+    colors: ["#000000", "#6B1D2A", "#FF7A45", "#A0A0A0"],
     waveX: 0.17,
     rotation: 260
   },
   {
     // Ghost Pulse
-    colors: ["#FFFFFF", "#A0A0A0", "#FF9500", "#000000"],
+    colors: ["#FFFFFF", "#A0A0A0", "#FF9F0A", "#000000"],
     waveX: 0.19,
     rotation: 270
   }
@@ -118,7 +118,7 @@ return (
     <section className="py-16 bg-black relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-3 lg:px-6">
         {/* Jony's Header: Pure & Monolithic */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-32">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-20">
           <div className="max-w-3xl space-y-6">
 
             <h2 className="text-7xl sm:text-8xl font-heading font-bold text-white tracking-tightest leading-[0.85]">
@@ -156,7 +156,7 @@ return (
                 return 'Contact';
               };
 
-              const iconUrl = model.icon ? urlFor(model.icon).width(200).height(200).url() : `/model-lib/${model.iconFilename}`;
+              const iconUrl = model.icon ? urlFor(model.icon).width(200).height(200).url() : model.iconFilename ? `/model-lib/${model.iconFilename}` : null;
               const shader = shaderConfigs[i % shaderConfigs.length];
 
               return (
@@ -188,11 +188,21 @@ return (
                   <div className="relative z-10 p-10 h-full flex flex-col justify-between">
                     {/* Top Left: Small Icon (No bounding box) */}
                     <div className="w-12 h-12 flex items-start justify-start group-hover:scale-110 transition-transform duration-500">
-                      <img
-                        src={iconUrl}
-                        alt={`${model.provider} logo`}
-                        className="w-10 h-10 object-contain filter brightness-100"
-                      />
+                      {iconUrl ? (
+                        <img
+                          src={iconUrl}
+                          alt={`${model.provider} logo`}
+                          className="w-10 h-10 object-contain filter brightness-100"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-10 h-10 flex items-center justify-center text-lg font-heading font-bold text-white/80 bg-white/10 rounded-md ${iconUrl ? 'hidden' : ''}`}>
+                        {model.initial || model.name?.charAt(0)}
+                      </div>
                     </div>
 
                     {/* Bottom Left: Identity */}
@@ -218,21 +228,21 @@ return (
             })}
           </div>
 
-          {/* Controls: Restrained & Silent */}
+          {/* Controls */}
           <div className="flex items-center gap-4 mt-12 justify-end">
             <button
               onClick={() => scroll("left")}
               disabled={!canScrollLeft}
               aria-label="Scroll models left"
-              className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-all ${canScrollLeft ? 'text-white hover:bg-white hover:text-black hover:border-white' : 'text-white/10'}`}
+              className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all duration-300 ${canScrollLeft ? 'bg-white/5 border-white/20 text-white hover:bg-white hover:text-black hover:border-white' : 'bg-white/[0.02] border-white/10 text-white/30'}`}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => scroll("right")}
               disabled={!canScrollRight}
               aria-label="Scroll models right"
-              className={`w-12 h-12 rounded-full border border-white/10 flex items-center justify-center transition-all ${canScrollRight ? 'text-white hover:bg-white hover:text-black hover:border-white' : 'text-white/10'}`}
+              className={`w-14 h-14 rounded-full border flex items-center justify-center transition-all duration-300 ${canScrollRight ? 'bg-white/5 border-white/20 text-white hover:bg-white hover:text-black hover:border-white' : 'bg-white/[0.02] border-white/10 text-white/30'}`}
             >
               <ArrowRight className="w-4 h-4" />
             </button>

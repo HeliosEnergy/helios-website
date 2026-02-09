@@ -58,7 +58,7 @@ export const GpuSovereigntySection = () => {
                     alt={gpu.name}
                     className="w-full h-full object-cover opacity-40 lg:opacity-60 lg:group-hover:opacity-20 lg:group-hover:scale-110 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/20" />
                 </div>
 
                 {/* Content */}
@@ -84,9 +84,9 @@ export const GpuSovereigntySection = () => {
                       <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.2em]">Starting at</p>
                       <div className="flex items-baseline gap-2">
                         <span className="text-4xl lg:text-5xl font-bold text-white tracking-tighter">${gpu.price}</span>
-                        <span className="text-white/60 text-sm font-light">/ hour</span>
+                        <span className="text-white/70 text-sm font-light">/ hour</span>
                       </div>
-                      <p className="text-white/50 text-[10px] font-mono uppercase tracking-[0.1em] pt-1">36 Month Reserved</p>
+                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.1em] pt-1">36 Month Reserved</p>
                     </div>
 
                     {/* CTA - always visible on mobile */}

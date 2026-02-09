@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export const PlatformDropdownMobile = () => {
   return (
     <div className="space-y-4 py-4">
-      <h4 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] px-4">
+      <h4 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.3em] px-4">
         Infrastructure
       </h4>
       <Link to="/model-library" className="block px-4 py-3 text-sm text-white/70 hover:text-white transition-colors border-b border-white/5 last:border-b-0">
@@ -14,7 +14,7 @@ export const PlatformDropdownMobile = () => {
         For Enterprises
       </Link>
 
-      <h4 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] px-4 mt-4">
+      <h4 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.3em] px-4 mt-4">
         Capabilities
       </h4>
       <div className="space-y-2 px-4">

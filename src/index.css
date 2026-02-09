@@ -13,7 +13,7 @@
     --popover: 0 0% 2%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 16 100% 61%;
+    --primary: 24 100% 64%;
     --primary-foreground: 0 0% 0%;
 
     --secondary: 0 0% 6%;
@@ -22,7 +22,7 @@
     --muted: 0 0% 12%;
     --muted-foreground: 0 0% 75%;
 
-    --accent: 16 100% 61%;
+    --accent: 24 100% 64%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
@@ -44,6 +44,11 @@
     --text-secondary: 0 0% 63%;
     --text-tertiary: 0 0% 40%;
     --banner-bg: 48 95% 53%;
+
+    /* Brand palette additions */
+    --primary-warm: 36 100% 50%;
+    --burgundy: 348 56% 27%;
+    --burgundy-foreground: 0 0% 98%;
 
     --sidebar-background: 45 15% 98%;
     --sidebar-foreground: 240 10% 10%;
@@ -116,6 +121,18 @@
 
   .glow-yellow-sm {
     box-shadow: 0 0 30px -10px hsl(var(--primary) / 0.2);
+  }
+
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-warm)));
+  }
+
+  .gradient-ember {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--burgundy)));
+  }
+
+  .gradient-deep {
+    background: linear-gradient(135deg, hsl(var(--burgundy)), hsl(0 0% 0%));
   }
 }
 

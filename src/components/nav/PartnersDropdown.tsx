@@ -7,10 +7,10 @@ export const PartnersDropdown = () => {
       {/* Strategic Alliances */}
       <div className="flex-1 p-12 space-y-10">
         <div>
-          <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-6">
+          <h3 className="text-white/70 font-mono text-[10px] uppercase tracking-[0.4em] mb-6">
             Alliances
           </h3>
-          <p className="text-xl text-white/60 leading-relaxed font-light">
+          <p className="text-xl text-white/70 leading-relaxed font-light">
             An ecosystem <br />of power.
           </p>
         </div>
@@ -23,10 +23,10 @@ export const PartnersDropdown = () => {
           ].map((item) => (
             <Link key={item.label} to={`/coming-soon?page=${item.page}`} className="flex items-center justify-between py-4 border-b border-white/5 text-sm text-white hover:text-white transition-all group">
               <div className="flex items-center gap-4">
-                <item.icon className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                <item.icon className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                 {item.label}
               </div>
-              <ArrowRight className="w-4 h-4 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all" />
             </Link>
           ))}
         </div>
@@ -34,7 +34,7 @@ export const PartnersDropdown = () => {
 
       {/* Startups Program */}
       <div className="flex-1 p-12 bg-white/[0.02] space-y-10">
-        <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
+        <h3 className="text-white/70 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
           Accelerate
         </h3>
         <div className="space-y-6">

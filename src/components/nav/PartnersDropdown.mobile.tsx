@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 export const PartnersDropdownMobile = () => {
   return (
     <div className="space-y-4 py-4">
-      <h4 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] px-4">
+      <h4 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.3em] px-4">
         Alliances
       </h4>
       <div className="space-y-2 px-4">
@@ -20,7 +20,7 @@ export const PartnersDropdownMobile = () => {
         ))}
       </div>
 
-      <h4 className="text-white/40 font-mono text-[10px] uppercase tracking-[0.3em] px-4 pt-4">
+      <h4 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.3em] px-4 pt-4">
         Startups
       </h4>
       <div className="px-4">

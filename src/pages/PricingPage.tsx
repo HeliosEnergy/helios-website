@@ -164,15 +164,15 @@ const GPUCalculator: React.FC<{
                 </div>
                 <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-3 gap-4 text-sm">
                     <div>
-                        <p className="text-white/40 text-[10px] uppercase">VRAM</p>
+                        <p className="text-white/60 text-[10px] uppercase">VRAM</p>
                         <p className="font-semibold">{selectedGPU.vram}</p>
                     </div>
                     <div>
-                        <p className="text-white/40 text-[10px] uppercase">Base</p>
+                        <p className="text-white/60 text-[10px] uppercase">Base</p>
                         <p className="font-semibold">${selectedGPU.heliosPrice}/hr</p>
                     </div>
                     <div>
-                        <p className="text-white/40 text-[10px] uppercase">Plan</p>
+                        <p className="text-white/60 text-[10px] uppercase">Plan</p>
                         <p className="font-semibold">{selectedTier.label}</p>
                     </div>
                 </div>
@@ -293,7 +293,7 @@ const InferenceCalculator: React.FC<{
                                             : (model.pricePerSecond * 60).toFixed(4)
                                         }
                                     </p>
-                                    <p className={`text-[10px] ${isSelected ? 'text-white/40' : 'text-black/30'}`}>
+                                    <p className={`text-[10px] ${isSelected ? 'text-white/60' : 'text-black/30'}`}>
                                         {UNIT_LABELS[model.estimationUnit]}
                                     </p>
                                 </div>
