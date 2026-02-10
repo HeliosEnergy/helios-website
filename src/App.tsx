@@ -25,6 +25,8 @@ import ModelApisPage from "./pages/ModelApisPage";
 import TrainingPage from "./pages/TrainingPage";
 import StartupsPage from "./pages/StartupsPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import BrandTransition from "./pages/BrandTransition";
+import { LEGACY_HOSTNAME } from "@/lib/site";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +36,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        {/*
+          Legacy domain behavior:
+          - `/` serves the brand transition page.
+          - Everything else redirects to the primary domain via src/lib/domainRedirect.ts.
+        */}
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route
+            path="/"
+            element={
+              typeof window !== "undefined" &&
+              (window.location.hostname === LEGACY_HOSTNAME ||
+                window.location.hostname === `www.${LEGACY_HOSTNAME}`)
+                ? <BrandTransition />
+                : <Index />
+            }
+          />
+          <Route path="/helios" element={<BrandTransition />} />
           {/* HIDDEN - Blog routes waiting for content */}
           {/* <Route path="/blog" element={<Blog />} /> */}
           {/* <Route path="/blog/:slug" element={<BlogPost />} /> */}

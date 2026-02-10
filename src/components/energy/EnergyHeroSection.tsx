@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { CONSOLE_URL } from '@/lib/site';
 
 const EnergyHeroSection = () => {
   return (
@@ -27,15 +28,15 @@ const EnergyHeroSection = () => {
               Our strategy is simple: go directly to the cheapest, cleanest energy sources. This allows us to power your AI workloads for a fraction of the cost of traditional data centers.
             </p>
 
-            <div className="flex items-center gap-4">
-              <Button
-                variant="default"
-                className="bg-[#fbbf24] text-black hover:bg-[#f59e0b] px-8 py-3 shadow-xl hover:shadow-2xl transition-all duration-300"
-                onClick={() => window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')}
-              >
-                Get started
-              </Button>
-            </div>
+	            <div className="flex items-center gap-4">
+	              <Button
+	                variant="default"
+	                className="bg-[#fbbf24] text-black hover:bg-[#f59e0b] px-8 py-3 shadow-xl hover:shadow-2xl transition-all duration-300"
+	                onClick={() => window.open(CONSOLE_URL, '_blank', 'noopener,noreferrer')}
+	              >
+	                Get started
+	              </Button>
+	            </div>
           </div>
 
         </div>

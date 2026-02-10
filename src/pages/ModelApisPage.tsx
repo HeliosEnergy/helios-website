@@ -14,6 +14,7 @@ import {
     Zap,
     CheckCircle2
 } from 'lucide-react';
+import { API_BASE_URL } from "@/lib/site";
 
 const fadeInUp = {
     initial: { opacity: 0, y: 30 },
@@ -177,7 +178,7 @@ const ModelApisPage = () => {
                         <pre className="font-mono text-xs md:text-sm text-white/80 overflow-x-auto whitespace-pre-wrap">
                             <span className="text-[#FF6B35]">import</span> openai{"\n\n"}
                             client = openai.OpenAI({" \n"}
-                            {"  "}base_url=<span className="text-green-400">"https://api.heliosenergy.io/v1"</span>,{"\n"}
+                            {"  "}base_url=<span className="text-green-400">"{API_BASE_URL}"</span>,{"\n"}
                             {"  "}api_key=<span className="text-green-400">"helios_..."</span>{"\n"}
                             ){"\n\n"}
                             response = client.chat.completions.create({" \n"}

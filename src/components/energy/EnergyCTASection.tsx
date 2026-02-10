@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { CONSOLE_URL } from '@/lib/site';
 
 const EnergyCTASection = () => {
   return (
@@ -28,15 +29,15 @@ const EnergyCTASection = () => {
           Build Something Amazing. For Less.
         </h2>
 
-        <div className="flex justify-center">
-          <Button
-            variant="default"
-            className="bg-[#fbbf24] text-black hover:bg-[#f59e0b] px-8 py-4 text-lg font-medium shadow-xl hover:shadow-2xl transition-all duration-300"
-            onClick={() => window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')}
-          >
-            Get started today
-          </Button>
-        </div>
+	        <div className="flex justify-center">
+	          <Button
+	            variant="default"
+	            className="bg-[#fbbf24] text-black hover:bg-[#f59e0b] px-8 py-4 text-lg font-medium shadow-xl hover:shadow-2xl transition-all duration-300"
+	            onClick={() => window.open(CONSOLE_URL, '_blank', 'noopener,noreferrer')}
+	          >
+	            Get started today
+	          </Button>
+	        </div>
       </div>
     </section>
   );

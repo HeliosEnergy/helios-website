@@ -6,6 +6,7 @@ import { IsometricGPUAnimation, AnimationPhase } from "./hero/IsometricGPUAnimat
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
+import { CONSOLE_SIGNUP_URL, DOCS_URL } from "@/lib/site";
 
 const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> = {
   'containers-drop': {
@@ -34,8 +35,8 @@ const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> 
 const fixUrl = (url: string) => {
   if (!url) return "#";
   if (url === 'https://helios.ai/contact') return '/contact';
-  if (url === 'https://helios.ai/signup') return 'https://console.heliosenergy.io/login?tab=signup';
-  if (url.includes('helios.ai/docs')) return 'https://heliosenergy.io/docs';
+  if (url === 'https://helios.ai/signup') return CONSOLE_SIGNUP_URL;
+  if (url.includes('helios.ai/docs')) return DOCS_URL;
   return url;
 };
 

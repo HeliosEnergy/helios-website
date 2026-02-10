@@ -1,13 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
+import { CONSOLE_SIGNUP_URL, DOCS_URL } from "@/lib/site";
 
 // Helper to fix legacy URLs from Sanity until re-migration
 const fixUrl = (url: string) => {
   if (!url) return "#";
   if (url === 'https://helios.ai/contact') return '/contact';
-  if (url === 'https://helios.ai/signup') return 'https://console.heliosenergy.io/login?tab=signup';
-  if (url.includes('helios.ai/docs')) return 'https://heliosenergy.io/docs';
+  if (url === 'https://helios.ai/signup') return CONSOLE_SIGNUP_URL;
+  if (url.includes('helios.ai/docs')) return DOCS_URL;
   return url;
 };
 

@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { X, Menu } from "lucide-react";
 import { Button } from "./ui/button";
+import { CONSOLE_SIGNUP_URL, CONSOLE_URL } from "@/lib/site";
 
-const DASHBOARD_LOGIN_URL = "https://console.heliosenergy.io/";
-const DASHBOARD_SIGNUP_URL = "https://console.heliosenergy.io/login?tab=signup";
+const DASHBOARD_LOGIN_URL = CONSOLE_URL;
+const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 
 // Simplified nav items for mobile
 const mobileNavItems = [

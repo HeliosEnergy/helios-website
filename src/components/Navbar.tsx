@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlatformDropdown } from "./nav/PlatformDropdown";
 import { ModelsDropdown } from "./nav/ModelsDropdown";
 import { PartnersDropdown } from "./nav/PartnersDropdown";
+import { CONSOLE_SIGNUP_URL, CONSOLE_URL } from "@/lib/site";
 
-const DASHBOARD_LOGIN_URL = "https://console.heliosenergy.io/";
-const DASHBOARD_SIGNUP_URL = "https://console.heliosenergy.io/login?tab=signup";
+const DASHBOARD_LOGIN_URL = CONSOLE_URL;
+const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 
 const navItems = [
   { label: "Platform", hasDropdown: true, dropdown: PlatformDropdown },

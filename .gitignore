@@ -28,3 +28,5 @@ dist-ssr
 # Environment files
 .env.production
 .env.production.new
+.env.vercel
+.env.verify

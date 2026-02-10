@@ -7,7 +7,7 @@ const initialContent = {
         title: 'Helios RFT now available!',
         description: 'Fine-tune open models that outperform frontier models.',
         ctaText: 'Try today',
-        ctaLink: 'https://heliosenergy.io/docs',
+        ctaLink: 'https://helios.co/docs',
         enabled: true
     },
     hero: {

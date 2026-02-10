@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
+import { DOCS_URL } from "@/lib/site";
 import { StaticMeshGradient } from '@paper-design/shaders-react';
 import {
     Zap,
@@ -125,14 +126,14 @@ const ServerlessPage = () => {
                                         Start Building
                                     </Button>
                                 </Link>
-                                <Link to="/docs">
+                                <a href={DOCS_URL} target="_blank" rel="noopener noreferrer">
                                     <Button
                                         variant="outline"
                                         className="rounded-full border-white/20 text-white hover:bg-white/10 px-8 py-6 text-lg"
                                     >
                                         Read Docs
                                     </Button>
-                                </Link>
+                                </a>
                             </motion.div>
 
                             <motion.div
