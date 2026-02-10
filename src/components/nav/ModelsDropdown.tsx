@@ -1,7 +1,26 @@
 import { Sparkles, Server, Brain, Image, AudioLines, Eye, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSanityQuery } from "@/hooks/useSanityData";
+import { urlFor } from "@/lib/sanity";
 
 export const ModelsDropdown = () => {
+  const { data: sectionData } = useSanityQuery<any>(
+    'models-section-nav',
+    `*[_type == "modelsSection"][0] {
+       models[]-> {
+        _id,
+        name,
+        slug,
+        provider,
+        icon,
+        iconFilename,
+        initial
+      }
+    }`
+  );
+
+  const models = sectionData?.models || [];
+
   return (
     <div className="flex gap-0 p-0 min-w-[1000px] bg-transparent">
       {/* Model Types */}
@@ -37,20 +56,42 @@ export const ModelsDropdown = () => {
         <h3 className="text-white/60 font-mono text-[10px] uppercase tracking-[0.4em] mb-8">
           The Ecosystem
         </h3>
-        <div className="grid grid-cols-2 gap-y-6 gap-x-8">
-           {[
-             { symbol: "✦", label: "Qwen" },
-             { symbol: "◇", label: "DeepSeek" },
-             { symbol: "∞", label: "Meta" },
-             { symbol: "⬡", label: "OpenAI" },
-             { symbol: "G", label: "Google" },
-             { symbol: "A", label: "Anthropic" },
-           ].map((item) => (
-             <Link key={item.label} to={`/model-library?filter=provider:${item.label}`} className="flex items-center gap-3 text-sm text-white hover:text-white group">
-               <span className="w-5 h-5 flex items-center justify-center text-white/70 group-hover:text-primary transition-colors">{item.symbol}</span>
-               {item.label}
-             </Link>
-           ))}
+        <div className="grid grid-cols-1 gap-y-4">
+           {models.slice(0, 6).map((model: any) => {
+             const iconUrl = model.icon ? urlFor(model.icon).width(40).height(40).url() : model.iconFilename ? `/model-lib/${model.iconFilename}` : null;
+             
+             return (
+               <Link 
+                 key={model._id} 
+                 to={`/model-library/${model.slug?.current}`} 
+                 className="flex items-center gap-4 text-sm text-white/80 hover:text-white group transition-colors"
+               >
+                 <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+                   {iconUrl ? (
+                     <img
+                       src={iconUrl}
+                       alt={`${model.name} logo`}
+                       className="w-5 h-5 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
+                       onError={(e) => {
+                         const target = e.currentTarget;
+                         target.style.display = 'none';
+                         target.nextElementSibling?.classList.remove('hidden');
+                       }}
+                     />
+                   ) : null}
+                   <div className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold text-white/40 bg-white/5 rounded-sm ${iconUrl ? 'hidden' : ''}`}>
+                     {model.initial || model.name?.charAt(0)}
+                   </div>
+                 </div>
+                 <div className="flex flex-col">
+                   <span className="text-[10px] font-mono uppercase tracking-widest text-white/40 group-hover:text-[#FF6B35] transition-colors leading-none mb-1">
+                     {model.provider}
+                   </span>
+                   <span className="font-medium tracking-tight">{model.name}</span>
+                 </div>
+               </Link>
+             );
+           })}
         </div>
       </div>
 
@@ -59,23 +100,10 @@ export const ModelsDropdown = () => {
         <div className="space-y-8">
           <div className="space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-[#FF6B35]">Library</span>
-            <h4 className="text-4xl font-heading font-bold tracking-tighter text-white">400+</h4>
+            <h4 className="text-4xl font-heading font-bold tracking-tighter text-white">5+</h4>
             <p className="text-sm text-white/70 leading-relaxed">
               Models supported with <br />optimized inference.
             </p>
-          </div>
-          
-          <div className="space-y-4 pt-4 border-t border-white/5">
-            {[
-              { name: "GLM-4.6", slug: "glm-4-6" },
-              { name: "DeepSeek V3", slug: "deepseek-v3" },
-              { name: "Kimi K2 Instruct", slug: "kimi-k2-instruct" }
-            ].map(model => (
-              <Link key={model.slug} to={`/model-library/${model.slug}`} className="flex items-center justify-between text-xs text-white/80 hover:text-white group transition-colors">
-                {model.name}
-                <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-              </Link>
-            ))}
           </div>
         </div>
         
