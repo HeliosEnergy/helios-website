@@ -5,7 +5,7 @@ import { FlutedGlass } from "@paper-design/shaders-react";
 import { PRIMARY_ORIGIN } from "@/lib/site";
 
 const TARGET_DOMAIN = PRIMARY_ORIGIN;
-const REDIRECT_DELAY = 12000;
+const REDIRECT_DELAY = 2400; // 80% faster (20% of 12000ms)
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -60,7 +60,7 @@ const BrandTransition = () => {
           className="flex justify-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.3 }}
+          transition={{ duration: 0.2, delay: 0.06 }}
         >
           <img
             src="/logos/logo-original.png"
@@ -77,7 +77,7 @@ const BrandTransition = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 0.25, 0.25, 0] }}
             transition={{
-              duration: 4,
+              duration: 0.8,
               times: [0, 0.25, 0.5, 1],
               ease: "easeInOut",
             }}
@@ -90,7 +90,7 @@ const BrandTransition = () => {
             className="text-7xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-heading font-black tracking-tighter text-black leading-[0.85]"
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.5, delay: 3, ease: EASE }}
+            transition={{ duration: 0.3, delay: 0.6, ease: EASE }}
           >
             helios
             <br />
@@ -102,21 +102,21 @@ const BrandTransition = () => {
             className="mt-8 md:mt-10 text-base md:text-lg text-black/35 max-w-md leading-relaxed"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 5, ease: "easeOut" }}
+            transition={{ duration: 0.2, delay: 1, ease: "easeOut" }}
           >
             Same GPU cloud. Shorter address.
           </motion.p>
 
-          {/* Text CTA — no button chrome */}
+          {/* CTA with black outline pill */}
           <motion.div
             className="mt-10 md:mt-14"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 6.5, ease: "easeOut" }}
+            transition={{ duration: 0.16, delay: 1.3, ease: "easeOut" }}
           >
             <button
               onClick={() => (window.location.href = TARGET_DOMAIN)}
-              className="group inline-flex items-center gap-4 text-black font-semibold text-base tracking-wide hover:gap-6 transition-all duration-500 cursor-pointer"
+              className="group inline-flex items-center gap-4 px-6 py-3 border-2 border-black rounded-full text-black font-semibold text-base tracking-wide hover:gap-6 hover:bg-black hover:text-white transition-all duration-500 cursor-pointer"
             >
               Continue
               <ArrowRight className="w-5 h-5" />
