@@ -1,21 +1,24 @@
-import { Github, Twitter, Linkedin, Youtube } from "lucide-react";
+import { Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const footerLinks = {
-  Platform: ["Inference", "Fine-tuning", "Evaluation", "Deployment"],
-  Models: ["LLMs", "Image", "Audio", "Embeddings"],
-  Developers: ["Documentation", "API Reference", "Quickstart", "Pricing"],
-  Company: ["About", /* "Blog", */ "Careers", "Contact"], // Blog hidden until content is ready
-  Legal: ["Privacy", "Terms", "Security"],
+const footerLinks: Record<string, { label: string; to: string }[]> = {
+  Company: [
+    { label: "Careers", to: "/careers" },
+    { label: "Contact", to: "/contact" },
+    { label: "Pricing", to: "/pricing" },
+  ],
+  Legal: [
+    { label: "Terms", to: "/tnc" },
+  ],
 };
 
 export const Footer = () => {
   return (
     <footer className="bg-background border-t border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Logo */}
-          <div className="col-span-2 md:col-span-1">
+          <div className="col-span-2 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <img
                 src="/logos/logo-original.png"
@@ -28,32 +31,13 @@ export const Footer = () => {
             </p>
             <div className="flex gap-2">
               <a
-                href="#"
-                aria-label="Twitter"
-                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="GitHub"
-                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
-              >
-                <Github className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
+                href="https://www.linkedin.com/company/helioscompute"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="LinkedIn"
                 className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
               >
                 <Linkedin className="w-4 h-4" />
-              </a>
-              <a
-                href="#"
-                aria-label="YouTube"
-                className="text-white/80 hover:text-primary transition-colors inline-flex items-center justify-center w-11 h-11"
-              >
-                <Youtube className="w-4 h-4" />
               </a>
             </div>
           </div>
@@ -63,37 +47,16 @@ export const Footer = () => {
             <div key={category}>
               <h3 className="font-semibold text-foreground text-sm mb-3">{category}</h3>
               <ul className="space-y-2">
-                {links.map((link) => {
-                  const internalRoutes: Record<string, string> = {
-                    "Pricing": "/pricing",
-                    // "Blog": "/blog", // HIDDEN
-                    "Careers": "/careers",
-                    "Contact": "/contact",
-                    "Terms": "/tnc",
-                  };
-
-                  const to = internalRoutes[link];
-
-                  return (
-                    <li key={link}>
-                      {to ? (
-                        <Link
-                          to={to}
-                          className="text-sm text-white/50 hover:text-white transition-colors"
-                        >
-                          {link}
-                        </Link>
-                      ) : (
-                        <a
-                          href="#"
-                          className="text-sm text-white/50 hover:text-white transition-colors"
-                        >
-                          {link}
-                        </a>
-                      )}
-                    </li>
-                  );
-                })}
+                {links.map(({ label, to }) => (
+                  <li key={label}>
+                    <Link
+                      to={to}
+                      className="text-sm text-white/50 hover:text-white transition-colors"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           ))}
