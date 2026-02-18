@@ -53,7 +53,7 @@ export const HeroSection = () => {
   }, [currentPhase]);
 
   return (
-    <section className="relative overflow-hidden bg-black min-h-[900px] flex items-start justify-center pt-24 lg:pt-32">
+    <section className="relative overflow-hidden bg-black min-h-[540px] md:min-h-[900px] flex items-start justify-center pt-24 lg:pt-32">
       {/* Background Image Layer - Capped at 2048px to prevent pixelation */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"

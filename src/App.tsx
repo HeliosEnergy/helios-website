@@ -27,6 +27,7 @@ import StartupsPage from "./pages/StartupsPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import BrandTransition from "./pages/BrandTransition";
 import { LEGACY_HOSTNAME } from "@/lib/site";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         {/*
           Legacy domain behavior:
           - `/` serves the brand transition page.

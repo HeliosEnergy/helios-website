@@ -180,7 +180,7 @@ const Tnc = () => {
                 <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
                   <p className="text-white/80 font-semibold">Helios Cloud, Inc.</p>
                   <p className="text-white/80">Legal Department</p>
-                  <p className="text-white/80">Email: legal@heliosenergy.io</p>
+                  <p className="text-white/80">Email: info@helios.co</p>
                 </div>
               </section>
             </div>
