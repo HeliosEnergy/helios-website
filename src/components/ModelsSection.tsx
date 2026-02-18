@@ -6,8 +6,10 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { urlFor } from "@/lib/sanity";
 import { StaticMeshGradient } from '@paper-design/shaders-react';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const ModelsSection = () => {
+  const isMobile = useIsMobile();
   const { data: sectionData } = useSanityQuery<any>(
     'models-section',
     `*[_type == "modelsSection"][0] {
@@ -165,24 +167,33 @@ return (
                   to={`/model-library/${model.slug?.current}`}
                   className="block flex-shrink-0 w-full md:w-[calc((100%-32px)/2)] lg:w-[calc((100%-64px)/3)] bg-[#0A0A0A] rounded-2xl overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-700 ease-out group snap-start relative h-[500px]"
                 >
-                  {/* The Background: Paper Shader */}
+                  {/* The Background: Shader on desktop, CSS gradient on mobile */}
                   <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-1000">
-<StaticMeshGradient
-  width={1280}
-  height={720}
-  colors={shader.colors}
-  positions={42}
-  mixing={0.38}
-  waveX={0.49}
-  waveXShift={0}
-  waveY={1}
-  waveYShift={0}
-  scale={0.68}
-  rotation={shader.rotation}
-  grainMixer={0}
-  grainOverlay={0.78}
-  offsetX={-0.28}
-/>
+                    {!isMobile ? (
+                      <StaticMeshGradient
+                        width={1280}
+                        height={720}
+                        colors={shader.colors}
+                        positions={42}
+                        mixing={0.38}
+                        waveX={0.49}
+                        waveXShift={0}
+                        waveY={1}
+                        waveYShift={0}
+                        scale={0.68}
+                        rotation={shader.rotation}
+                        grainMixer={0}
+                        grainOverlay={0.78}
+                        offsetX={-0.28}
+                      />
+                    ) : (
+                      <div
+                        className="w-full h-full"
+                        style={{
+                          background: `linear-gradient(${shader.rotation}deg, ${shader.colors[0]}, ${shader.colors[1]}, ${shader.colors[2]})`,
+                        }}
+                      />
+                    )}
                   </div>
 
                   <div className="relative z-10 p-10 h-full flex flex-col justify-between">

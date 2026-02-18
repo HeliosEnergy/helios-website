@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
 import { CONSOLE_SIGNUP_URL, DOCS_URL } from "@/lib/site";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> = {
   'containers-drop': {
@@ -44,6 +45,7 @@ export const HeroSection = () => {
   const { data: hero, isLoading } = useSanityQuery<HeroSectionData>('hero-section', QUERIES.heroSection);
   const [currentPhase, setCurrentPhase] = useState<AnimationPhase>('containers-drop');
   const [displayContent, setDisplayContent] = useState(phaseContent['containers-drop']);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const newContent = phaseContent[currentPhase];
@@ -64,27 +66,32 @@ export const HeroSection = () => {
         }}
       />
 
-      {/* Alchemy Background Stack */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-        <SimplexNoise
-          opacity={0.1}
-        />
-        <PaperTexture
-          opacity={0.15}
-        />
-      </div>
+      {/* Alchemy Background Stack — desktop only (WebGL crashes iOS Safari) */}
+      {!isMobile && (
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+          <SimplexNoise opacity={0.1} />
+          <PaperTexture opacity={0.15} />
+        </div>
+      )}
 
-      {/* celestial Aura Refined */}
-      <div className="absolute top-0 right-0 w-[1200px] h-[1200px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0">
-        <MeshGradient
-          speed={0.2}
-          color1="#FFB800"
-          color2="#FF6B35"
-          color3="#000000"
-          color4="#000000"
-          opacity={0.15}
+      {/* Celestial Aura — desktop only */}
+      {!isMobile ? (
+        <div className="absolute top-0 right-0 w-[1200px] h-[1200px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0">
+          <MeshGradient
+            speed={0.2}
+            color1="#FFB800"
+            color2="#FF6B35"
+            color3="#000000"
+            color4="#000000"
+            opacity={0.15}
+          />
+        </div>
+      ) : (
+        <div
+          className="absolute top-0 right-0 w-[600px] h-[600px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(255,184,0,0.12) 0%, rgba(255,107,53,0.06) 50%, transparent 70%)' }}
         />
-      </div>
+      )}
 
       <div className="relative z-10 max-w-7xl mx-auto px-3 lg:px-6 py-12">
         <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
