@@ -187,12 +187,64 @@ return (
                         offsetX={-0.28}
                       />
                     ) : (
+                      // Multi-layer CSS approach: off-canvas blob origins + per-layer blend modes
+                      // creates genuine color chemistry instead of flat layered gradients
                       <div
-                        className="w-full h-full"
-                        style={{
-                          background: `linear-gradient(${shader.rotation}deg, ${shader.colors[0]}, ${shader.colors[1]}, ${shader.colors[2]})`,
-                        }}
-                      />
+                        className="absolute inset-0 overflow-hidden"
+                        style={{ background: `linear-gradient(155deg, ${shader.colors[0]} 0%, ${shader.colors[1]} 100%)` }}
+                      >
+                        {/* Primary bloom — center lives beyond bottom-left edge, bleeds warmth inward */}
+                        <div
+                          className="absolute"
+                          style={{
+                            width: '170%', height: '140%',
+                            left: '-35%', top: '20%',
+                            background: `radial-gradient(ellipse at 30% 72%, ${shader.colors[2]} 0%, transparent 52%)`,
+                            mixBlendMode: 'screen',
+                            opacity: 0.9,
+                          }}
+                        />
+                        {/* Cool drift — large mass off the top-right corner, barely intruding */}
+                        <div
+                          className="absolute"
+                          style={{
+                            width: '130%', height: '120%',
+                            left: '35%', top: '-40%',
+                            background: `radial-gradient(ellipse at 68% 28%, ${shader.colors[3]} 0%, transparent 58%)`,
+                            mixBlendMode: 'overlay',
+                            opacity: 0.75,
+                          }}
+                        />
+                        {/* Hotspot — concentrated ember anchored low, gives the card a focal gravity */}
+                        <div
+                          className="absolute"
+                          style={{
+                            width: '55%', height: '45%',
+                            left: '6%', top: '55%',
+                            background: `radial-gradient(ellipse at center, ${shader.colors[2]} 0%, transparent 65%)`,
+                            mixBlendMode: 'screen',
+                            opacity: 0.55,
+                          }}
+                        />
+                        {/* Vignette — pulls the edges dark, creates depth and containment */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: 'radial-gradient(ellipse 85% 85% at 50% 50%, transparent 25%, rgba(0,0,0,0.65) 100%)',
+                            mixBlendMode: 'multiply',
+                          }}
+                        />
+                        {/* Film grain — fractalNoise via inline SVG, soft-light keeps it photographic not harsh */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E")`,
+                            backgroundSize: '220px 220px',
+                            mixBlendMode: 'soft-light',
+                            opacity: 0.28,
+                          }}
+                        />
+                      </div>
                     )}
                   </div>
 
