@@ -1,6 +1,6 @@
 import {
   BRAND_TRANSITION_PATH,
-  LEGACY_HOSTNAME,
+  LEGACY_HOSTNAMES,
   LEGACY_ORIGIN,
   PRIMARY_HOSTNAME,
   PRIMARY_ORIGIN,
@@ -23,7 +23,7 @@ export const maybeRedirectForDomainMigration = (loc: Location) => {
   const hostname = loc.hostname.toLowerCase();
   if (isLocalHost(hostname)) return;
 
-  const isLegacy = matchesHost(hostname, LEGACY_HOSTNAME.toLowerCase());
+  const isLegacy = LEGACY_HOSTNAMES.some((legacyHostname) => matchesHost(hostname, legacyHostname));
   const isPrimary = matchesHost(hostname, PRIMARY_HOSTNAME.toLowerCase());
   const isBrandTransition = isBrandTransitionPath(loc.pathname);
 
