@@ -26,7 +26,7 @@ import TrainingPage from "./pages/TrainingPage";
 import StartupsPage from "./pages/StartupsPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import BrandTransition from "./pages/BrandTransition";
-import { LEGACY_HOSTNAME } from "@/lib/site";
+import { LEGACY_HOSTNAMES } from "@/lib/site";
 import { ScrollToTop } from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -48,8 +48,10 @@ const App = () => (
             path="/"
             element={
               typeof window !== "undefined" &&
-              (window.location.hostname === LEGACY_HOSTNAME ||
-                window.location.hostname === `www.${LEGACY_HOSTNAME}`)
+              LEGACY_HOSTNAMES.some((legacyHostname) =>
+                window.location.hostname === legacyHostname ||
+                window.location.hostname === `www.${legacyHostname}`,
+              )
                 ? <BrandTransition />
                 : <Index />
             }
