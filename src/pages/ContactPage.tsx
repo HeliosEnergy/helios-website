@@ -14,7 +14,7 @@ const EMBER_GLOW = "radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 type ServiceInterest = 'clusters' | 'inference' | 'baremetal' | 'press' | 'partnership' | 'others';
-type ClusterType = 'rtx-6000-pro' | 'b200' | 'h200-sxm' | 'h100';
+type ClusterType = 'rtx-6000-pro' | 'b200' | 'b300' | 'h200-sxm' | 'h100';
 
 interface InferenceModel {
   _id: string;
@@ -252,6 +252,7 @@ const EstimationSlider = ({
 const clusterOptions: { value: ClusterType; label: string }[] = [
   { value: 'rtx-6000-pro', label: 'RTX 6000 Pro' },
   { value: 'b200', label: 'B200' },
+  { value: 'b300', label: 'B300' },
   { value: 'h200-sxm', label: 'H200 SXM' },
   { value: 'h100', label: 'H100' },
 ];
