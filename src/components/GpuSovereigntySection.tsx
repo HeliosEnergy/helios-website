@@ -17,6 +17,17 @@ const GPU_DATA = [
     theme: "white"
   },
   {
+    id: "b300",
+    clusterId: "b300",
+    name: "NVIDIA Blackwell B300",
+    price: "4.00",
+    description: "Next-gen Blackwell architecture with enhanced memory bandwidth for frontier model training and multi-modal workloads.",
+    specs: ["40 PFLOPS", "1.8TB/s NVLink", "288GB HBM3e"],
+    image: "/gpus/dgx-b300.jpg",
+    cta: "Reserve Cluster",
+    theme: "white"
+  },
+  {
     id: "rtx6000",
     clusterId: "rtx-6000-pro", // matches ContactPage ClusterType
     name: "NVIDIA RTX 6000 Pro",
