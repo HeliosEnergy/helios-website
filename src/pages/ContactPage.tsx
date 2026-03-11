@@ -565,7 +565,7 @@ const ContactPage = () => {
                     transition={{ delay: 0.3, duration: 1 }}
                     className="text-lg md:text-xl text-white/50 font-light max-w-lg mx-auto leading-relaxed"
                   >
-                    Whether you need a single H100 or a custom cluster, we're here to help you deploy.
+                    Whether you need a single B300 or a custom cluster, we're here to help you deploy.
                   </motion.p>
                 </div>
 
