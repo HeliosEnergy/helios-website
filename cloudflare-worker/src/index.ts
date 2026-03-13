@@ -75,6 +75,7 @@ const getInquiryEmoji = (type: string): string => {
 		'Baremetal': '🔧',
 		'Press': '📰',
 		'Partnership': '🤝',
+		'GPU Access': '🔥',
 		'Others': '💬',
 	};
 	return emojiMap[type] || '📬';
