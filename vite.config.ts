@@ -10,6 +10,9 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  define: {
+    __VERCEL_ENV__: JSON.stringify(process.env.VERCEL_ENV),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

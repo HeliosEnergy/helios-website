@@ -8,3 +8,5 @@ interface ImportMetaEnv {
 interface ImportMeta {
     readonly env: ImportMetaEnv
 }
+
+declare const __VERCEL_ENV__: string | undefined;
