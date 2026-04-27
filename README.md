@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+# Helios Website
 
-## Project info
+Production marketing site for Helios.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Source of Truth
 
-## How can I edit this code?
+- GitHub repository: `HeliosEnergy/helios-website`
+- Production branch: `main`
+- Vercel project: `helios-website`
+- Local working directory: `/Users/amoldericksoans/Documents/Helios/helios-website`
 
-There are several ways of editing your application.
+Do not use the old Next.js app under `website/helios-landing-page` for production website changes.
 
-**Use Lovable**
+## Production Domains
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- `helios.co`
+- `www.helios.co`
+- `helioscloud.org`
+- `www.helioscloud.org`
+- `heliosenergy.io`
+- `www.heliosenergy.io`
+- `heliosenergy.ai`
+- `www.heliosenergy.ai`
 
-Changes made via Lovable will be committed automatically to this repo.
+Legacy domains are handled in `src/lib/domainRedirect.ts` and `src/lib/site.ts`.
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm install --legacy-peer-deps
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run build
+```
 
-**Use GitHub Codespaces**
+Vercel production builds use:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Framework: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
 
-## What technologies are used for this project?
+## Analytics
 
-This project is built with:
+Microsoft Clarity is loaded only for Vercel production builds.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Clarity project ID: `whq1fqokkl`
+- Loader: `src/lib/microsoftClarity.ts`
+- Production gate: `VERCEL_ENV=production`
