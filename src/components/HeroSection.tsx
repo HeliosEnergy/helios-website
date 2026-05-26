@@ -6,7 +6,7 @@ import { IsometricGPUAnimation, AnimationPhase } from "./hero/IsometricGPUAnimat
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
-import { CONSOLE_SIGNUP_URL, CONSOLE_URL, DOCS_URL } from "@/lib/site";
+import { CONSOLE_SIGNUP_URL, DOCS_URL } from "@/lib/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> = {
@@ -37,14 +37,6 @@ const fixUrl = (url: string) => {
   if (!url) return "#";
   if (url === 'https://helios.ai/contact') return '/contact';
   if (url === 'https://helios.ai/signup') return CONSOLE_SIGNUP_URL;
-  try {
-    const parsedUrl = new URL(url);
-    if (parsedUrl.hostname === `console.${'heliosenergy.io'}`) {
-      return `${CONSOLE_URL.replace(/\/$/, '')}${parsedUrl.pathname}${parsedUrl.search}`;
-    }
-  } catch {
-    // Non-absolute internal routes should fall through unchanged.
-  }
   if (url.includes('helios.ai/docs')) return DOCS_URL;
   return url;
 };
