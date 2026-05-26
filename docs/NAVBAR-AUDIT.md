@@ -353,14 +353,14 @@ src/components/nav/*.mobile.tsx              # Mobile versions of all dropdowns
 ### Desktop Header
 | Button | Target | Type | Status |
 |--------|--------|------|--------|
-| Cloud login | `https://console.heliosenergy.io/` | External | 🟢 Connected |
-| Sign up | `https://console.heliosenergy.io/login?tab=signup` | External | 🟢 Connected |
+| Cloud login | `https://console.helios.co/` | External | 🟢 Connected |
+| Sign up | `https://console.helios.co/login?tab=signup` | External | 🟢 Connected |
 
 ### Mobile Footer
 | Button | Target | Type | Status |
 |--------|--------|------|--------|
-| Sign up | `https://console.heliosenergy.io/login?tab=signup` | External | 🟢 Connected |
-| Cloud login | `https://console.heliosenergy.io/` | External | 🟢 Connected |
+| Sign up | `https://console.helios.co/login?tab=signup` | External | 🟢 Connected |
+| Cloud login | `https://console.helios.co/` | External | 🟢 Connected |
 
 ---
 
@@ -400,8 +400,8 @@ src/components/nav/*.mobile.tsx              # Mobile versions of all dropdowns
 
 | URL | Purpose | Status |
 |-----|---------|--------|
-| `https://console.heliosenergy.io/` | Dashboard Login | 🟢 Active |
-| `https://console.heliosenergy.io/login?tab=signup` | Sign Up | 🟢 Active |
+| `https://console.helios.co/` | Dashboard Login | 🟢 Active |
+| `https://console.helios.co/login?tab=signup` | Sign Up | 🟢 Active |
 
 ---
 

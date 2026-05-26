@@ -20,23 +20,23 @@
 ```
 
 ### Header CTAs (desktop + mobile)
-- **Cloud login** anchor (desktop/mobile) → `https://console.heliosenergy.io/` (opens new tab via `window.open` or `<a>`).
-- **Sign up** button (desktop) & **Sign up** button in the mobile drawer → opens `https://console.heliosenergy.io/login?tab=signup` in a new tab via `window.open`.
+- **Cloud login** anchor (desktop/mobile) → `https://console.helios.co/` (opens new tab via `window.open` or `<a>`).
+- **Sign up** button (desktop) & **Sign up** button in the mobile drawer → opens `https://console.helios.co/login?tab=signup` in a new tab via `window.open`.
 
 ```
 [Header CTA]
   ├─> Cloud login link
   │       │
-  │       └─> https://console.heliosenergy.io/
+  │       └─> https://console.helios.co/
   └─> Sign up button
           │
-          └─> https://console.heliosenergy.io/login?tab=signup
+          └─> https://console.helios.co/login?tab=signup
 ```
 
 The mobile drawer repeats the same links as the desktop CTAs; the drawer’s close callbacks (`setMobileMenuOpen(false)`) ensure the dialog closes before the external navigation.
 
 ### Footer quick-actions + columns (`src/app/components/layout/Footer.tsx`)
-- **Top action bar:** `Cloud Console` & `Login` both open `https://console.heliosenergy.io/` (classic login entry point).
+- **Top action bar:** `Cloud Console` & `Login` both open `https://console.helios.co/` (classic login entry point).
 - **Columns:**
   - **Products**: `Energy` → `/energy`.
   - **Other**: `Terms & Conditions` → `/tnc` (internal small page).
@@ -45,8 +45,8 @@ The mobile drawer repeats the same links as the desktop CTAs; the drawer’s clo
 
 ```
 [Footer top actions]
-  ├─> Cloud Console → https://console.heliosenergy.io/
-  └─> Login         → https://console.heliosenergy.io/
+  ├─> Cloud Console → https://console.helios.co/
+  └─> Login         → https://console.helios.co/
 
 [Footer columns]
   ├─> Products → Energy page (/energy)
@@ -63,7 +63,7 @@ The only internally routed footer link is Terms & Conditions (`/tnc`), which ren
 
 ### Hero section (`src/app/components/sections/HeroSection.tsx`)
 - **Contact sales →** (`CalendlyButton`, variant `secondary`) opens `https://calendly.com/jose-helios/30min` in a popup (`window.open` with `width=800,height=600`).
-- **Get started →** opens `https://console.heliosenergy.io/` in a new tab.
+- **Get started →** opens `https://console.helios.co/` in a new tab.
 
 ```
 [Hero "Contact sales →"]
@@ -71,15 +71,15 @@ The only internally routed footer link is Terms & Conditions (`/tnc`), which ren
         └─> window.open('https://calendly.com/jose-helios/30min', 'calendly', popupFeatures)
 
 [Hero "Get started →"]
-  └─> window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')
+  └─> window.open('https://console.helios.co/', '_blank', 'noopener,noreferrer')
 ```
 
 ### Stack section CTA (`src/app/components/stack-section/StackSection.tsx`)
-- **Get Started Today** button opens the console (`https://console.heliosenergy.io/`) in a new tab.
+- **Get Started Today** button opens the console (`https://console.helios.co/`) in a new tab.
 
 ```
 [Stack section Get Started Today]
-  └─> window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')
+  └─> window.open('https://console.helios.co/', '_blank', 'noopener,noreferrer')
 ```
 
 ### Contact section waitlist (`src/app/components/contact-section/ContactSection.tsx`)
@@ -96,11 +96,11 @@ The only internally routed footer link is Terms & Conditions (`/tnc`), which ren
 ## 3. “Energy” page CTAs (`src/app/energy/page.tsx` + section components)
 
 ### Energy hero + CTA (`src/app/components/energy-section/EnergyHeroSection.tsx`)
-- **Get started** button opens `https://console.heliosenergy.io/` in a new tab.
+- **Get started** button opens `https://console.helios.co/` in a new tab.
 
 ```
 [Energy hero "Get started"]
-  └─> window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')
+  └─> window.open('https://console.helios.co/', '_blank', 'noopener,noreferrer')
 ```
 
 ### Energy CTA section (`src/app/components/energy-section/EnergyCTASection.tsx`)
@@ -108,22 +108,22 @@ The only internally routed footer link is Terms & Conditions (`/tnc`), which ren
 
 ```
 [Energy CTA "Get started today"]
-  └─> window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')
+  └─> window.open('https://console.helios.co/', '_blank', 'noopener,noreferrer')
 ```
 
-All energy-focused CTAs currently reuse the same `console.heliosenergy.io` endpoint.
+All energy-focused CTAs currently reuse the same `console.helios.co` endpoint.
 
 ---
 
 ## 4. GPU Pricing flows (`src/app/gpu-pricing` + shared GPU components)
 
 ### GPU Pricing hero (`src/app/components/gpu-pricing/GPUPricingHero.tsx`)
-- **Get Started** button → console (`https://console.heliosenergy.io/`).
+- **Get Started** button → console (`https://console.helios.co/`).
 - **Contact Sales** (`CalendlyButton`) → `https://calendly.com/jose-helios/30min` popup.
 
 ```
 [GPU Pricing hero "Get Started"]
-  └─> window.open('https://console.heliosenergy.io/', '_blank', 'noopener,noreferrer')
+  └─> window.open('https://console.helios.co/', '_blank', 'noopener,noreferrer')
 
 [GPU Pricing hero "Contact Sales"]
   └─> CalendlyButton

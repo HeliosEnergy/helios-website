@@ -38,7 +38,7 @@ const landingPageContent = {
         heading: 'Build. Tune. Scale.',
         description: 'Open-source AI models at blazing speed, optimized for your use case, scaled globally with the Helios Inference Cloud',
         primaryCtaText: 'Get Started',
-        primaryCtaLink: 'https://console.heliosenergy.io/login?tab=signup',
+        primaryCtaLink: 'https://console.helios.co/login?tab=signup',
         secondaryCtaText: 'Talk to Our Team',
         secondaryCtaLink: '/contact'
     },
@@ -115,7 +115,7 @@ const landingPageContent = {
         heading: 'Start building today',
         description: 'Instantly run popular and specialized models.',
         primaryCtaText: 'Get Started',
-        primaryCtaLink: 'https://console.heliosenergy.io/login?tab=signup',
+        primaryCtaLink: 'https://console.helios.co/login?tab=signup',
         secondaryCtaText: 'Talk to an Expert',
         secondaryCtaLink: '/contact'
     },
@@ -490,7 +490,7 @@ const pricingData = {
         heroTitle: 'GPU Pricing That Scales',
         heroSubtitle: 'Compare our competitive GPU pricing against leading cloud providers. Built for AI workloads, optimized for performance, designed for scale.',
         ctaButtonText: 'Get Started',
-        ctaButtonUrl: 'https://console.heliosenergy.io/',
+        ctaButtonUrl: 'https://console.helios.co/',
         calculatorTitle: 'Calculate Your Costs',
         comparisonTableTitle: 'GPU Pricing Comparison',
         footerNote: 'Prices are subject to change. Contact us for enterprise pricing and volume discounts.',

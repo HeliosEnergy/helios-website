@@ -26,9 +26,9 @@ export const BRAND_TRANSITION_PATH = "/helios";
 
 export const DOCS_URL = env.VITE_DOCS_URL || `${PRIMARY_ORIGIN}/docs`;
 
-// These are intentionally kept on the legacy domain for now.
-export const CONSOLE_URL = "https://console.heliosenergy.io/";
-export const CONSOLE_SIGNUP_URL = "https://console.heliosenergy.io/login?tab=signup";
+// Console entry points are centralized here so CTAs stay consistent.
+export const CONSOLE_URL = "https://console.helios.co/";
+export const CONSOLE_SIGNUP_URL = "https://console.helios.co/login?tab=signup";
 export const API_BASE_URL = "https://api.heliosenergy.io/v1";
 
 export const LEGAL_EMAIL = env.VITE_LEGAL_EMAIL || "legal@heliosenergy.io";
