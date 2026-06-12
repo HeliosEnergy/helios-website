@@ -24,7 +24,7 @@ const GPU_DATA = [
     eyebrow: "Flagship GPU",
     name: "NVIDIA B300",
     availability: "Q3 capacity",
-    description: "Blackwell Ultra with massive HBM3e memory and a major bandwidth jump over B200 — for multi-modal training and high-throughput inference clusters.",
+    description: "Blackwell Ultra with massive HBM3e memory and a major bandwidth jump over B200. Built for multi-modal training and high-throughput inference clusters.",
     specs: ["288 GB HBM3e", "InfiniBand, non-blocking", "Training & inference"],
     image: "/gpus/dgx-b300.jpg",
     cta: "Join Waitlist",
@@ -55,8 +55,8 @@ export const GpuSovereigntySection = () => {
           <h2 className={sectionHeading}>
             The newest NVIDIA hardware. Not last year's.
           </h2>
-          <p className="mt-6 text-lg lg:text-xl text-white/65 font-light leading-relaxed max-w-2xl">
-            We deploy the current Blackwell Ultra generation — as a service or as colo-ready racks.
+          <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
+            We deploy the current Blackwell Ultra generation, as a service or as colo-ready racks.
           </p>
         </motion.div>
         <div className="flex flex-col lg:flex-row gap-px bg-white/10 border border-white/10 lg:h-[600px]">
@@ -89,7 +89,7 @@ export const GpuSovereigntySection = () => {
                 <div className="relative z-10 h-full p-6 lg:p-10 flex flex-col justify-between">
                   <div className="space-y-4 lg:space-y-8">
                     <div className="space-y-2">
-                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.4em]">{gpu.eyebrow}</p>
+                      <p className="text-white/75 text-[11px] font-mono uppercase tracking-[0.4em]">{gpu.eyebrow}</p>
                       <h3 className="text-2xl lg:text-4xl font-bold text-white tracking-tight">
                         {gpu.name}
                       </h3>
@@ -97,7 +97,7 @@ export const GpuSovereigntySection = () => {
 
                     {/* Description - always visible on mobile, hover on desktop */}
                     <div className="max-w-md lg:opacity-0 lg:group-hover:opacity-100 lg:translate-y-2 lg:group-hover:translate-y-0 transition-all duration-500">
-                      <p className="text-white/70 lg:text-white/80 text-sm lg:text-lg font-light leading-relaxed">
+                      <p className="text-white/80 lg:text-white/85 text-base lg:text-lg font-light leading-relaxed">
                         {gpu.description}
                       </p>
                     </div>
@@ -105,7 +105,7 @@ export const GpuSovereigntySection = () => {
 
                   <div className="flex flex-col gap-4 lg:gap-8 mt-6 lg:mt-0">
                     <div className="space-y-1">
-                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.2em]">Specs</p>
+                      <p className="text-white/75 text-[11px] font-mono uppercase tracking-[0.2em]">Specs</p>
                       <div className="space-y-2 pt-2">
                         {gpu.specs.map((spec) => (
                           <div key={spec} className="text-white text-sm lg:text-base font-light border-b border-white/10 pb-2">

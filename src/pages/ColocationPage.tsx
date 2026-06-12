@@ -1,9 +1,16 @@
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { EASE, fadeUp, SectionRule, sectionHeading } from "@/components/HomeRevampSections";
+
+/* ------------------------------------------------------------------ */
+/* Data                                                                */
+/* ------------------------------------------------------------------ */
 
 const stats = [
   { value: "10s", unit: "MW", label: "Per-customer blocks" },
@@ -12,71 +19,195 @@ const stats = [
   { value: "0", unit: "L", label: "Water used for cooling" },
 ];
 
+const moduleSpecs = [
+  { label: "IT design load", value: "1.5", unit: "MW" },
+  { label: "Total load", value: "1.95", unit: "MW" },
+  { label: "Service voltage", value: "480", unit: "VAC · 3-PH · 4-W" },
+  { label: "Power feeds", value: "A+B", unit: "REDUNDANT" },
+  { label: "Design capacity", value: "2,400", unit: "kVA" },
+  { label: "Power factor", value: "0.95", unit: "LAGGING" },
+  { label: "Cooling", value: "0", unit: "L WATER" },
+  { label: "Footprint", value: "480 × 198", unit: "IN" },
+];
+
+const moduleViews = [
+  {
+    id: "enclosure",
+    label: "01 · Enclosure",
+    src: "/coloc/module-enclosure.png",
+    alt: "Helios modular data hall, sealed enclosure",
+    note: "Sealed, shielded and factory-built.",
+  },
+  {
+    id: "structure",
+    label: "02 · Structure",
+    src: "/coloc/module-structure.png",
+    alt: "Helios modular data hall with enclosure removed, exposing rack rows",
+    note: "Skin off. Rack rows, containment and cooling distribution.",
+  },
+] as const;
+
 const reasons = [
   {
     label: "Density",
     title: "Liquid-cooled, NVL72-ready",
-    description:
-      "Direct-to-chip liquid cooling supports full GB300 NVL72 rack deployments with no derating and no half-empty racks.",
+    description: "Direct-to-chip cooling runs full NVL72 racks with zero derating.",
   },
   {
     label: "Speed",
     title: "Energized in ~3 months",
-    description:
-      "Power, land and long-lead equipment are secured before you sign. Your committed delivery date is in the contract.",
+    description: "Power and equipment are secured before you sign. The date is in the contract.",
   },
   {
     label: "Power",
     title: "Renewable-backed megawatts",
-    description:
-      "Sites are located next to clean generation with long-term power agreements and zero water used for cooling.",
+    description: "Sited next to clean generation, on long-term power agreements.",
   },
   {
     label: "Scale",
     title: "Blocks of 10s of MW",
-    description:
-      "Take a hall, not a cage. Expansion rights are built in, so your second tranche lands as fast as your first.",
+    description: "Take a hall, not a cage. Expansion rights come built in.",
   },
   {
     label: "Operations",
     title: "24/7 staffed, remote hands",
-    description:
-      "Security, monitoring and smart-hands service around the clock, with SLAs that match hyperscale standards.",
+    description: "Staffed around the clock, with hyperscale-grade SLAs.",
   },
   {
     label: "Connectivity",
-    title: "Carrier-neutral, high-bandwidth",
-    description:
-      "Diverse fiber paths and carrier-neutral meet-me rooms for whatever network architecture you bring.",
+    title: "Carrier-neutral fiber",
+    description: "Diverse paths, neutral meet-me rooms, your choice of network.",
   },
 ];
 
 const steps = [
   {
-    number: "01",
+    when: "Day 0",
     title: "Reserve",
-    description:
-      "Join the waitlist with your MW target and timeline. We respond within 48 hours.",
+    description: "Tell us your megawatt target and your date. We reply within 48 hours.",
   },
   {
-    number: "02",
+    when: "Week 1",
     title: "Scope",
-    description:
-      "Our engineers spec power, cooling, density and connectivity around your hardware plan.",
+    description: "Our engineers spec power, cooling and network around your hardware.",
   },
   {
-    number: "03",
+    when: "Week 2",
     title: "Build-out",
-    description:
-      "Pre-secured power and equipment mean fit-out starts immediately after signature.",
+    description: "Fit-out begins at once. The land and equipment are already waiting.",
   },
   {
-    number: "04",
+    when: "Month 3",
     title: "Energize",
-    description:
-      "Racks powered, validated and handed over about three months after you signed.",
+    description: "Racks powered, validated and handed over. Yours to fill.",
   },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Drawing-sheet primitives                                            */
+/* ------------------------------------------------------------------ */
+
+const headingLight =
+  "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-black tracking-tightest leading-[0.92]";
+
+const SectionRuleLight = ({ index, children }: { index: string; children: string }) => (
+  <div className="flex items-center gap-5 mb-8 lg:mb-10">
+    <span className="text-primary text-[10px] font-mono uppercase tracking-[0.4em] whitespace-nowrap">
+      {children}
+    </span>
+    <span className="h-px flex-1 bg-black/15" />
+    <span className="text-black/35 text-[10px] font-mono tracking-[0.3em]">/ {index}</span>
+  </div>
+);
+
+const PlanBackdrop = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+    <img
+      src="/coloc/mdch02-plan-hero.png"
+      alt=""
+      className="absolute inset-0 w-full h-full object-cover invert opacity-[0.2] lg:opacity-[0.45]"
+      style={{ objectPosition: "80% 45%" }}
+    />
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,black_28%,rgba(0,0,0,0.55)_55%,rgba(0,0,0,0.1))]" />
+    <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black" />
+  </div>
+);
+
+/** Horizontal dimension line, drawing-style: |—— label ——| */
+const DimLine = ({ label, dark = false, className = "" }: { label: string; dark?: boolean; className?: string }) => {
+  const ink = dark ? "bg-black/30" : "bg-white/25";
+  const text = dark ? "text-black/55" : "text-white/50";
+  return (
+    <div className={`flex items-center ${className}`} aria-hidden>
+      <span className={`w-px h-2.5 ${ink}`} />
+      <span className={`flex-1 h-px ${ink}`} />
+      <span className={`px-3 text-[10px] font-mono tracking-[0.2em] whitespace-nowrap ${text}`}>{label}</span>
+      <span className={`flex-1 h-px ${ink}`} />
+      <span className={`w-px h-2.5 ${ink}`} />
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Module viewer (enclosure / structure crossfade)                     */
+/* ------------------------------------------------------------------ */
+
+const ModuleViewer = () => {
+  const [view, setView] = useState<(typeof moduleViews)[number]["id"]>("enclosure");
+  const touched = useRef(false);
+
+  // Slow auto-flip until the visitor takes over.
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (!touched.current) setView((v) => (v === "enclosure" ? "structure" : "enclosure"));
+    }, 4500);
+    return () => clearInterval(t);
+  }, []);
+
+  const active = moduleViews.find((v) => v.id === view)!;
+
+  return (
+    <div>
+      <div className="flex items-center gap-8 border-b border-black/10 pb-3">
+        {moduleViews.map((v) => (
+          <button
+            key={v.id}
+            onClick={() => {
+              touched.current = true;
+              setView(v.id);
+            }}
+            className={`text-[11px] font-mono uppercase tracking-[0.25em] transition-colors duration-300 ${
+              view === v.id ? "text-black" : "text-black/45 hover:text-black/75"
+            }`}
+          >
+            <span className={view === v.id ? "text-primary" : ""}>●</span> {v.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative mt-2 aspect-[16/10] md:aspect-[2/1] overflow-hidden bg-white">
+        {moduleViews.map((v) => (
+          <motion.img
+            key={v.id}
+            src={v.src}
+            alt={v.alt}
+            initial={false}
+            animate={{ opacity: view === v.id ? 1 : 0 }}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="absolute inset-0 w-full h-full object-contain scale-[1.5]"
+          />
+        ))}
+      </div>
+
+      <DimLine dark label="480 IN · 12.19 M" className="mt-1 mx-6 lg:mx-16" />
+      <p className="mt-5 text-black/70 text-base leading-relaxed min-h-[1.5rem]">{active.note}</p>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
 
 const ColocationPage = () => {
   return (
@@ -85,21 +216,31 @@ const ColocationPage = () => {
       <Navigation />
 
       <main>
+        {/* ───── Hero — the drawing sheet ───── */}
         <section className="relative overflow-hidden pt-24 lg:pt-32 pb-16 lg:pb-24">
-          <div className="absolute inset-x-[-20%] bottom-[-35%] h-[520px] bg-[radial-gradient(50%_60%_at_50%_100%,rgba(255,107,53,0.20),transparent_70%)] pointer-events-none" />
-          <div className="relative max-w-7xl mx-auto px-3 lg:px-6">
-            <div className="max-w-5xl">
-              <p className="text-[#FF6B35] text-[10px] font-mono uppercase tracking-[0.4em] mb-8">
-                Colocation
-              </p>
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[112px] font-heading font-bold tracking-tightest leading-[0.88]">
+          <PlanBackdrop />
+          <div className="absolute inset-x-[-20%] bottom-[-35%] h-[520px] bg-[radial-gradient(50%_60%_at_50%_100%,hsl(var(--primary)/0.14),transparent_70%)] pointer-events-none" />
+
+          <div className="relative max-w-7xl mx-auto px-4 lg:px-12">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: EASE }}
+              className="max-w-5xl"
+            >
+              <div className="flex items-baseline gap-5 mb-8">
+                <p className="text-primary text-[10px] font-mono uppercase tracking-[0.4em]">
+                  Colocation
+                </p>
+              </div>
+              <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[112px] font-heading font-bold tracking-tightest leading-[0.9]">
                 Your racks. Our megawatts.{" "}
                 <span className="text-primary">Live in ~3 months.</span>
               </h1>
-              <p className="mt-8 text-xl text-white/70 font-light leading-relaxed max-w-2xl">
-                High-density colocation purpose-built for Blackwell-generation
-                hardware — GB300 NVL72, B300 and RTX PRO 6000 deployments at
-                densities legacy facilities can't touch.
+              <p className="mt-8 text-xl lg:text-2xl text-white/80 font-light leading-relaxed max-w-2xl">
+                High-density colocation built for the Blackwell generation.
+                GB300 NVL72, B300 and RTX PRO 6000, at densities legacy
+                facilities can't touch.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4">
                 <Button
@@ -121,97 +262,243 @@ const ColocationPage = () => {
                   <Link to="/contact?service=coloc">Talk to our team</Link>
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="mt-20 border-y border-white/10">
-              <div className="grid grid-cols-2 lg:grid-cols-4">
-                {stats.map((stat, index) => (
-                  <div
-                    key={stat.label}
-                    className={`py-8 lg:py-10 px-4 lg:px-8 ${index % 2 === 1 ? "border-l border-white/10 lg:border-l" : "lg:border-l lg:first:border-l-0"}`}
-                  >
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl lg:text-5xl font-bold tracking-tighter">
-                        {stat.value}
+            <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  {...fadeUp}
+                  transition={{ duration: 0.8, delay: i * 0.1, ease: EASE }}
+                  className="bg-black py-8 lg:py-10 px-4 lg:px-8"
+                >
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl lg:text-5xl font-heading font-bold tracking-tightest">
+                      {stat.value}
+                    </span>
+                    {stat.unit && (
+                      <span className="text-lg text-primary font-mono tracking-[0.1em]">
+                        {stat.unit}
                       </span>
-                      {stat.unit && (
-                        <span className="text-lg text-white/50 font-semibold">
-                          {stat.unit}
+                    )}
+                  </div>
+                  <p className="mt-3 text-[11px] font-mono uppercase tracking-[0.24em] text-white/65">
+                    {stat.label}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ───── 01 · The module — paper datasheet ───── */}
+        <section className="bg-white text-black py-20 lg:py-28">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <SectionRuleLight index="01">The module</SectionRuleLight>
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
+              <h2 className={`${headingLight} max-w-5xl`}>
+                A data hall, productized.
+              </h2>
+              <p className="mt-6 text-lg lg:text-xl text-black/70 font-light leading-relaxed max-w-2xl">
+                A Helios hall is not a construction project. It is a product.
+                Engineered once, built in parallel, set down on land that is
+                already powered. That is how three months happens.
+              </p>
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="mt-14 lg:mt-20">
+              <ModuleViewer />
+            </motion.div>
+
+            {/* Electrical figures — compact strip under the render */}
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+              className="mt-12 lg:mt-16"
+            >
+              <div className="flex items-baseline justify-between pb-3">
+                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-black/60">
+                  Electrical · per module
+                </p>
+              </div>
+              <dl className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black/10 border border-black/10">
+                {moduleSpecs.map((spec) => (
+                  <div key={spec.label} className="bg-white px-4 py-4 lg:px-5 lg:py-5">
+                    <dd className="flex items-baseline gap-1.5 flex-wrap">
+                      <span className="font-heading font-bold text-xl lg:text-2xl tracking-tightest">
+                        {spec.value}
+                      </span>
+                      {spec.unit && (
+                        <span className="text-[10px] font-mono tracking-[0.12em] text-primary">
+                          {spec.unit}
                         </span>
                       )}
-                    </div>
-                    <p className="mt-3 text-[10px] font-mono uppercase tracking-[0.24em] text-white/50">
-                      {stat.label}
-                    </p>
+                    </dd>
+                    <dt className="mt-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-black/55">
+                      {spec.label}
+                    </dt>
                   </div>
                 ))}
-              </div>
-            </div>
+              </dl>
+            </motion.div>
           </div>
         </section>
 
+        {/* ───── 02 · Specification index — why Helios ───── */}
         <section className="py-20 lg:py-28 bg-black">
-          <div className="max-w-7xl mx-auto px-3 lg:px-6">
-            <p className="text-[#FF6B35] text-[10px] font-mono uppercase tracking-[0.4em] mb-6">
-              Why colo with Helios
-            </p>
-            <h2 className="text-5xl lg:text-7xl font-heading font-bold tracking-tightest leading-[0.9] max-w-5xl">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <SectionRule index="02">Why colo with Helios</SectionRule>
+            <motion.h2
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className={`${sectionHeading} max-w-5xl`}
+            >
               Most colo is built for servers. Ours is built for AI factories.
-            </h2>
+            </motion.h2>
 
-            <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {reasons.map((reason) => (
-                <div
+            <div className="mt-14 lg:mt-20 border-t border-white/10">
+              {reasons.map((reason, i) => (
+                <motion.div
                   key={reason.label}
-                  className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 lg:p-10"
+                  {...fadeUp}
+                  transition={{ duration: 0.7, delay: 0.05, ease: EASE }}
+                  className="group grid grid-cols-12 gap-x-4 gap-y-3 py-7 lg:py-9 border-b border-white/10 items-baseline"
                 >
-                  <p className="text-[#FF6B35] text-[10px] font-mono uppercase tracking-[0.32em] mb-6">
+                  <span className="col-span-2 lg:col-span-1 text-white/40 group-hover:text-primary transition-colors duration-300 text-sm font-mono tracking-[0.2em]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="col-span-10 lg:col-span-2 text-[11px] font-mono uppercase tracking-[0.3em] text-white/55 self-center">
                     {reason.label}
-                  </p>
-                  <h3 className="text-xl font-bold text-white mb-4">
+                  </span>
+                  <h3 className="col-span-10 col-start-3 lg:col-span-4 lg:col-start-auto text-xl lg:text-2xl font-heading font-bold text-white tracking-tight">
                     {reason.title}
                   </h3>
-                  <p className="text-white/60 text-sm leading-relaxed">
+                  <p className="col-span-10 col-start-3 lg:col-span-5 lg:col-start-auto text-base text-white/70 leading-relaxed">
                     {reason.description}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-20 lg:py-28 bg-[#111111] border-y border-white/10">
-          <div className="max-w-7xl mx-auto px-3 lg:px-6">
-            <p className="text-[#FF6B35] text-[10px] font-mono uppercase tracking-[0.4em] mb-6">
-              How it works
-            </p>
-            <h2 className="text-5xl lg:text-7xl font-heading font-bold tracking-tightest leading-[0.9] max-w-4xl">
-              Signature to energized racks in four steps.
-            </h2>
+        {/* ───── 03 · The sites ───── */}
+        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <SectionRule index="03">The sites</SectionRule>
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
+              <h2 className={`${sectionHeading} max-w-4xl`}>
+                Power first. Everything else follows.
+              </h2>
+              <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
+                We site next to clean generation, contract the megawatts long-term,
+                and energize the land before a single module arrives. Your hall
+                lands on power that already exists.
+              </p>
+            </motion.div>
 
-            <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-4 border-t border-white/10">
-              {steps.map((step, index) => (
-                <div
-                  key={step.number}
-                  className={`pt-9 pb-2 lg:pb-0 lg:px-8 ${index > 0 ? "lg:border-l lg:border-white/10" : ""}`}
-                >
-                  <span className="text-[#FF6B35] text-sm font-mono">
-                    {step.number}
-                  </span>
-                  <h3 className="mt-5 text-xl font-bold text-white">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-sm text-white/60 leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
+            <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-6 lg:gap-8">
+              <motion.div
+                {...fadeUp}
+                transition={{ duration: 0.8, ease: EASE }}
+                className="lg:col-span-8"
+              >
+                <figure className="relative aspect-[16/9] overflow-hidden border border-white/10 bg-[#0A0A0A]">
+                  <img
+                    src="/coloc/site-overview-aerial.png"
+                    alt="Aerial view of Helios modular data halls beside a substation and wind turbines at dusk"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </figure>
+              </motion.div>
+              <motion.div
+                {...fadeUp}
+                transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
+                className="lg:col-span-4"
+              >
+                <figure className="relative aspect-[4/5] lg:h-full lg:aspect-auto overflow-hidden border border-white/10 bg-[#0A0A0A]">
+                  <img
+                    src="/coloc/hall-interior-rack-corridor.png"
+                    alt="Interior corridor of high-density data hall racks"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </figure>
+              </motion.div>
             </div>
           </div>
         </section>
 
+        {/* ───── 04 · The timeline — vertical time spine ───── */}
+        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <SectionRule index="04">How it works</SectionRule>
+            <motion.h2
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className={`${sectionHeading} max-w-4xl`}
+            >
+              Four steps. About ninety days.
+            </motion.h2>
+
+            {/* Parent owns the in-view trigger — children scaled from 0 have no bbox */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              className="relative mt-10 lg:mt-14 max-w-3xl"
+            >
+              <motion.span
+                variants={{
+                  hidden: { scaleY: 0 },
+                  visible: { scaleY: 1, transition: { duration: 1.8, ease: EASE } },
+                }}
+                className="absolute left-[3px] top-10 bottom-10 w-px bg-white/15 origin-top"
+              />
+              {steps.map((step, i) => {
+                const last = i === steps.length - 1;
+                return (
+                  <motion.div
+                    key={step.title}
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.7, delay: 0.3 + i * 0.35, ease: EASE },
+                      },
+                    }}
+                    className="relative pl-10 lg:pl-14 py-8 lg:py-10"
+                  >
+                    <span
+                      className={`absolute left-0 top-[3.05rem] lg:top-[3.65rem] w-[7px] h-[7px] rounded-full ${
+                        last ? "bg-primary" : "bg-white/30"
+                      }`}
+                    />
+                    <div className="flex items-baseline justify-between gap-6">
+                      <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white tracking-tight">
+                        {step.title}
+                      </h3>
+                      <span
+                        className={`text-[11px] font-mono uppercase tracking-[0.25em] whitespace-nowrap ${
+                          last ? "text-primary" : "text-white/50"
+                        }`}
+                      >
+                        {step.when}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-base lg:text-lg text-white/70 leading-relaxed max-w-md">
+                      {step.description}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ───── CTA ───── */}
         <section className="bg-primary text-primary-foreground py-20 lg:py-28 px-4 text-center">
-          <h2 className="text-5xl lg:text-7xl font-heading font-bold tracking-tightest leading-[0.9]">
+          <h2 className="text-5xl lg:text-7xl font-heading font-bold tracking-tightest leading-[0.92]">
             Megawatts move fast here.
           </h2>
           <p className="mt-5 text-lg lg:text-xl font-medium opacity-80">

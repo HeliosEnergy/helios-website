@@ -1,43 +1,16 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { IsometricGPUAnimation, AnimationPhase } from "./hero/IsometricGPUAnimation";
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> = {
-  'containers-drop': {
-    title: 'Frontier compute, live in ~3 months.',
-    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
-  },
-  'containers-hold': {
-    title: 'Frontier compute, live in ~3 months.',
-    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
-  },
-  'containers-fall': {
-    title: 'Frontier compute, live in ~3 months.',
-    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
-  },
-  'maxima': {
-    title: 'Frontier compute, live in ~3 months.',
-    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
-  },
-  'inference': {
-    title: 'Frontier compute, live in ~3 months.',
-    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
-  },
+const heroContent = {
+  title: 'Frontier compute, live in ~3 months.',
+  subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation, deployed in about three months. Not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
 };
 
 export const HeroSection = () => {
-  const [currentPhase, setCurrentPhase] = useState<AnimationPhase>('containers-drop');
-  const [displayContent, setDisplayContent] = useState(phaseContent['containers-drop']);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    const newContent = phaseContent[currentPhase];
-    setDisplayContent(newContent);
-  }, [currentPhase]);
 
   return (
     <section className="relative overflow-hidden bg-black min-h-[540px] md:min-h-[900px] flex items-start justify-center pt-24 lg:pt-32">
@@ -80,7 +53,7 @@ export const HeroSection = () => {
         />
       )}
 
-      <div className="relative z-10 max-w-7xl mx-auto px-3 lg:px-6 py-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-6 py-12">
         <div className="grid lg:grid-cols-12 gap-16 lg:gap-24 items-center">
 
           {/* The Text Spine */}
@@ -93,22 +66,20 @@ export const HeroSection = () => {
             >
               <div className="space-y-6 lg:space-y-8 max-w-6xl">
                 <motion.h2
-                  key={displayContent.title}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-6xl sm:text-7xl lg:text-[92px] xl:text-[116px] font-heading font-bold text-white tracking-tighter leading-[0.9] max-w-6xl text-balance"
+                  className="text-6xl sm:text-7xl lg:text-[92px] xl:text-[116px] font-heading font-bold text-white tracking-tightest leading-[0.9] max-w-6xl text-balance"
                 >
-                  {displayContent.title}
+                  {heroContent.title}
                 </motion.h2>
                 <motion.p
-                  key={displayContent.subtitle}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-lg sm:text-xl text-white/70 font-light leading-relaxed max-w-3xl"
+                  className="text-lg sm:text-xl lg:text-2xl text-white/80 font-light leading-relaxed max-w-3xl"
                 >
-                  {displayContent.subtitle}
+                  {heroContent.subtitle}
                 </motion.p>
               </div>
 
