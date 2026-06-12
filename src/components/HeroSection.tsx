@@ -1,48 +1,35 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
-import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
-import type { HeroSection as HeroSectionData } from "@/types/sanity";
 import { IsometricGPUAnimation, AnimationPhase } from "./hero/IsometricGPUAnimation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
-import { CONSOLE_SIGNUP_URL, DOCS_URL } from "@/lib/site";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const phaseContent: Record<AnimationPhase, { title: string; subtitle: string }> = {
   'containers-drop': {
-    title: 'Scale as you need',
-    subtitle: 'Deploy GPU containers instantly. Add capacity on demand.',
+    title: 'Frontier compute, live in ~3 months.',
+    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
   },
   'containers-hold': {
-    title: 'Scale as you need',
-    subtitle: 'Deploy GPU containers instantly. Add capacity on demand.',
+    title: 'Frontier compute, live in ~3 months.',
+    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
   },
   'containers-fall': {
-    title: 'Scale as you need',
-    subtitle: 'Deploy GPU containers instantly. Add capacity on demand.',
+    title: 'Frontier compute, live in ~3 months.',
+    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
   },
   'maxima': {
-    title: 'Fine-tune at scale',
-    subtitle: 'Train and optimize models with enterprise-grade infrastructure.',
+    title: 'Frontier compute, live in ~3 months.',
+    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
   },
   'inference': {
-    title: 'Inference at scale',
-    subtitle: 'Serve millions of requests with low latency across the globe.',
+    title: 'Frontier compute, live in ~3 months.',
+    subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation — deployed in about three months, not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
   },
-};
-
-// Helper to fix legacy URLs from Sanity
-const fixUrl = (url: string) => {
-  if (!url) return "#";
-  if (url === 'https://helios.ai/contact') return '/contact';
-  if (url === 'https://helios.ai/signup') return CONSOLE_SIGNUP_URL;
-  if (url.includes('helios.ai/docs')) return DOCS_URL;
-  return url;
 };
 
 export const HeroSection = () => {
-  const { data: hero, isLoading } = useSanityQuery<HeroSectionData>('hero-section', QUERIES.heroSection);
   const [currentPhase, setCurrentPhase] = useState<AnimationPhase>('containers-drop');
   const [displayContent, setDisplayContent] = useState(phaseContent['containers-drop']);
   const isMobile = useIsMobile();
@@ -102,15 +89,15 @@ export const HeroSection = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="space-y-12 lg:space-y-16"
+              className="space-y-10 lg:space-y-12"
             >
-              <div className="space-y-6 lg:space-y-8">
+              <div className="space-y-6 lg:space-y-8 max-w-6xl">
                 <motion.h2
                   key={displayContent.title}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-7xl sm:text-8xl lg:text-[110px] xl:text-[130px] font-heading font-bold text-white tracking-tighter leading-[0.85] max-w-4xl"
+                  className="text-6xl sm:text-7xl lg:text-[92px] xl:text-[116px] font-heading font-bold text-white tracking-tighter leading-[0.9] max-w-6xl text-balance"
                 >
                   {displayContent.title}
                 </motion.h2>
@@ -119,7 +106,7 @@ export const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-xl text-white/70 font-light leading-relaxed max-w-md"
+                  className="text-lg sm:text-xl text-white/70 font-light leading-relaxed max-w-3xl"
                 >
                   {displayContent.subtitle}
                 </motion.p>
@@ -132,8 +119,8 @@ export const HeroSection = () => {
                   asChild
                   className="h-16 px-12 rounded-full bg-white text-black hover:bg-primary hover:text-primary-foreground transition-all duration-500 shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:scale-105 active:scale-95 group"
                 >
-                  <a href={fixUrl(hero?.primaryCtaLink)} className="flex items-center gap-4 font-mono uppercase tracking-widest text-xs font-bold">
-                    Initialize Cluster
+                  <a href="/contact?service=coloc" className="flex items-center gap-4 font-mono uppercase tracking-widest text-xs font-bold">
+                    Reserve capacity
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-500" />
                   </a>
                 </Button>

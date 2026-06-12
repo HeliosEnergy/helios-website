@@ -13,7 +13,7 @@ const CLOUDFLARE_WORKER_URL = "https://helios-contact-worker.helios-energy.worke
 const EMBER_GLOW = "radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0%, transparent 60%)";
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
-type ServiceInterest = 'clusters' | 'inference' | 'baremetal' | 'press' | 'partnership' | 'others';
+type ServiceInterest = 'clusters' | 'coloc' | 'inference' | 'baremetal' | 'press' | 'partnership' | 'others';
 type ClusterType = 'rtx-6000-pro' | 'b200' | 'b300' | 'h200-sxm' | 'h100';
 
 interface InferenceModel {
@@ -259,6 +259,7 @@ const clusterOptions: { value: ClusterType; label: string }[] = [
 
 const serviceLabels: Record<ServiceInterest, string> = {
   clusters: 'Clusters',
+  coloc: 'Colocation',
   inference: 'Inference',
   baremetal: 'Baremetal',
   press: 'Press',
@@ -647,6 +648,26 @@ const ContactPage = () => {
                               formatLabel={(v) => `${v} GPUs`}
                             />
                           </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Conditional: Colocation */}
+                  <AnimatePresence>
+                    {formData.serviceInterest === 'coloc' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-8 overflow-hidden"
+                      >
+                        <div className="bg-white/[0.04] rounded-3xl p-6 border border-white/15 space-y-3">
+                          <span className="block text-sm font-medium text-white">Colocation capacity</span>
+                          <p className="text-sm text-white/60 leading-relaxed">
+                            Tell us your target megawatts, rack density, hardware plan, and timeline in the message field.
+                          </p>
                         </div>
                       </motion.div>
                     )}

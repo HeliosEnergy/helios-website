@@ -13,6 +13,7 @@ const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 
 const navItems = [
   { label: "Platform", hasDropdown: true, dropdown: PlatformDropdown },
+  { label: "Colocation", hasDropdown: false, href: "/colocation" },
   { label: "Models", hasDropdown: true, dropdown: ModelsDropdown },
   { label: "Pricing", hasDropdown: false, href: "/pricing" },
   { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown },

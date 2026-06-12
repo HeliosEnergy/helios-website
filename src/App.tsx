@@ -18,6 +18,7 @@ import PressPage from "./pages/PressPage";
 import EventsPage from "./pages/EventsPage";
 import PartnerPage from "./pages/PartnerPage";
 import EnergyPage from "./pages/EnergyPage";
+import ColocationPage from "./pages/ColocationPage";
 import InferencePage from "./pages/InferencePage";
 import ClustersPage from "./pages/ClustersPage";
 import ServerlessPage from "./pages/ServerlessPage";
@@ -71,6 +72,7 @@ const App = () => (
           <Route path="/events" element={<EventsPage />} />
           <Route path="/partner" element={<PartnerPage />} />
           <Route path="/energy" element={<EnergyPage />} />
+          <Route path="/colocation" element={<ColocationPage />} />
           <Route path="/inference" element={<InferencePage />} />
           <Route path="/clusters" element={<ClustersPage />} />
           <Route path="/serverless" element={<ServerlessPage />} />

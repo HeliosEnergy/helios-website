@@ -3,39 +3,43 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import { EASE, fadeUp, SectionRule, sectionHeading } from "./HomeRevampSections";
 
 const GPU_DATA = [
   {
-    id: "b200",
-    clusterId: "b200", // matches ContactPage ClusterType
-    name: "NVIDIA Blackwell B200",
-    price: "3.10",
-    description: "Optimized for large-scale foundation models and high-throughput inference clusters.",
-    specs: ["20 PFLOPS", "900GB/s NVLink", "192GB HBM3e"],
+    id: "gb300",
+    clusterId: "gb300",
+    eyebrow: "Rack-scale system",
+    name: "NVIDIA GB300 NVL72",
+    availability: "Q3 capacity",
+    description: "72 Blackwell Ultra GPUs and 36 Grace CPUs in one liquid-cooled, rack-scale system. Built for frontier training and large-scale reasoning inference.",
+    specs: ["72x Blackwell Ultra", "Direct liquid, water-free", "Frontier training"],
     image: "/gpus/dgx-b200.jpg",
-    cta: "Reserve Cluster",
+    cta: "Join Waitlist",
     theme: "white"
   },
   {
     id: "b300",
     clusterId: "b300",
-    name: "NVIDIA Blackwell B300",
-    price: "4.00",
-    description: "Next-gen Blackwell architecture with enhanced memory bandwidth for frontier model training and multi-modal workloads.",
-    specs: ["40 PFLOPS", "1.8TB/s NVLink", "288GB HBM3e"],
+    eyebrow: "Flagship GPU",
+    name: "NVIDIA B300",
+    availability: "Q3 capacity",
+    description: "Blackwell Ultra with massive HBM3e memory and a major bandwidth jump over B200 — for multi-modal training and high-throughput inference clusters.",
+    specs: ["288 GB HBM3e", "InfiniBand, non-blocking", "Training & inference"],
     image: "/gpus/dgx-b300.jpg",
-    cta: "Reserve Cluster",
+    cta: "Join Waitlist",
     theme: "white"
   },
   {
     id: "rtx6000",
     clusterId: "rtx-6000-pro", // matches ContactPage ClusterType
-    name: "NVIDIA RTX 6000 Pro",
-    price: "1.10",
-    description: "Dedicated performance for model fine-tuning, image generation, and professional visualization.",
-    specs: ["48GB GDDR6", "142 TFLOPS", "Pro Series"],
+    eyebrow: "Workhorse GPU",
+    name: "NVIDIA RTX PRO 6000",
+    availability: "Available now",
+    description: "Blackwell server edition with 96 GB GDDR7. The price-performance pick for fine-tuning, image and video generation, and production inference.",
+    specs: ["96 GB GDDR7", "Air or liquid cooled", "Fine-tuning & inference"],
     image: "/gpus/NVIDIA-RTX-PRO-6000-BLACKWELL-SERVER-HERO.jpg",
-    cta: "Start Instance",
+    cta: "Join Waitlist",
     theme: "white"
   }
 ];
@@ -44,9 +48,18 @@ export const GpuSovereigntySection = () => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <section className="bg-black py-12 lg:py-24 px-4 lg:px-6 border-y border-white/5 overflow-hidden">
+    <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row gap-4 lg:h-[600px]">
+        <SectionRule index="02">The silicon</SectionRule>
+        <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="mb-14 lg:mb-20 max-w-4xl">
+          <h2 className={sectionHeading}>
+            The newest NVIDIA hardware. Not last year's.
+          </h2>
+          <p className="mt-6 text-lg lg:text-xl text-white/65 font-light leading-relaxed max-w-2xl">
+            We deploy the current Blackwell Ultra generation — as a service or as colo-ready racks.
+          </p>
+        </motion.div>
+        <div className="flex flex-col lg:flex-row gap-px bg-white/10 border border-white/10 lg:h-[600px]">
           {GPU_DATA.map((gpu) => {
             const isHovered = hoveredId === gpu.id;
             const isOtherHovered = hoveredId !== null && hoveredId !== gpu.id;
@@ -60,7 +73,7 @@ export const GpuSovereigntySection = () => {
                   flex: isHovered ? 2 : isOtherHovered ? 0.5 : 1,
                 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="relative group cursor-pointer overflow-hidden rounded-3xl bg-[#0A0A0A] border border-white/5 flex flex-col min-h-[400px] lg:min-h-0"
+                className="relative group cursor-pointer overflow-hidden bg-black flex flex-col min-h-[400px] lg:min-h-0"
               >
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0">
@@ -76,7 +89,7 @@ export const GpuSovereigntySection = () => {
                 <div className="relative z-10 h-full p-6 lg:p-10 flex flex-col justify-between">
                   <div className="space-y-4 lg:space-y-8">
                     <div className="space-y-2">
-                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.4em]">Infrastructure</p>
+                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.4em]">{gpu.eyebrow}</p>
                       <h3 className="text-2xl lg:text-4xl font-bold text-white tracking-tight">
                         {gpu.name}
                       </h3>
@@ -92,12 +105,15 @@ export const GpuSovereigntySection = () => {
 
                   <div className="flex flex-col gap-4 lg:gap-8 mt-6 lg:mt-0">
                     <div className="space-y-1">
-                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.2em]">Starting at</p>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-4xl lg:text-5xl font-bold text-white tracking-tighter">${gpu.price}</span>
-                        <span className="text-white/70 text-sm font-light">/ hour</span>
+                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.2em]">Specs</p>
+                      <div className="space-y-2 pt-2">
+                        {gpu.specs.map((spec) => (
+                          <div key={spec} className="text-white text-sm lg:text-base font-light border-b border-white/10 pb-2">
+                            {spec}
+                          </div>
+                        ))}
                       </div>
-                      <p className="text-white/70 text-[10px] font-mono uppercase tracking-[0.1em] pt-1">36 Month Reserved</p>
+                      <p className="text-primary text-[10px] font-mono uppercase tracking-[0.18em] pt-3">{gpu.availability}</p>
                     </div>
 
                     {/* CTA - always visible on mobile */}

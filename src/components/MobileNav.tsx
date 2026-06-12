@@ -10,7 +10,7 @@ const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 // Simplified nav items for mobile
 const mobileNavItems = [
   { label: "Pricing", href: "/pricing" },
-  { label: "Clusters", href: "/clusters" },
+  { label: "Colocation", href: "/colocation" },
   { label: "Model Library", href: "/model-library" },
 ];
 

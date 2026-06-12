@@ -1,4 +1,4 @@
-import { Code, MessageSquare, Bot } from "lucide-react";
+import { Building, MessageSquare, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const PlatformDropdownMobile = () => {
@@ -18,9 +18,9 @@ export const PlatformDropdownMobile = () => {
         Capabilities
       </h4>
       <div className="space-y-2 px-4">
-        <Link to="/clusters" className="flex items-center gap-3 py-2 text-xs text-white/60 hover:text-white transition-colors">
-          <Code className="w-4 h-4 opacity-30 group-hover:opacity-100" />
-          GPU Clusters
+        <Link to="/colocation" className="flex items-center gap-3 py-2 text-xs text-white/60 hover:text-white transition-colors">
+          <Building className="w-4 h-4 opacity-30 group-hover:opacity-100" />
+          Colocation
         </Link>
         <Link to="/serverless" className="flex items-center gap-3 py-2 text-xs text-white/60 hover:text-white transition-colors">
           <MessageSquare className="w-4 h-4 opacity-30 group-hover:opacity-100" />
