@@ -333,7 +333,7 @@ export const HomeSustainabilitySection = () => {
       )}
 
       <div className="relative max-w-7xl mx-auto">
-        <SectionRule index="04" accent="text-emerald-400" rule="bg-emerald-400/20">
+        <SectionRule index="04" accent="text-eco" rule="bg-eco/20">
           Sustainability
         </SectionRule>
         <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="max-w-4xl">
@@ -355,7 +355,7 @@ export const HomeSustainabilitySection = () => {
                 whileInView={{ scaleX: 1 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.55, delay: 1.05, ease: EASE }}
-                className="absolute left-[-0.04em] right-[-0.04em] top-[51%] h-[0.055em] origin-left bg-emerald-400"
+                className="absolute left-[-0.04em] right-[-0.04em] top-[51%] h-[0.055em] origin-left bg-eco"
               />
             </span>
           </h2>
@@ -366,20 +366,20 @@ export const HomeSustainabilitySection = () => {
         </motion.div>
 
         <div className="mt-16 lg:mt-24">
-          <div className="sustain-pulse h-px bg-emerald-400/25" aria-hidden />
-          <div className="grid md:grid-cols-3 border-b border-emerald-400/15 md:divide-x md:divide-emerald-400/15">
+          <div className="sustain-pulse h-px bg-eco/25" aria-hidden />
+          <div className="grid md:grid-cols-3 border-b border-eco/15 md:divide-x md:divide-eco/15">
             {sustainability.map((item, i) => (
               <motion.div
                 key={item.title}
                 {...fadeUp}
                 transition={{ duration: 0.8, delay: i * 0.12, ease: EASE }}
-                className="sustain-cell py-12 lg:py-16 md:px-8 lg:px-10 md:first:pl-0 border-t border-emerald-400/15 first:border-t-0 md:border-t-0"
+                className="sustain-cell py-12 lg:py-16 md:px-8 lg:px-10 md:first:pl-0 border-t border-eco/15 first:border-t-0 md:border-t-0"
               >
                 <div className="flex items-baseline gap-3">
                   <span className="sustain-metric text-white text-[88px] lg:text-[112px] xl:text-[128px] font-heading font-bold tracking-tightest leading-none">
                     {item.metric}
                   </span>
-                  <span className="sustain-unit text-emerald-400/90 font-mono text-lg lg:text-xl tracking-[0.15em]">
+                  <span className="sustain-unit text-eco/90 font-mono text-lg lg:text-xl tracking-[0.15em]">
                     {item.unit}
                   </span>
                 </div>
@@ -391,7 +391,7 @@ export const HomeSustainabilitySection = () => {
         </div>
         <Link
           to="/sustainability"
-          className="mt-10 inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors font-semibold group"
+          className="mt-10 inline-flex items-center gap-2 text-eco hover:text-eco-bright transition-colors font-semibold group"
         >
           How our data centers work
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

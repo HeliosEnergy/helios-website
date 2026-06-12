@@ -19,15 +19,18 @@ const stats = [
   { value: "0", unit: "L", label: "Water used for cooling" },
 ];
 
+const moduleHighlights = [
+  { value: "1.5", unit: "MW", label: "IT load" },
+  { value: "0", unit: "L", label: "water cooling" },
+  { value: "A+B", unit: "", label: "feeds" },
+];
+
 const moduleSpecs = [
-  { label: "IT design load", value: "1.5", unit: "MW" },
-  { label: "Total load", value: "1.95", unit: "MW" },
-  { label: "Service voltage", value: "480", unit: "VAC · 3-PH · 4-W" },
-  { label: "Power feeds", value: "A+B", unit: "REDUNDANT" },
-  { label: "Design capacity", value: "2,400", unit: "kVA" },
-  { label: "Power factor", value: "0.95", unit: "LAGGING" },
-  { label: "Cooling", value: "0", unit: "L WATER" },
-  { label: "Footprint", value: "480 × 198", unit: "IN" },
+  { label: "Total load", value: "1.95 MW" },
+  { label: "Service voltage", value: "480 VAC · 3-PH · 4-W" },
+  { label: "Design capacity", value: "2,400 kVA" },
+  { label: "Power factor", value: "0.95 lagging" },
+  { label: "Footprint", value: "480 × 198 in" },
 ];
 
 const moduleViews = [
@@ -306,41 +309,61 @@ const ColocationPage = () => {
               </p>
             </motion.div>
 
-            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="mt-14 lg:mt-20">
-              <ModuleViewer />
-            </motion.div>
+            <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+              <motion.div
+                {...fadeUp}
+                transition={{ duration: 0.8, ease: EASE }}
+                className="lg:col-span-8"
+              >
+                <ModuleViewer />
+              </motion.div>
 
-            {/* Electrical figures — compact strip under the render */}
-            <motion.div
-              {...fadeUp}
-              transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-              className="mt-12 lg:mt-16"
-            >
-              <div className="flex items-baseline justify-between pb-3">
-                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-black/60">
+              {/* Electrical figures — ledger beside the render */}
+              <motion.div
+                {...fadeUp}
+                transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+                className="lg:col-span-4 lg:pt-1"
+              >
+                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-black/60 pb-3 border-b border-black/10">
                   Electrical · per module
                 </p>
-              </div>
-              <dl className="grid grid-cols-2 md:grid-cols-4 gap-px bg-black/10 border border-black/10">
-                {moduleSpecs.map((spec) => (
-                  <div key={spec.label} className="bg-white px-4 py-4 lg:px-5 lg:py-5">
-                    <dd className="flex items-baseline gap-1.5 flex-wrap">
-                      <span className="font-heading font-bold text-xl lg:text-2xl tracking-tightest">
-                        {spec.value}
+
+                <div className="mt-6 flex flex-wrap gap-2.5">
+                  {moduleHighlights.map((pill) => (
+                    <span
+                      key={pill.label}
+                      className="inline-flex items-baseline gap-2 rounded-full bg-black text-white pl-5 pr-4 py-2.5"
+                    >
+                      <span className="font-heading font-bold text-lg tracking-tightest leading-none">
+                        {pill.value}
+                        {pill.unit && (
+                          <span className="text-primary"> {pill.unit}</span>
+                        )}
                       </span>
-                      {spec.unit && (
-                        <span className="text-[10px] font-mono tracking-[0.12em] text-primary">
-                          {spec.unit}
-                        </span>
-                      )}
-                    </dd>
-                    <dt className="mt-1.5 text-[10px] font-mono uppercase tracking-[0.16em] text-black/55">
-                      {spec.label}
-                    </dt>
-                  </div>
-                ))}
-              </dl>
-            </motion.div>
+                      <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-white/70">
+                        {pill.label}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+
+                <dl className="mt-8">
+                  {moduleSpecs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="flex items-baseline justify-between gap-6 py-3.5 border-b border-black/10"
+                    >
+                      <dt className="text-[11px] font-mono uppercase tracking-[0.16em] text-black/55 whitespace-nowrap">
+                        {spec.label}
+                      </dt>
+                      <dd className="font-heading font-bold text-base lg:text-lg tracking-tight text-black text-right">
+                        {spec.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </motion.div>
+            </div>
           </div>
         </section>
 

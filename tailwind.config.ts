@@ -74,6 +74,10 @@ export default {
           DEFAULT: "hsl(var(--burgundy))",
           foreground: "hsl(var(--burgundy-foreground))",
         },
+        eco: {
+          DEFAULT: "hsl(var(--eco))",
+          bright: "hsl(var(--eco-bright))",
+        },
       },
       fontFamily: {
         sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],

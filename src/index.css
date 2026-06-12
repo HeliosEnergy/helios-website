@@ -49,6 +49,8 @@
     --primary-warm: 36 100% 50%;
     --burgundy: 348 56% 27%;
     --burgundy-foreground: 0 0% 98%;
+    --eco: 158 64% 52%;
+    --eco-bright: 156 72% 67%;
 
     --sidebar-background: 45 15% 98%;
     --sidebar-foreground: 240 10% 10%;
@@ -253,7 +255,7 @@
 
   .sustain-cell:hover .sustain-metric,
   .sustain-cell:hover .sustain-unit {
-    color: #6ee7b7;
+    color: hsl(var(--eco-bright));
   }
 
   /* Light pulse traveling along a 1px rule */
@@ -270,7 +272,7 @@
     left: 0;
     width: 22%;
     transform: translateX(-110%);
-    background: linear-gradient(90deg, transparent, rgba(110, 231, 183, 0.9) 50%, transparent);
+    background: linear-gradient(90deg, transparent, hsl(var(--eco-bright) / 0.9) 50%, transparent);
     animation: sustain-pulse-travel 7.5s cubic-bezier(0.65, 0, 0.35, 1) infinite 1.2s;
   }
 
