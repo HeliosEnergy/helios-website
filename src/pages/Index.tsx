@@ -36,6 +36,7 @@ import {
   HomeSpeedSection,
   HomeSustainabilitySection,
 } from "@/components/HomeRevampSections";
+import { HomeFootprintSection } from "@/components/map/FootprintSection";
 import { Footer } from "@/components/Footer";
 import { useSanityQuery, QUERIES } from "@/hooks/useSanityData";
 
@@ -57,6 +58,7 @@ const sectionMap: Record<string, React.ComponentType<any>> = {
   homeOfferingsSection: HomeOfferingsSection,
   homeSpeedSection: HomeSpeedSection,
   homeSustainabilitySection: HomeSustainabilitySection,
+  homeFootprintSection: HomeFootprintSection,
   homeModelsStrip: HomeModelsStrip,
 };
 
@@ -76,6 +78,7 @@ const Index = () => {
           <GpuSovereigntySection />
           <HomeSpeedSection />
           <HomeSustainabilitySection />
+          <HomeFootprintSection />
           <HomeModelsStrip />
           {/* <InfrastructureSection /> HIDDEN */}
           {/* <CoreValueProposition /> HIDDEN */}
@@ -95,6 +98,7 @@ const Index = () => {
       { _type: "gpuSovereigntySection", _id: "manual-sovereignty" },
       { _type: "homeSpeedSection", _id: "manual-speed" },
       { _type: "homeSustainabilitySection", _id: "manual-sustainability" },
+      { _type: "homeFootprintSection", _id: "manual-footprint" },
       { _type: "homeModelsStrip", _id: "manual-models-strip" },
       { _type: "ctaSection", _id: "manual-cta" },
     ].map((section: any, index: number) => {

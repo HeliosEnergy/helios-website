@@ -7,6 +7,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { EASE, fadeUp, SectionRule, sectionHeading } from "@/components/HomeRevampSections";
+import { ColoFootprintMap } from "@/components/map/FootprintSection";
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -378,6 +379,14 @@ const ColocationPage = () => {
                 and energize the land before a single module arrives. Your hall
                 lands on power that already exists.
               </p>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
+              className="mt-12 lg:mt-16"
+            >
+              <ColoFootprintMap />
             </motion.div>
 
             <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-6 lg:gap-8">

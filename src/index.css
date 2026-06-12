@@ -292,4 +292,31 @@
       animation: none;
     }
   }
+
+  /* Footprint map: expanding ring around site markers */
+  .map-ping {
+    background: hsl(var(--primary) / 0.14);
+    border: 1px solid hsl(var(--primary) / 0.5);
+    animation: map-ping 3.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  @keyframes map-ping {
+    0% {
+      transform: scale(0.3);
+      opacity: 0.9;
+    }
+
+    70%,
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-ping {
+      animation: none;
+      opacity: 0;
+    }
+  }
 }
