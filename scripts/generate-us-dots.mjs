@@ -66,8 +66,10 @@ for (let y = minY; y <= maxY; y += ROW, row++) {
   }
 }
 
-// Site cities -> same Albers 975x610 space
-const projection = geoAlbersUsa(); // defaults match the pre-projected atlas
+// Site cities -> same Albers 975x610 space. d3's defaults (scale 1070,
+// translate [480, 250]) do NOT match the pre-projected atlas — us-atlas
+// albers files are built with scale 1300, translate [487.5, 305].
+const projection = geoAlbersUsa().scale(1300).translate([487.5, 305]);
 const cities = {
   utah: [-111.891, 40.7608], // Salt Lake City
   northCarolina: [-80.8431, 35.2271], // Charlotte

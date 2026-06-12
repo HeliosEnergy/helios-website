@@ -383,7 +383,7 @@ const Markers = ({
                   } ${active ? "scale-150" : ""}`}
                 />
                 <span
-                  className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 font-mono text-xs whitespace-nowrap transition-all duration-300 ${
+                  className={`hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-1 font-mono text-xs whitespace-nowrap transition-all duration-300 ${
                     active && below ? "opacity-0" : active ? "text-white" : "text-white/60"
                   }`}
                 >
