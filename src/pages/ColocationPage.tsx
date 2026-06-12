@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -136,74 +136,34 @@ const PlanBackdrop = () => (
   </div>
 );
 
-/** Horizontal dimension line, drawing-style: |—— label ——| */
-const DimLine = ({ label, dark = false, className = "" }: { label: string; dark?: boolean; className?: string }) => {
-  const ink = dark ? "bg-black/30" : "bg-white/25";
-  const text = dark ? "text-black/55" : "text-white/50";
-  return (
-    <div className={`flex items-center ${className}`} aria-hidden>
-      <span className={`w-px h-2.5 ${ink}`} />
-      <span className={`flex-1 h-px ${ink}`} />
-      <span className={`px-3 text-[10px] font-mono tracking-[0.2em] whitespace-nowrap ${text}`}>{label}</span>
-      <span className={`flex-1 h-px ${ink}`} />
-      <span className={`w-px h-2.5 ${ink}`} />
-    </div>
-  );
-};
-
 /* ------------------------------------------------------------------ */
-/* Module viewer (enclosure / structure crossfade)                     */
+/* Module image crossfade                                              */
 /* ------------------------------------------------------------------ */
 
 const ModuleViewer = () => {
   const [view, setView] = useState<(typeof moduleViews)[number]["id"]>("enclosure");
-  const touched = useRef(false);
 
-  // Slow auto-flip until the visitor takes over.
   useEffect(() => {
     const t = setInterval(() => {
-      if (!touched.current) setView((v) => (v === "enclosure" ? "structure" : "enclosure"));
-    }, 4500);
+      setView((v) => (v === "enclosure" ? "structure" : "enclosure"));
+    }, 4200);
+
     return () => clearInterval(t);
   }, []);
 
-  const active = moduleViews.find((v) => v.id === view)!;
-
   return (
-    <div>
-      <div className="flex items-center gap-8 border-b border-black/10 pb-3">
-        {moduleViews.map((v) => (
-          <button
-            key={v.id}
-            onClick={() => {
-              touched.current = true;
-              setView(v.id);
-            }}
-            className={`text-[11px] font-mono uppercase tracking-[0.25em] transition-colors duration-300 ${
-              view === v.id ? "text-black" : "text-black/45 hover:text-black/75"
-            }`}
-          >
-            <span className={view === v.id ? "text-primary" : ""}>●</span> {v.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="relative mt-2 aspect-[16/10] md:aspect-[2/1] overflow-hidden bg-white">
-        {moduleViews.map((v) => (
-          <motion.img
-            key={v.id}
-            src={v.src}
-            alt={v.alt}
-            initial={false}
-            animate={{ opacity: view === v.id ? 1 : 0 }}
-            transition={{ duration: 0.7, ease: EASE }}
-            className="absolute inset-0 w-full h-full object-contain scale-[1.5]"
-          />
-        ))}
-      </div>
-
-      <DimLine dark label="480 IN · 12.19 M" className="mt-1 mx-6 lg:mx-16" />
-      <p className="mt-5 text-black/70 text-base leading-relaxed min-h-[1.5rem]">{active.note}</p>
+    <div className="relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white">
+      {moduleViews.map((v) => (
+        <motion.img
+          key={v.id}
+          src={v.src}
+          alt={v.alt}
+          initial={false}
+          animate={{ opacity: view === v.id ? 1 : 0 }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="absolute inset-0 w-full h-full object-contain scale-[1.7]"
+        />
+      ))}
     </div>
   );
 };
@@ -309,54 +269,54 @@ const ColocationPage = () => {
               </p>
             </motion.div>
 
-            <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            <div className="mt-14 lg:mt-20 grid lg:grid-cols-[minmax(0,1fr)_300px] gap-8 lg:gap-12 items-end">
               <motion.div
                 {...fadeUp}
                 transition={{ duration: 0.8, ease: EASE }}
-                className="lg:col-span-8"
+                className="min-w-0"
               >
                 <ModuleViewer />
               </motion.div>
 
-              {/* Electrical figures — ledger beside the render */}
+              {/* Electrical figures — compact lower-right ledger */}
               <motion.div
                 {...fadeUp}
                 transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                className="lg:col-span-4 lg:pt-1"
+                className="w-full max-w-[330px] lg:justify-self-end"
               >
-                <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-black/60 pb-3 border-b border-black/10">
+                <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
                   Electrical · per module
                 </p>
 
-                <div className="mt-6 flex flex-wrap gap-2.5">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {moduleHighlights.map((pill) => (
                     <span
                       key={pill.label}
-                      className="inline-flex items-baseline gap-2 rounded-full bg-black text-white pl-5 pr-4 py-2.5"
+                      className="inline-flex items-baseline gap-1.5 rounded-full bg-black text-white pl-3.5 pr-3 py-1.5"
                     >
-                      <span className="font-heading font-bold text-lg tracking-tightest leading-none">
+                      <span className="font-heading font-bold text-sm tracking-tightest leading-none">
                         {pill.value}
                         {pill.unit && (
                           <span className="text-primary"> {pill.unit}</span>
                         )}
                       </span>
-                      <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-white/70">
+                      <span className="text-[9px] font-mono uppercase tracking-[0.12em] text-white/70">
                         {pill.label}
                       </span>
                     </span>
                   ))}
                 </div>
 
-                <dl className="mt-8">
+                <dl className="mt-5 space-y-2.5">
                   {moduleSpecs.map((spec) => (
                     <div
                       key={spec.label}
-                      className="flex items-baseline justify-between gap-6 py-3.5 border-b border-black/10"
+                      className="flex items-baseline justify-between gap-4"
                     >
-                      <dt className="text-[11px] font-mono uppercase tracking-[0.16em] text-black/55 whitespace-nowrap">
+                      <dt className="text-[9px] font-mono uppercase tracking-[0.14em] text-black/50 whitespace-nowrap">
                         {spec.label}
                       </dt>
-                      <dd className="font-heading font-bold text-base lg:text-lg tracking-tight text-black text-right">
+                      <dd className="font-heading font-bold text-sm tracking-tight text-black text-right">
                         {spec.value}
                       </dd>
                     </div>

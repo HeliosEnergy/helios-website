@@ -1,6 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -105,30 +107,62 @@ const WaterOdometer = () => (
 const PueRuler = () => {
   const reduced = useReducedMotion();
   const ticks = Array.from({ length: 41 }, (_, i) => i);
+  const HELIOS = 12; // % along the scale
+  const INDUSTRY = 56;
 
   return (
     <div className="relative mt-16 lg:mt-24">
       {/* Markers */}
-      <div className="relative h-24 lg:h-28">
-        <div className="absolute inset-y-0 w-px bg-white/25" style={{ left: "56%" }} aria-hidden />
-        <span
-          className="absolute top-10 md:top-0 font-mono text-xs text-white/50 whitespace-nowrap pl-3"
-          style={{ left: "56%" }}
-        >
-          Industry average
-        </span>
-
+      <div className="relative h-28 lg:h-32">
+        {/* Reclaimed-overhead band, dragged open by the Helios marker */}
         <motion.div
-          className="absolute inset-y-0 w-[2px] bg-emerald-400"
-          initial={reduced ? { left: "12%" } : { left: "56%", opacity: 0 }}
-          whileInView={{ left: "12%", opacity: 1 }}
+          className="absolute inset-y-0 origin-right border-y border-eco/25"
+          style={{
+            left: `${HELIOS}%`,
+            width: `${INDUSTRY - HELIOS}%`,
+            background:
+              "repeating-linear-gradient(135deg, hsl(var(--eco)/0.16) 0 1px, transparent 1px 7px), linear-gradient(to right, hsl(var(--eco)/0.14), hsl(var(--eco)/0.02))",
+          }}
+          initial={reduced ? { scaleX: 1 } : { scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-120px" }}
           transition={{ duration: 1.6, delay: 0.3, ease: EASE }}
           aria-hidden
         />
         <motion.span
-          className="absolute top-0 font-mono text-xs text-emerald-300 whitespace-nowrap pl-3"
-          style={{ left: "12%" }}
+          className="absolute bottom-3 font-mono text-[11px] uppercase tracking-[0.18em] text-eco-bright whitespace-nowrap"
+          style={{ left: `${HELIOS}%`, paddingLeft: "0.875rem" }}
+          initial={reduced ? { opacity: 1 } : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.6, delay: 1.9, ease: EASE }}
+        >
+          ← Overhead reclaimed for compute
+        </motion.span>
+
+        <div
+          className="absolute inset-y-0 w-0 border-l border-dashed border-white/40"
+          style={{ left: `${INDUSTRY}%` }}
+          aria-hidden
+        />
+        <span
+          className="absolute top-10 md:top-0 font-mono text-xs text-white/60 whitespace-nowrap pl-3"
+          style={{ left: `${INDUSTRY}%` }}
+        >
+          Industry average
+        </span>
+
+        <motion.div
+          className="absolute inset-y-0 w-[2px] bg-eco shadow-[0_0_16px_2px_hsl(var(--eco)/0.55)]"
+          initial={reduced ? { left: `${HELIOS}%` } : { left: `${INDUSTRY}%`, opacity: 0 }}
+          whileInView={{ left: `${HELIOS}%`, opacity: 1 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 1.6, delay: 0.3, ease: EASE }}
+          aria-hidden
+        />
+        <motion.span
+          className="absolute top-0 -translate-y-1/2 font-mono text-[11px] uppercase tracking-[0.18em] text-eco-bright whitespace-nowrap border border-eco/40 bg-black px-3 py-1.5"
+          style={{ left: `calc(${HELIOS}% - 1px)` }}
           initial={reduced ? { opacity: 1 } : { opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-120px" }}
@@ -141,11 +175,11 @@ const PueRuler = () => {
       {/* Tick scale */}
       <div className="flex items-end justify-between h-8" aria-hidden>
         {ticks.map((i) => (
-          <span key={i} className={i % 4 === 0 ? "w-px h-8 bg-white/35" : "w-px h-3.5 bg-white/15"} />
+          <span key={i} className={i % 4 === 0 ? "w-px h-8 bg-white/50" : "w-px h-3.5 bg-white/25"} />
         ))}
       </div>
 
-      <div className="mt-4 flex justify-between gap-8 text-sm text-white/50">
+      <div className="mt-4 flex justify-between gap-8 text-sm text-white/60">
         <span>1.0 — every watt reaches compute</span>
         <span className="text-right">2.0 — half of it wasted</span>
       </div>
@@ -195,6 +229,8 @@ const InstrumentIndex = ({ children }: { children: string }) => (
 );
 
 const SustainabilityPage = () => {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-black text-white">
       <AnnouncementBanner />
@@ -203,14 +239,53 @@ const SustainabilityPage = () => {
       <main>
         {/* ——— Hero ——— */}
         <section className="relative overflow-hidden pt-28 lg:pt-40 px-4 lg:px-6">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden
-            style={{
-              background:
-                "radial-gradient(65% 70% at 50% 0%, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 40%, transparent 70%)",
-            }}
-          />
+          {/* Canopy light from above — WebGL crashes iOS Safari, so CSS fallback on mobile */}
+          {!isMobile ? (
+            <div
+              className="absolute inset-x-0 top-0 h-full pointer-events-none opacity-30"
+              aria-hidden
+              style={{
+                maskImage:
+                  "linear-gradient(to bottom, black 0%, black 25%, transparent 75%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 0%, black 25%, transparent 75%)",
+              }}
+            >
+              <GrainGradient
+                style={{ width: "100%", height: "100%" }}
+                colors={["#03130c", "#0d5a37", "#22aa6b"]}
+                colorBack="#000000"
+                softness={0.8}
+                intensity={0.12}
+                noise={0.3}
+                shape="blob"
+                speed={0.12}
+                scale={1.9}
+                offsetY={-0.35}
+              />
+              <PaperTexture
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.45 }}
+                colorFront="#1d5e3d"
+                colorBack="#000000"
+                contrast={0.4}
+                roughness={0.3}
+                fiber={0.55}
+                fiberSize={0.4}
+                crumples={0.15}
+                folds={0.1}
+                drops={0.05}
+              />
+            </div>
+          ) : (
+            <div
+              className="absolute inset-0 pointer-events-none"
+              aria-hidden
+              style={{
+                background:
+                  "radial-gradient(65% 70% at 50% 0%, hsl(var(--eco) / 0.14) 0%, hsl(var(--eco) / 0.04) 40%, transparent 70%)",
+              }}
+            />
+          )}
 
           <div className="relative max-w-7xl mx-auto">
             <motion.div {...fadeUp} transition={{ duration: 0.9, ease: EASE }}>
@@ -282,37 +357,6 @@ const SustainabilityPage = () => {
                 <p className="mt-5 text-sm lg:text-base text-white/50">
                   Litres of water drawn for cooling — per site, per year.
                 </p>
-
-                <div className="mt-14 lg:mt-16 space-y-8 max-w-xl">
-                  <div>
-                    <div className="flex items-baseline justify-between gap-6 text-sm text-white/55 mb-3">
-                      <span>A typical AI campus</span>
-                      <span>millions of litres a year</span>
-                    </div>
-                    <motion.div
-                      className="h-px bg-white/35 origin-left"
-                      initial={{ scaleX: 0 }}
-                      whileInView={{ scaleX: 1 }}
-                      viewport={{ once: true, margin: "-100px" }}
-                      transition={{ duration: 1.4, delay: 0.4, ease: EASE }}
-                      aria-hidden
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-baseline justify-between gap-6 text-sm text-emerald-300/90 mb-3">
-                      <span>Helios</span>
-                      <span>zero</span>
-                    </div>
-                    <motion.div
-                      className="h-1 w-1 rounded-full bg-emerald-400"
-                      initial={{ opacity: 0 }}
-                      whileInView={{ opacity: 1 }}
-                      viewport={{ once: true, margin: "-100px" }}
-                      transition={{ duration: 0.5, delay: 1.6, ease: EASE }}
-                      aria-hidden
-                    />
-                  </div>
-                </div>
 
                 <ImagePlaceholder
                   label="Placeholder — dry cooler / cold plate macro, ≥1600px"
