@@ -11,6 +11,7 @@ const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 const mobileNavItems = [
   { label: "Pricing", href: "/pricing" },
   { label: "Colocation", href: "/colocation" },
+  { label: "Sustainability", href: "/sustainability" },
   { label: "Model Library", href: "/model-library" },
 ];
 

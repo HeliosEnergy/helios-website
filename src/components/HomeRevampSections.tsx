@@ -340,7 +340,15 @@ export const HomeSustainabilitySection = () => {
           <h2 className={sectionHeading}>
             Fast shouldn't mean{" "}
             <span className="relative inline-block whitespace-nowrap">
-              wasteful.
+              <motion.span
+                initial={{ opacity: 1 }}
+                whileInView={{ opacity: 0.55 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, delay: 1.5, ease: EASE }}
+                className="inline-block"
+              >
+                wasteful.
+              </motion.span>
               <motion.span
                 aria-hidden
                 initial={{ scaleX: 0 }}
@@ -368,10 +376,10 @@ export const HomeSustainabilitySection = () => {
                 className="sustain-cell py-12 lg:py-16 md:px-8 lg:px-10 md:first:pl-0 border-t border-emerald-400/15 first:border-t-0 md:border-t-0"
               >
                 <div className="flex items-baseline gap-3">
-                  <span className="sustain-aurora text-[88px] lg:text-[112px] xl:text-[128px] font-heading font-bold tracking-tightest leading-none">
+                  <span className="sustain-metric text-white text-[88px] lg:text-[112px] xl:text-[128px] font-heading font-bold tracking-tightest leading-none">
                     {item.metric}
                   </span>
-                  <span className="text-emerald-400/90 font-mono text-lg lg:text-xl tracking-[0.15em]">
+                  <span className="sustain-unit text-emerald-400/90 font-mono text-lg lg:text-xl tracking-[0.15em]">
                     {item.unit}
                   </span>
                 </div>
@@ -382,7 +390,7 @@ export const HomeSustainabilitySection = () => {
           </div>
         </div>
         <Link
-          to="/colocation"
+          to="/sustainability"
           className="mt-10 inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors font-semibold group"
         >
           How our data centers work

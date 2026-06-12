@@ -1,4 +1,4 @@
-import { ArrowRight, Bot, Building, Zap } from "lucide-react";
+import { ArrowRight, Bot, Building, Leaf, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const PlatformDropdown = () => {
@@ -39,6 +39,14 @@ export const PlatformDropdown = () => {
               <span className="text-sm font-bold text-white">Colocation</span>
             </div>
             <p className="text-xs text-white/70 pl-7">Your racks, our megawatts</p>
+          </Link>
+
+          <Link to="/sustainability" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
+            <div className="flex items-center gap-3 mb-1">
+              <Leaf className="w-4 h-4 text-[#FF6B35]" />
+              <span className="text-sm font-bold text-white">Sustainability</span>
+            </div>
+            <p className="text-xs text-white/70 pl-7">0 water, low PUE, renewable-backed</p>
           </Link>
 
           <Link to="/serverless" className="group block p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] transition-colors">
