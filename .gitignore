@@ -30,3 +30,4 @@ dist-ssr
 .env.production.new
 .env.vercel
 .env.verify
+.design-refs/

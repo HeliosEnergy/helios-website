@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -39,6 +40,7 @@ export const sectionHeading =
 const offerings = [
   {
     tag: "GPU as a Service",
+    label: "GPU Cloud",
     title: "Dedicated GPU clusters, managed by Helios",
     description:
       "Reserved, single-tenant clusters of the latest NVIDIA silicon. Provisioned, networked and burned-in by our team, ready for training and inference at scale.",
@@ -48,13 +50,22 @@ const offerings = [
       "Non-blocking InfiniBand fabric, parallel storage",
       "Slurm or Kubernetes orchestration, your choice",
     ],
+    blurb:
+      "Reserved, single-tenant clusters of the latest NVIDIA silicon, networked and burned in by our team, ready to train.",
     primary: "Join the GPU waitlist",
     primaryHref: "/contact?service=clusters",
     secondary: "Explore GPU Cloud",
     secondaryHref: "/clusters",
+    image: "/gpus/dgx-b200.jpg",
+    specs: [
+      { k: "GPUs", v: "8 to 4096" },
+      { k: "Tenancy", v: "Single-tenant" },
+      { k: "Silicon", v: "GB300 / B300" },
+    ],
   },
   {
     tag: "Colocation",
+    label: "Colocation",
     title: "Your hardware, our megawatts",
     description:
       "High-density colocation engineered for Blackwell-generation deployments. Liquid-cooled, water-free halls with renewable-backed power, in blocks of tens of megawatts.",
@@ -64,79 +75,156 @@ const offerings = [
       "Up to rack densities required by NVL72 systems",
       "Remote hands, security and 24/7 operations included",
     ],
+    blurb:
+      "High-density, liquid-cooled halls on renewable-backed power, delivered in blocks of tens of megawatts.",
     primary: "Reserve colo space",
     primaryHref: "/contact?service=coloc",
     secondary: "Explore Colocation",
     secondaryHref: "/colocation",
+    image: "/coloc/hall-interior-rack-corridor.png",
+    specs: [
+      { k: "Power", v: "10s of MW" },
+      { k: "Ready in", v: "~3 months" },
+      { k: "Cooling", v: "Liquid, water-free" },
+    ],
   },
 ];
 
-export const HomeOfferingsSection = () => (
-  <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10">
-    <div className="max-w-7xl mx-auto">
-      <SectionRule index="01">What we do</SectionRule>
-      <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="max-w-4xl">
-        <h2 className={sectionHeading}>Two ways to get Blackwell-class compute.</h2>
-        <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
-          Run on our cloud, or put your own racks in our data centers. Same sites, same power,
-          same ~3-month timeline.
-        </p>
-      </motion.div>
+// Restrained entrance: the module settles in once on scroll, one quiet stagger.
+const stage: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.04 } },
+};
 
-      <div className="mt-14 lg:mt-20 grid lg:grid-cols-2 border-y border-white/10 lg:divide-x lg:divide-white/10">
-        {offerings.map((offering, i) => (
-          <motion.div
-            key={offering.title}
-            {...fadeUp}
-            transition={{ duration: 0.8, delay: i * 0.12, ease: EASE }}
-            className={`py-10 lg:py-14 flex flex-col ${
-              i === 0 ? "lg:pr-12 xl:pr-16" : "lg:pl-12 xl:pl-16 border-t border-white/10 lg:border-t-0"
-            }`}
-          >
-            <div className="flex items-baseline justify-between gap-4">
-              <span className="text-primary font-mono text-sm tracking-[0.2em]">0{i + 1}</span>
-              <span className="text-white/55 text-[11px] font-mono uppercase tracking-[0.3em]">
-                {offering.tag}
-              </span>
-            </div>
-            <h3 className="mt-8 text-3xl lg:text-[44px] font-heading font-bold text-white tracking-tightest leading-[0.95]">
-              {offering.title}
-            </h3>
-            <p className="mt-6 text-white/75 text-base lg:text-lg font-light leading-relaxed">
-              {offering.description}
-            </p>
-            <div className="mt-10 border-t border-white/10">
-              {offering.bullets.map((bullet) => (
-                <div
-                  key={bullet}
-                  className="flex items-baseline gap-4 border-b border-white/10 py-3.5 text-sm lg:text-base text-white/80"
+const rise: Variants = {
+  hidden: { y: 16, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.6, ease: EASE } },
+};
+
+export const HomeOfferingsSection = () => {
+  const reduced = useReducedMotion();
+  const [active, setActive] = useState(0);
+  const o = offerings[active];
+
+  const tabSpring = reduced
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 420, damping: 38 };
+
+  const swap = reduced
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -8 },
+      };
+
+  return (
+    <section className="relative overflow-hidden bg-[#EDF0F2]">
+      <motion.div
+        variants={stage}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.25 }}
+        className="mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-center px-5 py-24 sm:px-8 lg:py-0"
+      >
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+          {/* LEFT: title, tabs, big description, CTA — all in view with the image */}
+          <div className="relative z-10 max-w-xl">
+            <motion.h2
+              variants={rise}
+              className="font-heading text-4xl font-medium leading-[1.02] tracking-tight text-[#15171A] sm:text-5xl lg:text-[3.5rem]"
+            >
+              Two ways to get Blackwell-class compute.
+            </motion.h2>
+
+            {/* tabs */}
+            <motion.div variants={rise} className="mt-9 border-b border-black/10">
+              <div role="tablist" aria-label="Compute options" className="flex gap-10">
+                {offerings.map((opt, i) => {
+                  const on = active === i;
+                  return (
+                    <button
+                      key={opt.label}
+                      role="tab"
+                      aria-selected={on}
+                      onClick={() => setActive(i)}
+                      className={`relative -mb-px pb-3.5 font-mono text-xs uppercase tracking-[0.18em] transition-colors duration-200 ${
+                        on ? "text-[#15171A]" : "text-black/40 hover:text-black/60"
+                      }`}
+                    >
+                      {opt.label}
+                      {on && (
+                        <motion.span
+                          layoutId="zjTabMark"
+                          transition={tabSpring}
+                          className="absolute inset-x-0 -bottom-px h-px bg-[#E0701A]"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+            {/* big, pronounced description */}
+            <motion.div variants={rise} className="mt-9 min-h-[6.5rem] lg:min-h-[7.5rem]">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={active}
+                  initial={swap.initial}
+                  animate={swap.animate}
+                  exit={swap.exit}
+                  transition={{ duration: 0.34, ease: EASE }}
+                  className="max-w-lg text-xl font-light leading-snug text-[#2A2D31] lg:text-2xl"
                 >
-                  <span className="w-3 h-px bg-primary shrink-0 self-center" />
-                  <span>{bullet}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 lg:mt-auto lg:pt-10 flex flex-col sm:flex-row gap-3">
-              <Button
-                asChild
-                className="rounded-full bg-white text-black hover:bg-primary hover:text-primary-foreground transition-colors duration-300 font-mono uppercase tracking-widest text-xs"
+                  {o.blurb}
+                </motion.p>
+              </AnimatePresence>
+            </motion.div>
+
+            {/* CTA */}
+            <motion.div variants={rise} className="mt-10 flex items-center gap-6">
+              <Link
+                to={o.primaryHref}
+                className="group inline-flex items-center gap-3 rounded-full border border-black/15 bg-white/50 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#15171A] transition-colors hover:border-[#E0701A]/40 hover:bg-white"
               >
-                <Link to={offering.primaryHref}>{offering.primary}</Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="rounded-full border-white/20 text-white hover:bg-white/10 font-mono uppercase tracking-widest text-xs"
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-[#15171A] text-white transition-colors group-hover:bg-[#E0701A]">
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+                {o.primary}
+              </Link>
+              <Link
+                to={o.secondaryHref}
+                className="font-mono text-[11px] uppercase tracking-[0.16em] text-black/45 underline-offset-4 transition-colors hover:text-black/70 hover:underline"
               >
-                <Link to={offering.secondaryHref}>{offering.secondary}</Link>
-              </Button>
-            </div>
+                Explore
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* RIGHT: tall image, sharp, bleeds to the right edge and overlaps the gutter */}
+          <motion.div
+            variants={rise}
+            className="relative aspect-[5/4] overflow-hidden bg-[#0A0A0B] sm:aspect-[16/10] lg:aspect-auto lg:-ml-8 lg:h-[80vh] lg:mr-[calc(50%-50vw)]"
+          >
+            <AnimatePresence initial={false}>
+              <motion.img
+                key={o.image}
+                src={o.image}
+                alt={o.title}
+                initial={{ opacity: 0, scale: reduced ? 1 : 1.04 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.7, ease: EASE }}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            </AnimatePresence>
           </motion.div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
+        </div>
+      </motion.div>
+    </section>
+  );
+};
 
 const MONTHS_MAX = 36;
 const RULER_TICKS = [0, 6, 12, 18, 24, 30, 36];

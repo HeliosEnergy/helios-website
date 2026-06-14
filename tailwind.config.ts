@@ -14,6 +14,12 @@ export default {
       },
     },
     extend: {
+      // Widen the standard section container site-wide. Every section uses
+      // `max-w-7xl`; bumping the token (was 80rem/1280px) lets content reclaim
+      // horizontal space on larger screens without editing each component.
+      maxWidth: {
+        "7xl": "88rem",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
