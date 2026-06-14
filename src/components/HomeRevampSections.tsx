@@ -1,7 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
+import { useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useScroll,
+  useMotionValueEvent,
+  type Variants,
+} from "framer-motion";
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -103,43 +110,128 @@ const rise: Variants = {
 
 export const HomeOfferingsSection = () => {
   const reduced = useReducedMotion();
+  const isMobile = useIsMobile();
   const [active, setActive] = useState(0);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const o = offerings[active];
 
-  const tabSpring = reduced
-    ? { duration: 0 }
-    : { type: "spring" as const, stiffness: 420, damping: 38 };
+  // Scroll progress across the tall wrapper drives the active path on desktop.
+  // The section is pinned (sticky) for the duration, so scrolling switches
+  // GPU Cloud -> Colocation, then releases.
+  const { scrollYProgress } = useScroll({
+    target: wrapRef,
+    offset: ["start start", "end end"],
+  });
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+    if (isMobile) return;
+    const next = p < 0.5 ? 0 : 1;
+    setActive((cur) => (cur === next ? cur : next));
+  });
+
+  // Click a dot: on desktop scroll to that segment (keeps the pin in sync);
+  // on mobile just switch with a transition.
+  const goTo = (i: number) => {
+    if (isMobile || !wrapRef.current) {
+      setActive(i);
+      return;
+    }
+    const el = wrapRef.current;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    const len = el.offsetHeight - window.innerHeight;
+    const prog = i === 0 ? 0.25 : 0.75;
+    window.scrollTo({ top: top + prog * len, behavior: reduced ? "auto" : "smooth" });
+  };
 
   const swap = reduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : {
-        initial: { opacity: 0, y: 10 },
+        initial: { opacity: 0, y: 12 },
         animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -8 },
+        exit: { opacity: 0, y: -10 },
       };
 
   return (
-    <section className="relative overflow-hidden bg-[#EDF0F2]">
-      <motion.div
-        variants={stage}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.25 }}
-        className="mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-center px-5 py-24 sm:px-8 lg:py-0"
-      >
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
-          {/* LEFT: title, tabs, big description, CTA — all in view with the image */}
-          <div className="relative z-10 max-w-xl">
-            <motion.h2
-              variants={rise}
-              className="font-heading text-4xl font-medium leading-[1.02] tracking-tight text-[#15171A] sm:text-5xl lg:text-[3.5rem]"
-            >
-              Two ways to get Blackwell-class compute.
-            </motion.h2>
+    <div ref={wrapRef} className="relative lg:h-[220vh]">
+      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-[#EDF0F2] px-5 py-24 sm:px-8 lg:sticky lg:top-0 lg:h-screen lg:min-h-0 lg:py-0">
+        <motion.div
+          variants={stage}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          className="mx-auto w-full max-w-7xl"
+        >
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-8">
+            {/* LEFT: title, big description, CTA */}
+            <div className="relative z-10 max-w-xl">
+              <motion.h2
+                variants={rise}
+                className="font-heading text-4xl font-medium leading-[1.02] tracking-tight text-[#15171A] sm:text-5xl lg:text-[3.5rem]"
+              >
+                Two ways to get Blackwell-class compute.
+              </motion.h2>
 
-            {/* tabs */}
-            <motion.div variants={rise} className="mt-9 border-b border-black/10">
-              <div role="tablist" aria-label="Compute options" className="flex gap-10">
+              <motion.div variants={rise} className="mt-10 min-h-[7rem] lg:min-h-[8rem]">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={active}
+                    initial={swap.initial}
+                    animate={swap.animate}
+                    exit={swap.exit}
+                    transition={{ duration: 0.36, ease: EASE }}
+                    className="max-w-lg text-xl font-light leading-snug text-[#2A2D31] lg:text-2xl"
+                  >
+                    {o.blurb}
+                  </motion.p>
+                </AnimatePresence>
+              </motion.div>
+
+              <motion.div variants={rise} className="mt-10 flex items-center gap-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={active}
+                    initial={swap.initial}
+                    animate={swap.animate}
+                    exit={swap.exit}
+                    transition={{ duration: 0.36, ease: EASE }}
+                  >
+                    <Link
+                      to={o.primaryHref}
+                      className="group inline-flex items-center gap-3 rounded-full border border-black/15 bg-white/50 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#15171A] transition-colors hover:border-[#E0701A]/40 hover:bg-white"
+                    >
+                      <span className="grid h-7 w-7 place-items-center rounded-full bg-[#15171A] text-white transition-colors group-hover:bg-[#E0701A]">
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                      {o.primary}
+                    </Link>
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            </div>
+
+            {/* RIGHT: tall bleeding image with vertical dot switcher */}
+            <motion.div
+              variants={rise}
+              className="relative aspect-[5/4] overflow-hidden bg-[#0A0A0B] sm:aspect-[16/10] lg:aspect-auto lg:-ml-8 lg:h-[82vh] lg:mr-[calc(50%-50vw)]"
+            >
+              <AnimatePresence initial={false}>
+                <motion.img
+                  key={o.image}
+                  src={o.image}
+                  alt={o.title}
+                  initial={{ opacity: 0, scale: reduced ? 1 : 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.7, ease: EASE }}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </AnimatePresence>
+
+              {/* vertical dot switcher / scroll indicator */}
+              <div
+                role="tablist"
+                aria-label="Compute options"
+                className="absolute left-4 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-5 lg:left-7"
+              >
                 {offerings.map((opt, i) => {
                   const on = active === i;
                   return (
@@ -147,82 +239,31 @@ export const HomeOfferingsSection = () => {
                       key={opt.label}
                       role="tab"
                       aria-selected={on}
-                      onClick={() => setActive(i)}
-                      className={`relative -mb-px pb-3.5 font-mono text-xs uppercase tracking-[0.18em] transition-colors duration-200 ${
-                        on ? "text-[#15171A]" : "text-black/40 hover:text-black/60"
-                      }`}
+                      aria-label={opt.label}
+                      onClick={() => goTo(i)}
+                      className="group flex items-center gap-3"
                     >
-                      {opt.label}
-                      {on && (
-                        <motion.span
-                          layoutId="zjTabMark"
-                          transition={tabSpring}
-                          className="absolute inset-x-0 -bottom-px h-px bg-[#E0701A]"
-                        />
-                      )}
+                      <span
+                        className={`block w-1.5 rounded-full transition-all duration-300 ${
+                          on ? "h-8 bg-[#E0701A]" : "h-1.5 bg-white/45 group-hover:bg-white/80"
+                        }`}
+                      />
+                      <span
+                        className={`font-mono text-[10px] uppercase tracking-[0.18em] transition-colors duration-300 ${
+                          on ? "text-white" : "text-white/0 group-hover:text-white/60"
+                        }`}
+                      >
+                        {opt.label}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </motion.div>
-
-            {/* big, pronounced description */}
-            <motion.div variants={rise} className="mt-9 min-h-[6.5rem] lg:min-h-[7.5rem]">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={active}
-                  initial={swap.initial}
-                  animate={swap.animate}
-                  exit={swap.exit}
-                  transition={{ duration: 0.34, ease: EASE }}
-                  className="max-w-lg text-xl font-light leading-snug text-[#2A2D31] lg:text-2xl"
-                >
-                  {o.blurb}
-                </motion.p>
-              </AnimatePresence>
-            </motion.div>
-
-            {/* CTA */}
-            <motion.div variants={rise} className="mt-10 flex items-center gap-6">
-              <Link
-                to={o.primaryHref}
-                className="group inline-flex items-center gap-3 rounded-full border border-black/15 bg-white/50 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#15171A] transition-colors hover:border-[#E0701A]/40 hover:bg-white"
-              >
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-[#15171A] text-white transition-colors group-hover:bg-[#E0701A]">
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-                {o.primary}
-              </Link>
-              <Link
-                to={o.secondaryHref}
-                className="font-mono text-[11px] uppercase tracking-[0.16em] text-black/45 underline-offset-4 transition-colors hover:text-black/70 hover:underline"
-              >
-                Explore
-              </Link>
-            </motion.div>
           </div>
-
-          {/* RIGHT: tall image, sharp, bleeds to the right edge and overlaps the gutter */}
-          <motion.div
-            variants={rise}
-            className="relative aspect-[5/4] overflow-hidden bg-[#0A0A0B] sm:aspect-[16/10] lg:aspect-auto lg:-ml-8 lg:h-[80vh] lg:mr-[calc(50%-50vw)]"
-          >
-            <AnimatePresence initial={false}>
-              <motion.img
-                key={o.image}
-                src={o.image}
-                alt={o.title}
-                initial={{ opacity: 0, scale: reduced ? 1 : 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.7, ease: EASE }}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </AnimatePresence>
-          </motion.div>
-        </div>
-      </motion.div>
-    </section>
+        </motion.div>
+      </section>
+    </div>
   );
 };
 
