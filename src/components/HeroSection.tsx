@@ -1,10 +1,11 @@
-import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ArrowCTA } from "@/components/ui/ArrowCTA";
 
 const heroContent = {
-  title: 'Frontier compute, live in ~3 months.',
+  titlePrefix: 'Frontier compute,',
+  titleHighlight: 'live in ~3 months.',
   subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation, deployed in about three months. Not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
 };
 
@@ -70,7 +71,8 @@ export const HeroSection = () => {
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                   className="text-5xl sm:text-6xl lg:text-7xl font-heading font-medium text-white tracking-tight leading-[1.02] max-w-5xl text-balance"
                 >
-                  {heroContent.title}
+                  {heroContent.titlePrefix}{" "}
+                  <span className="text-primary">{heroContent.titleHighlight}</span>
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
@@ -83,15 +85,9 @@ export const HeroSection = () => {
               </div>
 
               <div className="pt-4">
-                <a
-                  href="/contact?service=coloc"
-                  className="group inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:border-primary/50 hover:bg-white/10"
-                >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-black transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
+                <ArrowCTA to="/contact?service=coloc" tone="dark" accent="primary">
                   Reserve capacity
-                </a>
+                </ArrowCTA>
               </div>
             </motion.div>
           </div>

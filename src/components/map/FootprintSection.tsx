@@ -38,19 +38,19 @@ const Ledger = ({
             active ? "bg-white/[0.06]" : ""
           }`}
         >
-          <span className="font-mono text-xs text-white/40">
+          <span className="font-mono text-xs text-white/60">
             {String(i + 1).padStart(2, "0")}
           </span>
           <span className="font-heading font-bold text-white text-[15px] tracking-tight">
             {site.name}
-            <span className="ml-2 font-mono font-normal text-xs text-white/40">{site.abbr}</span>
+            <span className="ml-2 font-mono font-normal text-xs text-white/55">{site.abbr}</span>
           </span>
           <span className="flex items-center gap-2">
             {variant === "colo" && (
-              <span className="font-mono text-xs text-white/55 mr-1">{site.capacity}</span>
+              <span className="font-mono text-xs text-white/70 mr-1">{site.capacity}</span>
             )}
             <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-            <span className="font-mono text-xs text-white/55 w-[4.6rem]">{meta.label}</span>
+            <span className="font-mono text-xs text-white/70 w-[4.6rem]">{meta.label}</span>
           </span>
         </button>
       );

@@ -12,6 +12,7 @@ import {
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ArrowCTA } from "./ui/ArrowCTA";
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -174,15 +175,9 @@ export const HomeOfferingsSection = () => {
                     exit={swap.exit}
                     transition={{ duration: 0.36, ease: EASE }}
                   >
-                    <Link
-                      to={o.primaryHref}
-                      className="group inline-flex items-center gap-3 rounded-full border border-black/15 bg-white/50 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-[#15171A] transition-colors hover:border-[#E0701A]/40 hover:bg-white"
-                    >
-                      <span className="grid h-7 w-7 place-items-center rounded-full bg-[#15171A] text-white transition-colors group-hover:bg-[#E0701A]">
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </span>
+                    <ArrowCTA to={o.primaryHref} tone="light" accent="primary">
                       {o.primary}
-                    </Link>
+                    </ArrowCTA>
                   </motion.div>
                 </AnimatePresence>
               </motion.div>

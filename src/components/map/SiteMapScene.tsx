@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { AnimatePresence, motion } from "framer-motion";
 import mapData from "./us-map-data.json";
-import { STATUS_META, type Site } from "./sites";
+import { STATUS_META, type Site, type SiteStatus } from "./sites";
 
 /* Albers 975x610 -> world space centered on the contiguous US */
 const [MIN_X, MIN_Y, MAX_X, MAX_Y] = mapData.bbox;
@@ -87,7 +87,7 @@ const DOT_VERT = /* glsl */ `
     vAlpha = smoothstep(gate, gate + 0.09, uReveal);
     float breath = 1.0 + 0.09 * sin(uTime * 0.7 + aRand * 6.2831);
     vGlow = aGlow * (0.72 + 0.28 * sin(uTime * 1.4 + aRand * 6.2831));
-    float size = 2.6 * (1.0 + aGlow * 1.05) * breath;
+    float size = 2.95 * (1.0 + aGlow * 1.05) * breath;
     gl_PointSize = max(size * uScale / -mv.z, 1.0);
     gl_Position = projectionMatrix * mv;
   }
@@ -100,8 +100,12 @@ const DOT_FRAG = /* glsl */ `
     vec2 c = gl_PointCoord - 0.5;
     float disc = 1.0 - smoothstep(0.3, 0.5, length(c));
     if (disc < 0.01) discard;
-    vec3 col = mix(vec3(0.6, 0.63, 0.67), vec3(1.0, 0.57, 0.3), vGlow);
-    gl_FragColor = vec4(col, vAlpha * disc * (0.3 + 0.62 * vGlow));
+    // Cool blue-grey land recedes; warm amber halo blooms near sites.
+    // Warm-on-cool makes the markers pop while the continent stays legible.
+    vec3 land = vec3(0.56, 0.62, 0.70);
+    vec3 hot = vec3(1.0, 0.62, 0.32);
+    vec3 col = mix(land, hot, vGlow);
+    gl_FragColor = vec4(col, vAlpha * disc * (0.66 + 0.34 * vGlow));
   }
 `;
 
@@ -202,7 +206,7 @@ const ARC_FRAG = /* glsl */ `
     float p = fract(vT - uFlow);
     float pulse = smoothstep(0.1, 0.0, min(p, 1.0 - p));
     vec3 col = mix(vec3(1.0), vec3(1.0, 0.57, 0.3), pulse);
-    gl_FragColor = vec4(col, (0.10 + 0.5 * pulse) * endFade * uAlpha);
+    gl_FragColor = vec4(col, (0.2 + 0.55 * pulse) * endFade * uAlpha);
   }
 `;
 
@@ -332,6 +336,21 @@ const MarkerTooltip = ({
   );
 };
 
+/* Marker fill carries status meaning, matching the ledger legend:
+   live = green, energizing = amber, reserving = hollow cool ring. */
+const MARKER_FILL: Record<SiteStatus, string> = {
+  live: "bg-eco shadow-[0_0_16px_3px_hsl(var(--eco)/0.5)]",
+  energizing: "bg-primary shadow-[0_0_16px_3px_hsl(24_100%_64%/0.55)]",
+  reserving: "border-[1.5px] border-white/55 bg-black/40",
+};
+
+/* Diameter encodes capacity (area ∝ MW), so a 60 MW site reads bigger
+   than an 18 MW one at a glance. Floored so the smallest stays tappable. */
+const markerSize = (capacity: string) => {
+  const mw = parseInt(capacity, 10) || 24;
+  return Math.max(10, Math.round(18 * Math.sqrt(mw / 60)));
+};
+
 const Markers = ({
   sites,
   variant,
@@ -351,7 +370,8 @@ const Markers = ({
       const active = activeId === site.id;
       const below = site.y < CY;
       const align = site.x > 700 ? ("right" as const) : ("center" as const);
-      const solid = site.status !== "reserving";
+      const reserving = site.status === "reserving";
+      const dia = markerSize(site.capacity);
       return (
         <group key={site.id} position={[wx, wy, 4]}>
           <Html center zIndexRange={[40, 0]} style={{ pointerEvents: "none" }}>
@@ -371,22 +391,32 @@ const Markers = ({
                 onClick={() => onActive(active ? null : site.id)}
                 className="relative flex items-center justify-center w-7 h-7 cursor-pointer"
               >
+                {!reserving && (
+                  <span
+                    className="map-ping absolute inset-0 rounded-full"
+                    style={
+                      {
+                        animationDelay: `${i * 0.5}s`,
+                        ...(site.status === "live" ? { "--ping": "158 64% 52%" } : {}),
+                      } as React.CSSProperties
+                    }
+                  />
+                )}
                 <span
-                  className="map-ping absolute inset-0 rounded-full"
-                  style={{ animationDelay: `${i * 0.5}s` }}
-                />
-                <span
-                  className={`relative rounded-full w-[9px] h-[9px] transition-transform duration-300 ${
-                    solid
-                      ? "bg-primary shadow-[0_0_14px_2px_hsl(24_100%_64%/0.45)]"
-                      : "border-[1.5px] border-primary bg-black"
+                  className={`relative block rounded-full transition-transform duration-300 ${
+                    MARKER_FILL[site.status]
                   } ${active ? "scale-150" : ""}`}
+                  style={{ width: dia, height: dia }}
                 />
+                {/* Label sits on a solid plate (matching the ledger) so the
+                    name reads cleanly off the dot field. Hidden while active,
+                    where the richer tooltip takes over. */}
                 <span
-                  className={`hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-1 font-mono text-xs whitespace-nowrap transition-all duration-300 ${
-                    active && below ? "opacity-0" : active ? "text-white" : "text-white/60"
+                  className={`hidden sm:flex items-center gap-1.5 absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap border border-white/15 bg-black/80 px-2 py-1 font-mono text-[11px] tracking-tight text-white/90 backdrop-blur-sm transition-opacity duration-300 ${
+                    active ? "opacity-0" : "opacity-100"
                   }`}
                 >
+                  <span className={`h-1 w-1 rounded-full ${STATUS_META[site.status].dot}`} />
                   {site.name}
                 </span>
                 <AnimatePresence>

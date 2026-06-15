@@ -8,6 +8,7 @@ import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { EASE, fadeUp } from "@/components/HomeRevampSections";
+import { ArrowCTA } from "@/components/ui/ArrowCTA";
 
 const consequences = [
   {
@@ -45,40 +46,6 @@ const stage = {
 const rise = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
-};
-
-/* Quiet pill + leading icon-chip (the site CTA convention). */
-const PillCTA = ({
-  to,
-  children,
-  tone = "dark",
-}: {
-  to: string;
-  children: string;
-  tone?: "dark" | "light";
-}) => {
-  const dark = tone === "dark";
-  return (
-    <Link
-      to={to}
-      className={`group inline-flex items-center gap-3 rounded-full border py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
-        dark
-          ? "border-white/15 bg-white/5 text-white hover:border-emerald-400/50 hover:bg-white/10"
-          : "border-black/15 bg-white/50 text-[#15171A] hover:border-emerald-600/40 hover:bg-white"
-      }`}
-    >
-      <span
-        className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
-          dark
-            ? "bg-white text-black group-hover:bg-emerald-400"
-            : "bg-[#15171A] text-white group-hover:bg-emerald-600"
-        }`}
-      >
-        <ArrowRight className="h-3.5 w-3.5" />
-      </span>
-      {children}
-    </Link>
-  );
 };
 
 /* A single odometer digit: a descending reel that rolls through nine values
@@ -433,9 +400,9 @@ const SustainabilityPage = () => {
               transition={{ duration: 0.8, delay: 0.4, ease: EASE }}
               className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4"
             >
-              <PillCTA to="/contact?service=coloc" tone="dark">
+              <ArrowCTA to="/contact?service=coloc" tone="dark" accent="emerald">
                 Reserve capacity
-              </PillCTA>
+              </ArrowCTA>
               <Link
                 to="/colocation"
                 className="group inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-white/70 transition-colors hover:text-white"
@@ -629,9 +596,9 @@ const SustainabilityPage = () => {
                 transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
                 className="mt-10 flex"
               >
-                <PillCTA to="/contact?service=coloc" tone="light">
+                <ArrowCTA to="/contact?service=coloc" tone="light" accent="emerald">
                   Join the waitlist
-                </PillCTA>
+                </ArrowCTA>
               </motion.div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
@@ -123,41 +123,6 @@ const rise = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
 };
 
-/* Quiet pill + leading icon-chip (the site CTA convention). Orange accent
-   keeps the colocation page identity. */
-const PillCTA = ({
-  to,
-  children,
-  tone = "dark",
-}: {
-  to: string;
-  children: string;
-  tone?: "dark" | "light";
-}) => {
-  const dark = tone === "dark";
-  return (
-    <Link
-      to={to}
-      className={`group inline-flex items-center gap-3 rounded-full border py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
-        dark
-          ? "border-white/15 bg-white/5 text-white hover:border-primary/50 hover:bg-white/10"
-          : "border-black/15 bg-white/50 text-[#15171A] hover:border-primary/50 hover:bg-white"
-      }`}
-    >
-      <span
-        className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
-          dark
-            ? "bg-white text-black group-hover:bg-primary group-hover:text-primary-foreground"
-            : "bg-[#15171A] text-white group-hover:bg-primary group-hover:text-primary-foreground"
-        }`}
-      >
-        <ArrowRight className="h-3.5 w-3.5" />
-      </span>
-      {children}
-    </Link>
-  );
-};
-
 const PlanBackdrop = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
     <img
@@ -242,9 +207,9 @@ const ColocationPage = () => {
                 facilities can't touch.
               </motion.p>
               <motion.div variants={rise} className="mt-10 flex flex-wrap items-center gap-5">
-                <PillCTA to="/contact?service=coloc" tone="dark">
+                <ArrowCTA to="/contact?service=coloc" tone="dark" accent="primary">
                   Reserve colo capacity
-                </PillCTA>
+                </ArrowCTA>
                 <Link
                   to="/contact?service=coloc"
                   className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/60 hover:text-white transition-colors"
@@ -515,9 +480,9 @@ const ColocationPage = () => {
                 Blocks are allocated in waitlist order. Claim yours.
               </p>
               <div className="mt-10">
-                <PillCTA to="/contact?service=coloc" tone="light">
+                <ArrowCTA to="/contact?service=coloc" tone="light" accent="primary">
                   Reserve colo capacity
-                </PillCTA>
+                </ArrowCTA>
               </div>
             </motion.div>
           </div>
