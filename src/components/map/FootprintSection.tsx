@@ -2,7 +2,7 @@ import { lazy, Suspense, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { EASE, fadeUp, SectionRule, sectionHeading } from "@/components/HomeRevampSections";
+import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
 import { COLO_SITES, DC_SITES, STATUS_META, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
@@ -100,7 +100,6 @@ export const FootprintMap = ({
 export const HomeFootprintSection = () => (
   <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
     <div className="max-w-7xl mx-auto">
-      <SectionRule index="05">Footprint</SectionRule>
       <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 items-end">
         <motion.div
           {...fadeUp}

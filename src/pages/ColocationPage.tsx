@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { EASE, fadeUp, SectionRule, sectionHeading } from "@/components/HomeRevampSections";
+import { EASE, fadeUp } from "@/components/HomeRevampSections";
 import { ColoFootprintMap } from "@/components/map/FootprintSection";
 
 /* ------------------------------------------------------------------ */
@@ -108,21 +107,56 @@ const steps = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Drawing-sheet primitives                                            */
+/* Calm design system (shared with the sustainability page)            */
 /* ------------------------------------------------------------------ */
 
-const headingLight =
-  "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-black tracking-tightest leading-[0.92]";
+// Modest, lighter-weight headings, sentence case. Per-use size appended.
+const calmHeading = "font-heading font-medium tracking-tight leading-[1.02]";
 
-const SectionRuleLight = ({ index, children }: { index: string; children: string }) => (
-  <div className="flex items-center gap-5 mb-8 lg:mb-10">
-    <span className="text-primary text-[10px] font-mono uppercase tracking-[0.4em] whitespace-nowrap">
+// Hero stagger: eyebrow → heading → body → CTA, calm rise.
+const stage = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.08 } },
+};
+const rise = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
+};
+
+/* Quiet pill + leading icon-chip (the site CTA convention). Orange accent
+   keeps the colocation page identity. */
+const PillCTA = ({
+  to,
+  children,
+  tone = "dark",
+}: {
+  to: string;
+  children: string;
+  tone?: "dark" | "light";
+}) => {
+  const dark = tone === "dark";
+  return (
+    <Link
+      to={to}
+      className={`group inline-flex items-center gap-3 rounded-full border py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
+        dark
+          ? "border-white/15 bg-white/5 text-white hover:border-primary/50 hover:bg-white/10"
+          : "border-black/15 bg-white/50 text-[#15171A] hover:border-primary/50 hover:bg-white"
+      }`}
+    >
+      <span
+        className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
+          dark
+            ? "bg-white text-black group-hover:bg-primary group-hover:text-primary-foreground"
+            : "bg-[#15171A] text-white group-hover:bg-primary group-hover:text-primary-foreground"
+        }`}
+      >
+        <ArrowRight className="h-3.5 w-3.5" />
+      </span>
       {children}
-    </span>
-    <span className="h-px flex-1 bg-black/15" />
-    <span className="text-black/35 text-[10px] font-mono tracking-[0.3em]">/ {index}</span>
-  </div>
-);
+    </Link>
+  );
+};
 
 const PlanBackdrop = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
@@ -187,45 +221,37 @@ const ColocationPage = () => {
 
           <div className="relative max-w-7xl mx-auto px-4 lg:px-12">
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: EASE }}
+              variants={stage}
+              initial="hidden"
+              animate="visible"
               className="max-w-5xl"
             >
-              <div className="flex items-baseline gap-5 mb-8">
-                <p className="text-primary text-[10px] font-mono uppercase tracking-[0.4em]">
-                  Colocation
-                </p>
-              </div>
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl xl:text-[112px] font-heading font-bold tracking-tightest leading-[0.9]">
+              <motion.h1
+                variants={rise}
+                className={`${calmHeading} text-5xl sm:text-6xl lg:text-7xl text-white`}
+              >
                 Your racks. Our megawatts.{" "}
                 <span className="text-primary">Live in ~3 months.</span>
-              </h1>
-              <p className="mt-8 text-xl lg:text-2xl text-white/80 font-light leading-relaxed max-w-2xl">
+              </motion.h1>
+              <motion.p
+                variants={rise}
+                className="mt-8 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl"
+              >
                 High-density colocation built for the Blackwell generation.
                 GB300 NVL72, B300 and RTX PRO 6000, at densities legacy
                 facilities can't touch.
-              </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="xl"
-                  className="rounded-full bg-white text-black hover:bg-primary hover:text-primary-foreground px-10 group"
+              </motion.p>
+              <motion.div variants={rise} className="mt-10 flex flex-wrap items-center gap-5">
+                <PillCTA to="/contact?service=coloc" tone="dark">
+                  Reserve colo capacity
+                </PillCTA>
+                <Link
+                  to="/contact?service=coloc"
+                  className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/60 hover:text-white transition-colors"
                 >
-                  <Link to="/contact?service=coloc">
-                    Reserve colo capacity
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="xl"
-                  className="rounded-full border-white/30 bg-transparent text-white hover:bg-white hover:text-black px-10"
-                >
-                  <Link to="/contact?service=coloc">Talk to our team</Link>
-                </Button>
-              </div>
+                  Talk to our team
+                </Link>
+              </motion.div>
             </motion.div>
 
             <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/10 border-y border-white/10">
@@ -237,7 +263,7 @@ const ColocationPage = () => {
                   className="bg-black py-8 lg:py-10 px-4 lg:px-8"
                 >
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl lg:text-5xl font-heading font-bold tracking-tightest">
+                    <span className={`${calmHeading} text-4xl lg:text-5xl text-white`}>
                       {stat.value}
                     </span>
                     {stat.unit && (
@@ -258,9 +284,8 @@ const ColocationPage = () => {
         {/* ───── 01 · The module — paper datasheet ───── */}
         <section className="bg-white text-black py-20 lg:py-28">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <SectionRuleLight index="01">The module</SectionRuleLight>
             <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
-              <h2 className={`${headingLight} max-w-5xl`}>
+              <h2 className={`${calmHeading} text-4xl lg:text-5xl text-[#15171A] max-w-3xl`}>
                 A data hall, productized.
               </h2>
               <p className="mt-6 text-lg lg:text-xl text-black/70 font-light leading-relaxed max-w-2xl">
@@ -285,17 +310,13 @@ const ColocationPage = () => {
                 transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
                 className="w-full max-w-[330px] lg:justify-self-end"
               >
-                <p className="text-[10px] font-mono uppercase tracking-[0.24em] text-black/55">
-                  Electrical · per module
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                   {moduleHighlights.map((pill) => (
                     <span
                       key={pill.label}
                       className="inline-flex items-baseline gap-1.5 rounded-full bg-black text-white pl-3.5 pr-3 py-1.5"
                     >
-                      <span className="font-heading font-bold text-sm tracking-tightest leading-none">
+                      <span className="font-heading font-medium text-sm tracking-tight leading-none">
                         {pill.value}
                         {pill.unit && (
                           <span className="text-primary"> {pill.unit}</span>
@@ -317,7 +338,7 @@ const ColocationPage = () => {
                       <dt className="text-[9px] font-mono uppercase tracking-[0.14em] text-black/50 whitespace-nowrap">
                         {spec.label}
                       </dt>
-                      <dd className="font-heading font-bold text-sm tracking-tight text-black text-right">
+                      <dd className="font-heading font-medium text-sm tracking-tight text-black text-right">
                         {spec.value}
                       </dd>
                     </div>
@@ -331,33 +352,26 @@ const ColocationPage = () => {
         {/* ───── 02 · Specification index — why Helios ───── */}
         <section className="py-20 lg:py-28 bg-black">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <SectionRule index="02">Why colo with Helios</SectionRule>
             <motion.h2
               {...fadeUp}
               transition={{ duration: 0.8, ease: EASE }}
-              className={`${sectionHeading} max-w-5xl`}
+              className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-4xl`}
             >
               Most colo is built for servers. Ours is built for AI factories.
             </motion.h2>
 
             <div className="mt-14 lg:mt-20 border-t border-white/10">
-              {reasons.map((reason, i) => (
+              {reasons.map((reason) => (
                 <motion.div
                   key={reason.label}
                   {...fadeUp}
                   transition={{ duration: 0.7, delay: 0.05, ease: EASE }}
-                  className="group grid grid-cols-12 gap-x-4 gap-y-3 py-7 lg:py-9 border-b border-white/10 items-baseline"
+                  className="group grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-3 py-7 lg:py-9 border-b border-white/10 items-baseline"
                 >
-                  <span className="col-span-2 lg:col-span-1 text-white/40 group-hover:text-primary transition-colors duration-300 text-sm font-mono tracking-[0.2em]">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="col-span-10 lg:col-span-2 text-[11px] font-mono uppercase tracking-[0.3em] text-white/55 self-center">
-                    {reason.label}
-                  </span>
-                  <h3 className="col-span-10 col-start-3 lg:col-span-4 lg:col-start-auto text-xl lg:text-2xl font-heading font-bold text-white tracking-tight">
+                  <h3 className={`lg:col-span-5 text-xl lg:text-2xl ${calmHeading} text-white`}>
                     {reason.title}
                   </h3>
-                  <p className="col-span-10 col-start-3 lg:col-span-5 lg:col-start-auto text-base text-white/70 leading-relaxed">
+                  <p className="lg:col-span-6 lg:col-start-7 text-base text-white/70 leading-relaxed">
                     {reason.description}
                   </p>
                 </motion.div>
@@ -369,9 +383,8 @@ const ColocationPage = () => {
         {/* ───── 03 · The sites ───── */}
         <section className="py-20 lg:py-28 bg-black border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <SectionRule index="03">The sites</SectionRule>
             <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
-              <h2 className={`${sectionHeading} max-w-4xl`}>
+              <h2 className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-3xl`}>
                 Power first. Everything else follows.
               </h2>
               <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
@@ -423,11 +436,10 @@ const ColocationPage = () => {
         {/* ───── 04 · The timeline — vertical time spine ───── */}
         <section className="py-20 lg:py-28 bg-black border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <SectionRule index="04">How it works</SectionRule>
             <motion.h2
               {...fadeUp}
               transition={{ duration: 0.8, ease: EASE }}
-              className={`${sectionHeading} max-w-4xl`}
+              className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-3xl`}
             >
               Four steps. About ninety days.
             </motion.h2>
@@ -467,7 +479,7 @@ const ColocationPage = () => {
                       }`}
                     />
                     <div className="flex items-baseline justify-between gap-6">
-                      <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white tracking-tight">
+                      <h3 className={`text-2xl lg:text-3xl ${calmHeading} text-white`}>
                         {step.title}
                       </h3>
                       <span
@@ -488,22 +500,26 @@ const ColocationPage = () => {
           </div>
         </section>
 
-        {/* ───── CTA ───── */}
-        <section className="bg-primary text-primary-foreground py-20 lg:py-28 px-4 text-center">
-          <h2 className="text-5xl lg:text-7xl font-heading font-bold tracking-tightest leading-[0.92]">
-            Megawatts move fast here.
-          </h2>
-          <p className="mt-5 text-lg lg:text-xl font-medium opacity-80">
-            Blocks are allocated in waitlist order. Claim yours.
-          </p>
-          <div className="mt-10">
-            <Button
-              asChild
-              size="xl"
-              className="rounded-full bg-black text-white hover:bg-black/80 px-10"
+        {/* ───── CTA — quiet light band ───── */}
+        <section className="bg-[#EDF0F2] text-[#15171A] py-24 lg:py-36 px-4 lg:px-12">
+          <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-8 items-end">
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className="lg:col-span-7 lg:col-start-6"
             >
-              <Link to="/contact?service=coloc">Reserve colo capacity</Link>
-            </Button>
+              <h2 className={`${calmHeading} text-4xl sm:text-5xl lg:text-6xl text-[#15171A]`}>
+                Megawatts move fast here.
+              </h2>
+              <p className="mt-5 text-lg lg:text-xl text-[#2A2D31] font-light max-w-md">
+                Blocks are allocated in waitlist order. Claim yours.
+              </p>
+              <div className="mt-10">
+                <PillCTA to="/contact?service=coloc" tone="light">
+                  Reserve colo capacity
+                </PillCTA>
+              </div>
+            </motion.div>
           </div>
         </section>
       </main>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { EASE, fadeUp, SectionRule, sectionHeading } from "./HomeRevampSections";
+import { EASE, fadeUp, sectionHeading } from "./HomeRevampSections";
 
 const GPU_DATA = [
   {
@@ -50,7 +50,6 @@ export const GpuSovereigntySection = () => {
   return (
     <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <SectionRule index="02">The silicon</SectionRule>
         <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="mb-14 lg:mb-20 max-w-4xl">
           <h2 className={sectionHeading}>
             The newest NVIDIA hardware. Not last year's.

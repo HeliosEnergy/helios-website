@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -69,7 +68,7 @@ export const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-6xl sm:text-7xl lg:text-[92px] xl:text-[116px] font-heading font-bold text-white tracking-tightest leading-[0.9] max-w-6xl text-balance"
+                  className="text-5xl sm:text-6xl lg:text-7xl font-heading font-medium text-white tracking-tight leading-[1.02] max-w-5xl text-balance"
                 >
                   {heroContent.title}
                 </motion.h2>
@@ -77,24 +76,22 @@ export const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-lg sm:text-xl lg:text-2xl text-white/80 font-light leading-relaxed max-w-3xl"
+                  className="text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl"
                 >
                   {heroContent.subtitle}
                 </motion.p>
               </div>
 
               <div className="pt-4">
-                <Button
-                  variant="default"
-                  size="xl"
-                  asChild
-                  className="h-16 px-12 rounded-full bg-white text-black hover:bg-primary hover:text-primary-foreground transition-all duration-500 shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:scale-105 active:scale-95 group"
+                <a
+                  href="/contact?service=coloc"
+                  className="group inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 py-1.5 pl-1.5 pr-5 font-mono text-[11px] uppercase tracking-[0.16em] text-white transition-colors hover:border-primary/50 hover:bg-white/10"
                 >
-                  <a href="/contact?service=coloc" className="flex items-center gap-4 font-mono uppercase tracking-widest text-xs font-bold">
-                    Reserve capacity
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-500" />
-                  </a>
-                </Button>
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-black transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                  Reserve capacity
+                </a>
               </div>
             </motion.div>
           </div>

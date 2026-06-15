@@ -21,28 +21,8 @@ export const fadeUp = {
   viewport: { once: true, margin: "-80px" },
 } as const;
 
-export const SectionRule = ({
-  index,
-  children,
-  accent = "text-primary",
-  rule = "bg-white/10",
-}: {
-  index: string;
-  children: string;
-  accent?: string;
-  rule?: string;
-}) => (
-  <div className="flex items-center gap-5 mb-8 lg:mb-10">
-    <span className={`${accent} text-[10px] font-mono uppercase tracking-[0.4em] whitespace-nowrap`}>
-      {children}
-    </span>
-    <span className={`h-px flex-1 ${rule}`} />
-    <span className="text-white/40 text-[10px] font-mono tracking-[0.3em]">/ {index}</span>
-  </div>
-);
-
 export const sectionHeading =
-  "text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold text-white tracking-tightest leading-[0.92]";
+  "text-4xl lg:text-5xl font-heading font-medium text-white tracking-tight leading-[1.02]";
 
 const offerings = [
   {
@@ -279,7 +259,6 @@ const timeline = [
 export const HomeSpeedSection = () => (
   <section className="bg-black py-20 lg:py-28 px-4 lg:px-6">
     <div className="max-w-7xl mx-auto">
-      <SectionRule index="03">Why Helios</SectionRule>
       <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="max-w-4xl">
         <h2 className={sectionHeading}>
           The market quotes years.
@@ -462,9 +441,6 @@ export const HomeSustainabilitySection = () => {
       )}
 
       <div className="relative max-w-7xl mx-auto">
-        <SectionRule index="04" accent="text-eco" rule="bg-eco/20">
-          Sustainability
-        </SectionRule>
         <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }} className="max-w-4xl">
           <h2 className={sectionHeading}>
             Fast shouldn't mean{" "}
@@ -534,10 +510,7 @@ export const HomeModelsStrip = () => (
   <section className="bg-black px-4 lg:px-6">
     <div className="max-w-7xl mx-auto border-t border-white/10 py-12 lg:py-16 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
       <div className="max-w-2xl">
-        <p className="text-white/55 text-[11px] font-mono uppercase tracking-[0.4em] mb-5">
-          Also on Helios
-        </p>
-        <h3 className="text-2xl lg:text-3xl font-heading font-bold text-white tracking-tight">
+        <h3 className="text-2xl lg:text-3xl font-heading font-medium text-white tracking-tight leading-[1.02]">
           Serverless inference &amp; open models
         </h3>
         <p className="mt-3 text-white/70 leading-relaxed">
