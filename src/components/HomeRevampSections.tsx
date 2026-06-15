@@ -384,6 +384,7 @@ const sustainability = [
 
 export const HomeSustainabilitySection = () => {
   const isMobile = useIsMobile();
+  const reduced = useReducedMotion();
 
   return (
     <section className="relative overflow-hidden bg-black py-24 lg:py-36 px-4 lg:px-6">
@@ -465,28 +466,114 @@ export const HomeSustainabilitySection = () => {
           </p>
         </motion.div>
 
-        <div className="mt-16 lg:mt-24">
-          <div className="sustain-pulse h-px bg-eco/25" aria-hidden />
-          <div className="grid md:grid-cols-3 border-b border-eco/15 md:divide-x md:divide-eco/15">
-            {sustainability.map((item, i) => (
-              <motion.div
-                key={item.title}
-                {...fadeUp}
-                transition={{ duration: 0.8, delay: i * 0.12, ease: EASE }}
-                className="sustain-cell py-12 lg:py-16 md:px-8 lg:px-10 md:first:pl-0 border-t border-eco/15 first:border-t-0 md:border-t-0"
-              >
-                <div className="flex items-baseline gap-3">
-                  <span className="sustain-metric text-white text-[88px] lg:text-[112px] xl:text-[128px] font-heading font-bold tracking-tightest leading-none">
-                    {item.metric}
-                  </span>
-                  <span className="sustain-unit text-eco/90 font-mono text-lg lg:text-xl tracking-[0.15em]">
-                    {item.unit}
-                  </span>
+        {/* Proof — three engineered readings hung from one measurement
+            baseline. The form of each instrument encodes its meaning:
+            water held flat at zero, power split mostly to compute, renewable
+            drawn to full. Same visual language, three different readings. */}
+        <div className="mt-16 lg:mt-28">
+          <div className="sustain-pulse h-px bg-gradient-to-r from-eco/45 via-eco/15 to-transparent" aria-hidden />
+          <div className="grid md:grid-cols-3">
+            {/* 01 — Water: a flatline held at zero */}
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className="pt-10 pb-12 lg:pt-12 lg:pr-12 border-t border-white/10 md:border-t-0"
+            >
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em]">
+                <span className="text-eco/50">01</span>
+                <span className="text-eco/90">Water</span>
+              </div>
+              <div className="mt-7 flex items-end gap-2">
+                <span className="font-heading font-bold text-white text-[92px] lg:text-[124px] leading-[0.82] tracking-tightest">
+                  0
+                </span>
+                <span className="mb-3 font-mono text-lg text-eco/90">L</span>
+              </div>
+              <div className="mt-7 relative h-px bg-white/12">
+                <motion.span
+                  aria-hidden
+                  initial={reduced ? false : { scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-eco shadow-[0_0_12px_2px_hsl(var(--eco)/0.6)]"
+                />
+                <span className="absolute right-0 -top-5 font-mono text-[10px] tracking-wider text-white/40">
+                  held at zero
+                </span>
+              </div>
+              <h3 className="mt-9 text-lg font-heading font-bold text-white">{sustainability[0].title}</h3>
+              <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-white/65">{sustainability[0].body}</p>
+            </motion.div>
+
+            {/* 02 — Power: a two-tone proportion bar, compute vs overhead */}
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
+              className="pt-10 pb-12 lg:pt-12 lg:px-12 border-t border-white/10 md:border-t-0 md:border-l md:border-white/10"
+            >
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em]">
+                <span className="text-eco/50">02</span>
+                <span className="text-eco/90">Power</span>
+              </div>
+              <div className="mt-7 lg:mt-12">
+                <div className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
+                  <span className="text-eco/90">Compute</span>
+                  <span className="text-white/40">Overhead</span>
                 </div>
-                <h3 className="mt-10 text-xl font-heading font-bold text-white">{item.title}</h3>
-                <p className="mt-4 text-white/70 leading-relaxed text-base">{item.body}</p>
-              </motion.div>
-            ))}
+                <div className="mt-3 flex h-3.5 w-full overflow-hidden bg-white/[0.07]">
+                  <motion.span
+                    aria-hidden
+                    initial={reduced ? false : { width: 0 }}
+                    whileInView={{ width: "88%" }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 1, delay: 0.2, ease: EASE }}
+                    className="h-full bg-eco"
+                  />
+                  <span aria-hidden className="h-full flex-1 bg-eco/20" />
+                </div>
+                <div className="mt-4 flex items-baseline gap-2.5">
+                  <span className="font-heading font-bold text-white text-2xl lg:text-[28px] tracking-tight">Low</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-eco/80">PUE</span>
+                </div>
+              </div>
+              <h3 className="mt-9 text-lg font-heading font-bold text-white">{sustainability[1].title}</h3>
+              <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-white/65">{sustainability[1].body}</p>
+            </motion.div>
+
+            {/* 03 — Renewable: a line drawn to full, 100% */}
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, delay: 0.24, ease: EASE }}
+              className="pt-10 pb-12 lg:pt-12 lg:pl-12 border-t border-white/10 md:border-t-0 md:border-l md:border-white/10"
+            >
+              <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.22em]">
+                <span className="text-eco/50">03</span>
+                <span className="text-eco/90">Renewable</span>
+              </div>
+              <div className="mt-7 flex items-end gap-2">
+                <span className="font-heading font-bold text-white text-[92px] lg:text-[124px] leading-[0.82] tracking-tightest">
+                  100
+                </span>
+                <span className="mb-3 font-mono text-lg text-eco/90">%</span>
+              </div>
+              <div className="mt-7 relative h-px overflow-hidden bg-white/12">
+                <motion.span
+                  aria-hidden
+                  initial={reduced ? false : { scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 1, delay: 0.3, ease: EASE }}
+                  style={{ transformOrigin: "left" }}
+                  className="absolute inset-0 bg-eco shadow-[0_0_12px_1px_hsl(var(--eco)/0.5)]"
+                />
+                <span className="absolute right-0 -top-5 font-mono text-[10px] tracking-wider text-white/40">
+                  every site
+                </span>
+              </div>
+              <h3 className="mt-9 text-lg font-heading font-bold text-white">{sustainability[2].title}</h3>
+              <p className="mt-3 max-w-xs text-[15px] leading-relaxed text-white/65">{sustainability[2].body}</p>
+            </motion.div>
           </div>
         </div>
         <Link
