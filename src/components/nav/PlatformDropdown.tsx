@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export const PlatformDropdown = () => {
   return (
-    <div className="flex gap-0 p-0 min-w-[1000px] bg-transparent">
+    <div className="flex gap-0 p-0 min-w-[720px] bg-transparent">
       {/* Virtual Cloud Infrastructure */}
       <div className="flex-1 p-12 space-y-10">
         <div>
@@ -67,7 +67,7 @@ export const PlatformDropdown = () => {
         </div>
       </div>
 
-      {/* Testimonial Spotlight */}
+      {/* Testimonial Spotlight - hidden until approved customer quote is available.
       <div className="flex-1 p-12 bg-[#111111] flex flex-col justify-between">
         <div className="space-y-6">
           <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-[#FF6B35]">What They Say</span>
@@ -86,6 +86,7 @@ export const PlatformDropdown = () => {
           </div>
         </div>
       </div>
+      */}
     </div>
   );
 };
