@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
@@ -141,18 +141,27 @@ const PlanBackdrop = () => (
 /* ------------------------------------------------------------------ */
 
 const ModuleViewer = () => {
-  const [view, setView] = useState<(typeof moduleViews)[number]["id"]>("enclosure");
-
-  useEffect(() => {
-    const t = setInterval(() => {
-      setView((v) => (v === "enclosure" ? "structure" : "enclosure"));
-    }, 4200);
-
-    return () => clearInterval(t);
-  }, []);
+  // Skin on by default; reveal the structure (skin off) on hover / tap.
+  const [revealed, setRevealed] = useState(false);
+  const view: (typeof moduleViews)[number]["id"] = revealed ? "structure" : "enclosure";
+  const active = moduleViews.find((v) => v.id === view)!;
 
   return (
-    <div className="relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white">
+    <div
+      className="group relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white cursor-pointer"
+      onMouseEnter={() => setRevealed(true)}
+      onMouseLeave={() => setRevealed(false)}
+      onClick={() => setRevealed((r) => !r)}
+      role="button"
+      tabIndex={0}
+      aria-label="Toggle data hall cutaway view"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setRevealed((r) => !r);
+        }
+      }}
+    >
       {moduleViews.map((v) => (
         <motion.img
           key={v.id}
@@ -164,6 +173,16 @@ const ModuleViewer = () => {
           className="absolute inset-0 w-full h-full object-contain scale-[1.7]"
         />
       ))}
+
+      {/* Caption + hover affordance */}
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 lg:p-5">
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-black/70">
+          {active.label}
+        </span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/40 transition-opacity duration-300 group-hover:opacity-0">
+          Hover to see inside
+        </span>
+      </div>
     </div>
   );
 };

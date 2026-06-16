@@ -424,11 +424,6 @@ const SustainabilityPage = () => {
                 <p className="mt-5 text-sm lg:text-base text-white/50">
                   Litres of water drawn for cooling — per site, per year.
                 </p>
-
-                <ImagePlaceholder
-                  label="Placeholder — dry cooler / cold plate macro, ≥1600px"
-                  className="mt-14 lg:mt-16 aspect-[16/10] max-w-xl"
-                />
               </div>
 
               <div className="lg:col-span-4 lg:col-start-9 order-1 lg:order-2">
@@ -479,13 +474,13 @@ const SustainabilityPage = () => {
               <div className="lg:col-span-4 lg:col-start-2">
                 <InstrumentIndex>03</InstrumentIndex>
                 <h3 className={`mt-5 ${calmHeading} text-3xl lg:text-4xl text-white`}>
-                  Renewable-backed power is part of the site plan.
+                  We aim for the highest renewable share at every site.
                 </h3>
                 <div className="mt-7 space-y-5">
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Every Helios site is developed alongside clean generation and backed by
-                    long-term power agreements, so renewable energy is always part of the mix
-                    powering your cluster.
+                    long-term power agreements, so renewable energy is part of every site's mix —
+                    around 70% today, and climbing as we add capacity.
                   </p>
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Siting next to generation is also why we move fast: secured power is the
@@ -495,15 +490,18 @@ const SustainabilityPage = () => {
               </div>
               <div className="lg:col-span-6 lg:col-start-7">
                 <div className="flex items-end gap-4 text-white">
+                  <span className="pb-1.5 lg:pb-5 font-mono text-3xl lg:text-5xl tracking-tight text-emerald-400">
+                    ~
+                  </span>
                   <span className="text-[72px] sm:text-[104px] lg:text-[148px] font-heading font-medium tracking-tight leading-none">
-                    100
+                    70
                   </span>
                   <span className="pb-1.5 lg:pb-3 font-mono text-xl lg:text-2xl tracking-[0.2em] text-emerald-400">
                     %
                   </span>
                 </div>
                 <p className="mt-8 text-sm lg:text-base text-white/50">
-                  100 of 100 sites — renewable-backed.
+                  Renewable energy in every site's mix — and rising.
                 </p>
               </div>
             </div>

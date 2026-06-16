@@ -13,8 +13,8 @@ const CLOUDFLARE_WORKER_URL = "https://helios-contact-worker.helios-energy.worke
 const EMBER_GLOW = "radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0%, transparent 60%)";
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
-type ServiceInterest = 'clusters' | 'coloc' | 'inference' | 'baremetal' | 'press' | 'partnership' | 'others';
-type ClusterType = 'rtx-6000-pro' | 'b200' | 'b300' | 'h200-sxm' | 'h100';
+type ServiceInterest = 'clusters' | 'coloc' | 'inference' | 'baremetal' | 'partnership' | 'others';
+type ClusterType = 'gb300-nvl72' | 'b300' | 'rtx-pro-6000' | '5090';
 
 interface InferenceModel {
   _id: string;
@@ -33,9 +33,9 @@ interface FormData {
   organization: string;
   serviceInterest: ServiceInterest | '';
   message: string;
-  // Clusters specific
+  // Clusters / baremetal specific
   clusterTypes: ClusterType[];
-  gpuRange: [number, number];
+  nodeRange: [number, number];
   // Inference specific
   selectedModels: string[];
   modelEstimations: Record<string, number>; // model ID -> estimation value
@@ -250,19 +250,31 @@ const EstimationSlider = ({
 );
 
 const clusterOptions: { value: ClusterType; label: string }[] = [
-  { value: 'rtx-6000-pro', label: 'RTX 6000 Pro' },
-  { value: 'b200', label: 'B200' },
+  { value: 'gb300-nvl72', label: 'GB300 NVL72' },
   { value: 'b300', label: 'B300' },
-  { value: 'h200-sxm', label: 'H200 SXM' },
-  { value: 'h100', label: 'H100' },
+  { value: 'rtx-pro-6000', label: 'RTX PRO 6000' },
+  { value: '5090', label: '5090' },
 ];
+
+// Sizing math. Standard nodes hold 8 GPUs; the GB300 NVL72 is a separate
+// entity that scales one rack (72 GPUs) at a time.
+const GPUS_PER_NODE = 8;
+const GPUS_PER_NVL72 = 72;
+const NODE_SLIDER_MAX = 1024; // 1024+ nodes
+
+// When GB300 NVL72 is the sole selected type, the slider counts NVL72 racks.
+const sizingForTypes = (types: ClusterType[]) => {
+  const nvl72Only = types.length === 1 && types[0] === 'gb300-nvl72';
+  return nvl72Only
+    ? { gpusPerUnit: GPUS_PER_NVL72, unit: 'rack', unitPlural: 'racks' }
+    : { gpusPerUnit: GPUS_PER_NODE, unit: 'node', unitPlural: 'nodes' };
+};
 
 const serviceLabels: Record<ServiceInterest, string> = {
   clusters: 'Clusters',
   coloc: 'Colocation',
   inference: 'Inference',
   baremetal: 'Baremetal',
-  press: 'Press',
   partnership: 'Partnership',
   others: 'Others'
 };
@@ -276,7 +288,7 @@ const ContactPage = () => {
     message: '',
     serviceInterest: '',
     clusterTypes: [],
-    gpuRange: [8, 64],
+    nodeRange: [8, 64],
     selectedModels: [],
     modelEstimations: {},
     partnershipDetails: ''
@@ -435,16 +447,22 @@ const ContactPage = () => {
       message: formData.message || formData.partnershipDetails || 'No message provided',
       inquiryType: serviceLabels[formData.serviceInterest as ServiceInterest] || formData.serviceInterest,
       // Cluster details
-      ...(formData.serviceInterest === 'clusters' && {
-        clusterDetails: {
-          types: formData.clusterTypes.length > 0
-            ? formData.clusterTypes.map(c =>
-                clusterOptions.find(o => o.value === c)?.label || c
-              ).join(', ')
-            : 'Not specified',
-          gpuCountMin: formData.gpuRange[0],
-          gpuCountMax: formData.gpuRange[1]
-        }
+      ...((formData.serviceInterest === 'clusters' || formData.serviceInterest === 'baremetal') && {
+        clusterDetails: (() => {
+          const { gpusPerUnit, unitPlural } = sizingForTypes(formData.clusterTypes);
+          return {
+            types: formData.clusterTypes.length > 0
+              ? formData.clusterTypes.map(c =>
+                  clusterOptions.find(o => o.value === c)?.label || c
+                ).join(', ')
+              : 'Not specified',
+            unit: unitPlural,
+            nodeCountMin: formData.nodeRange[0],
+            nodeCountMax: formData.nodeRange[1],
+            gpuCountMin: formData.nodeRange[0] * gpusPerUnit,
+            gpuCountMax: formData.nodeRange[1] * gpusPerUnit,
+          };
+        })()
       }),
       // Inference details
       ...(formData.serviceInterest === 'inference' && selectedModelDetails.length > 0 && {
@@ -493,7 +511,7 @@ const ContactPage = () => {
       message: '',
       serviceInterest: '',
       clusterTypes: [],
-      gpuRange: [8, 64],
+      nodeRange: [8, 64],
       selectedModels: [],
       modelEstimations: {},
       partnershipDetails: ''
@@ -617,9 +635,18 @@ const ContactPage = () => {
                     </div>
                   </div>
 
-                  {/* Conditional: Clusters */}
+                  {/* Conditional: Clusters / Baremetal */}
                   <AnimatePresence>
-                    {formData.serviceInterest === 'clusters' && (
+                    {(formData.serviceInterest === 'clusters' || formData.serviceInterest === 'baremetal') && (() => {
+                      const { gpusPerUnit, unit, unitPlural } = sizingForTypes(formData.clusterTypes);
+                      const [minNodes, maxNodes] = formData.nodeRange;
+                      const minGpus = minNodes * gpusPerUnit;
+                      const maxGpus = maxNodes * gpusPerUnit;
+                      const fmtNodes = (v: number) =>
+                        v >= NODE_SLIDER_MAX ? `${NODE_SLIDER_MAX}+ ${unitPlural}` : `${v} ${v === 1 ? unit : unitPlural}`;
+                      const fmtGpus = (v: number) =>
+                        v >= NODE_SLIDER_MAX * gpusPerUnit ? `${NODE_SLIDER_MAX * gpusPerUnit}+` : `${v.toLocaleString()}`;
+                      return (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
@@ -629,7 +656,7 @@ const ContactPage = () => {
                       >
                         <div className="bg-white/[0.04] rounded-3xl p-6 border border-white/15 space-y-6">
                           <div className="space-y-4">
-                            <span className="block text-sm font-medium text-white">Select Cluster Type</span>
+                            <span className="block text-sm font-medium text-white">Select GPU Type</span>
                             <ChipSelect
                               options={clusterOptions}
                               selected={formData.clusterTypes}
@@ -638,19 +665,26 @@ const ContactPage = () => {
                           </div>
 
                           <div className="space-y-4">
-                            <span className="block text-sm font-medium text-white">Approximate GPU Count</span>
+                            <span className="block text-sm font-medium text-white">
+                              Approximate {unit === 'rack' ? 'NVL72 Rack' : 'Node'} Count
+                            </span>
                             <DualRangeSlider
-                              min={4}
-                              max={480}
-                              step={4}
-                              value={formData.gpuRange}
-                              onValueChange={(v) => setFormData(prev => ({ ...prev, gpuRange: v }))}
-                              formatLabel={(v) => `${v} GPUs`}
+                              min={1}
+                              max={NODE_SLIDER_MAX}
+                              step={1}
+                              value={formData.nodeRange}
+                              onValueChange={(v) => setFormData(prev => ({ ...prev, nodeRange: v }))}
+                              formatLabel={fmtNodes}
                             />
+                            <p className="text-sm text-white/55">
+                              ≈ <span className="font-medium text-white">{fmtGpus(minGpus)}–{fmtGpus(maxGpus)} GPUs</span>
+                              <span className="text-white/40"> · {gpusPerUnit} GPUs / {unit}</span>
+                            </p>
                           </div>
                         </div>
                       </motion.div>
-                    )}
+                      );
+                    })()}
                   </AnimatePresence>
 
                   {/* Conditional: Colocation */}

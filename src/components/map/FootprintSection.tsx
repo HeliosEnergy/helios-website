@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
-import { COLO_SITES, DC_SITES, STATUS_META, type Site } from "./sites";
+import { COLO_SITES, STATUS_META, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
 
@@ -114,7 +114,7 @@ export const HomeFootprintSection = () => (
           className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
         >
           Helios builds where clean power is abundant and interconnection is
-          fast. Three sites across three grids today — water-free,
+          fast. Five sites across five grids today — water-free,
           renewable-backed, Blackwell-ready.
         </motion.p>
       </div>
@@ -124,7 +124,7 @@ export const HomeFootprintSection = () => (
         transition={{ duration: 0.9, delay: 0.15, ease: EASE }}
         className="mt-10 lg:mt-14"
       >
-        <FootprintMap sites={DC_SITES} variant="home" />
+        <FootprintMap sites={COLO_SITES} variant="home" />
       </motion.div>
 
       <motion.div

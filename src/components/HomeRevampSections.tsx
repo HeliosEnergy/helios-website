@@ -44,6 +44,8 @@ const offerings = [
     primaryHref: "/contact?service=clusters",
     secondary: "Explore GPU Cloud",
     secondaryHref: "/clusters",
+    custom:
+      "Custom configurations welcome — tell us the B300 build you want and we can provide that version. Flexible on CPU type, storage, network equipment and more.",
     image: "/gpus/dgx-b200.jpg",
     specs: [
       { k: "GPUs", v: "8 to 4096" },
@@ -69,6 +71,7 @@ const offerings = [
     primaryHref: "/contact?service=coloc",
     secondary: "Explore Colocation",
     secondaryHref: "/colocation",
+    custom: "",
     image: "/coloc/hall-interior-rack-corridor.png",
     specs: [
       { k: "Power", v: "10s of MW" },
@@ -181,6 +184,21 @@ export const HomeOfferingsSection = () => {
                   </motion.div>
                 </AnimatePresence>
               </motion.div>
+
+              <AnimatePresence mode="wait">
+                {o.custom && (
+                  <motion.p
+                    key={`custom-${active}`}
+                    initial={swap.initial}
+                    animate={swap.animate}
+                    exit={swap.exit}
+                    transition={{ duration: 0.36, ease: EASE }}
+                    className="mt-8 max-w-md border-l-2 border-primary pl-4 text-sm font-light leading-relaxed text-[#2A2D31]/75"
+                  >
+                    {o.custom}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* RIGHT: tall bleeding image with vertical dot switcher */}
@@ -375,10 +393,10 @@ const sustainability = [
     body: "Purpose-built halls, direct liquid cooling and modern power distribution keep overhead low, so more of every megawatt goes to compute.",
   },
   {
-    metric: "100",
+    metric: "~70",
     unit: "%",
     title: "Renewable-backed power",
-    body: "Every site is powered with renewable energy in the mix, sited next to clean generation and backed by long-term power agreements.",
+    body: "We aim for the highest renewable share at every site — around 70% today, sited next to clean generation and backed by long-term power agreements, and climbing as we add capacity.",
   },
 ];
 
@@ -468,15 +486,15 @@ export const HomeSustainabilitySection = () => {
 
         {/* Proof — three quiet readings. Each value sits above one thin
             measure line whose fill tells the story: water held empty, power
-            mostly to compute, renewable drawn full. No labels, no ornament —
-            the number, the line and the title carry it. */}
+            mostly to compute, renewable ~70% and climbing. No labels, no
+            ornament — the number, the line and the title carry it. */}
         <div className="mt-20 lg:mt-32">
           <div className="h-px w-full bg-white/10" aria-hidden />
           <div className="grid gap-y-16 pt-14 md:grid-cols-3 md:gap-x-12 lg:gap-x-24 lg:pt-20">
             {[
               { value: "0", unit: "L", fill: 0 },
               { value: "Low", unit: "PUE", fill: 0.88 },
-              { value: "100", unit: "%", fill: 1 },
+              { value: "~70", unit: "%", fill: 0.7 },
             ].map((m, i) => (
               <motion.div
                 key={sustainability[i].title}
