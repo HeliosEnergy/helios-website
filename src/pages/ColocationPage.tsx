@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
@@ -143,24 +143,53 @@ const PlanBackdrop = () => (
 const ModuleViewer = () => {
   // Skin on by default; reveal the structure (skin off) on hover / tap.
   const [revealed, setRevealed] = useState(false);
+  // Hover-capable pointers (desktop) get the hover reveal; touch devices keep
+  // the old auto-switch, since there is no hover there.
+  const [canHover, setCanHover] = useState(true);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const apply = () => setCanHover(mq.matches);
+    apply();
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
+  }, []);
+
+  // Touch / no-hover devices: auto-cycle enclosure <-> structure like before.
+  useEffect(() => {
+    if (canHover) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setRevealed((r) => !r), 4200);
+    return () => clearInterval(t);
+  }, [canHover]);
+
   const view: (typeof moduleViews)[number]["id"] = revealed ? "structure" : "enclosure";
   const active = moduleViews.find((v) => v.id === view)!;
 
+  // Interaction props only on hover-capable devices.
+  const interactionProps = canHover
+    ? {
+        onMouseEnter: () => setRevealed(true),
+        onMouseLeave: () => setRevealed(false),
+        onClick: () => setRevealed((r) => !r),
+        role: "button" as const,
+        tabIndex: 0,
+        "aria-label": "Toggle data hall cutaway view",
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setRevealed((r) => !r);
+          }
+        },
+      }
+    : {};
+
   return (
     <div
-      className="group relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white cursor-pointer"
-      onMouseEnter={() => setRevealed(true)}
-      onMouseLeave={() => setRevealed(false)}
-      onClick={() => setRevealed((r) => !r)}
-      role="button"
-      tabIndex={0}
-      aria-label="Toggle data hall cutaway view"
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setRevealed((r) => !r);
-        }
-      }}
+      className={`group relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white ${
+        canHover ? "cursor-pointer" : ""
+      }`}
+      {...interactionProps}
     >
       {moduleViews.map((v) => (
         <motion.img
@@ -174,14 +203,16 @@ const ModuleViewer = () => {
         />
       ))}
 
-      {/* Caption + hover affordance */}
+      {/* Caption + hover affordance (hint only where hover applies) */}
       <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 lg:p-5">
         <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-black/70">
           {active.label}
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/40 transition-opacity duration-300 group-hover:opacity-0">
-          Hover to see inside
-        </span>
+        {canHover && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/40 transition-opacity duration-300 group-hover:opacity-0">
+            Hover to see inside
+          </span>
+        )}
       </div>
     </div>
   );
