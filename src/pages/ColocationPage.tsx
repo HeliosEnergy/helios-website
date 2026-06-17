@@ -219,6 +219,198 @@ const ModuleViewer = () => {
 };
 
 /* ------------------------------------------------------------------ */
+/* Line-art placeholder — clearly illustrative, never mistaken for a   */
+/* photograph. Drops in for the AI-stylized line drawings Jose sends.  */
+/* ------------------------------------------------------------------ */
+
+const LineArtPlaceholder = ({
+  label,
+  className = "",
+}: {
+  label: string;
+  className?: string;
+}) => (
+  <div className={`relative overflow-hidden border border-white/15 bg-[#0A0A0A] ${className}`}>
+    <div
+      className="absolute inset-0"
+      aria-hidden
+      style={{
+        background:
+          "repeating-linear-gradient(45deg, transparent, transparent 23px, rgba(255,255,255,0.05) 23px, rgba(255,255,255,0.05) 24px)",
+      }}
+    />
+    <div className="absolute inset-0 flex items-center justify-center p-6">
+      <p className="font-mono text-[11px] leading-relaxed text-white/45 text-center max-w-xs">
+        {label}
+      </p>
+    </div>
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/* Colocation cost estimator                                           */
+/* ------------------------------------------------------------------ */
+
+// Approx. power draw per GPU (kW), board-level. These are estimates pending
+// Jose's confirmed figures. A broad list — customers may bring their own GPUs.
+type GpuOption = { id: string; name: string; kw: number };
+const CALC_GPUS: GpuOption[] = [
+  { id: "gb300", name: "GB300 (NVL72)", kw: 1.4 },
+  { id: "b300", name: "B300", kw: 1.2 },
+  { id: "b200", name: "B200", kw: 1.0 },
+  { id: "h200", name: "H200", kw: 0.7 },
+  { id: "h100", name: "H100", kw: 0.7 },
+  { id: "rtx-pro-6000", name: "RTX PRO 6000", kw: 0.6 },
+  { id: "5090", name: "RTX 5090", kw: 0.575 },
+  { id: "custom", name: "Other / bring your own", kw: 1.0 },
+];
+
+// Facility overhead (PUE). Liquid runs tighter than air.
+const CALC_PUE = { liquid: 1.2, air: 1.4 } as const;
+// Published colocation range, per kW per month.
+const RATE_LOW = 150;
+const RATE_HIGH = 225;
+
+const fmtUsd = (n: number) =>
+  `$${Math.round(n).toLocaleString("en-US")}`;
+
+const ColoCalculator = () => {
+  const [gpuId, setGpuId] = useState<string>(CALC_GPUS[0].id);
+  const [qty, setQty] = useState<number>(72);
+  const [customKw, setCustomKw] = useState<number>(1.0);
+  const [cooling, setCooling] = useState<"liquid" | "air">("liquid");
+
+  const gpu = CALC_GPUS.find((g) => g.id === gpuId)!;
+  const perGpuKw = gpu.id === "custom" ? customKw : gpu.kw;
+  const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 0;
+  const itKw = safeQty * perGpuKw;
+  const facilityKw = itKw * CALC_PUE[cooling];
+  const lo = facilityKw * RATE_LOW;
+  const hi = facilityKw * RATE_HIGH;
+
+  const fieldLabel =
+    "block font-mono text-[11px] uppercase tracking-[0.16em] text-black/50 mb-2.5";
+  const inputBase =
+    "w-full bg-white border border-black/15 px-4 py-3 font-heading text-lg text-black focus:outline-none focus:border-black/60 transition-colors";
+
+  return (
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-start">
+      {/* Inputs */}
+      <div className="space-y-7">
+        <div>
+          <label htmlFor="calc-gpu" className={fieldLabel}>
+            GPU type
+          </label>
+          <select
+            id="calc-gpu"
+            value={gpuId}
+            onChange={(e) => setGpuId(e.target.value)}
+            className={`${inputBase} appearance-none cursor-pointer`}
+          >
+            {CALC_GPUS.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-5">
+          <div>
+            <label htmlFor="calc-qty" className={fieldLabel}>
+              Number of GPUs
+            </label>
+            <input
+              id="calc-qty"
+              type="number"
+              min={1}
+              value={qty}
+              onChange={(e) => setQty(parseInt(e.target.value, 10) || 0)}
+              className={inputBase}
+            />
+          </div>
+          {gpu.id === "custom" && (
+            <div>
+              <label htmlFor="calc-kw" className={fieldLabel}>
+                kW per GPU
+              </label>
+              <input
+                id="calc-kw"
+                type="number"
+                min={0.1}
+                step={0.1}
+                value={customKw}
+                onChange={(e) => setCustomKw(parseFloat(e.target.value) || 0)}
+                className={inputBase}
+              />
+            </div>
+          )}
+        </div>
+
+        <div>
+          <span className={fieldLabel}>Cooling</span>
+          <div className="grid grid-cols-2 gap-0 border border-black/15">
+            {(["liquid", "air"] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCooling(c)}
+                className={`py-3 font-mono text-xs uppercase tracking-[0.14em] transition-colors ${
+                  cooling === c
+                    ? "bg-black text-white"
+                    : "bg-white text-black/60 hover:text-black"
+                }`}
+              >
+                {c === "liquid" ? "Liquid cooled" : "Air cooled"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Readout */}
+      <div className="bg-black text-white p-7 lg:p-9">
+        <div className="flex items-baseline justify-between gap-4 pb-5 border-b border-white/15">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+            Estimated power
+          </span>
+          <span className="font-heading text-2xl lg:text-3xl tracking-tight">
+            {facilityKw.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            <span className="text-primary text-lg"> kW</span>
+          </span>
+        </div>
+
+        <div className="pt-6">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+            Estimated cost
+          </span>
+          <div className="mt-3 flex items-end gap-2 flex-wrap">
+            <span className="font-heading text-4xl lg:text-5xl tracking-tight leading-none">
+              {fmtUsd(lo)}
+            </span>
+            <span className="font-heading text-2xl lg:text-3xl tracking-tight leading-none text-white/45 pb-0.5">
+              – {fmtUsd(hi)}
+            </span>
+            <span className="font-mono text-sm text-primary pb-1">/ month</span>
+          </div>
+          <p className="mt-3 font-mono text-[11px] text-white/45">
+            Based on $150–$225 / kW / month · {itKw.toLocaleString("en-US", { maximumFractionDigits: 0 })} kW IT load × {CALC_PUE[cooling]} PUE
+          </p>
+        </div>
+
+        <p className="mt-7 pt-6 border-t border-white/15 text-sm text-white/65 leading-relaxed">
+          All-inclusive, white-glove colocation: Helios maintains everything —
+          power, cooling, networking and remote hands. You get bare-metal access.
+        </p>
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
+          Indicative estimate — final pricing confirmed on a call.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -364,39 +556,35 @@ const ColocationPage = () => {
           </div>
         </section>
 
-        {/* ───── 02 · Specification index — why Helios ───── */}
-        <section className="py-20 lg:py-28 bg-black">
+        {/* ───── 02 · Cost estimator ───── */}
+        <section className="py-20 lg:py-28 bg-white text-black border-t border-black/10">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <motion.h2
-              {...fadeUp}
-              transition={{ duration: 0.8, ease: EASE }}
-              className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-4xl`}
-            >
-              Most colo is built for servers. Ours is built for AI factories.
-            </motion.h2>
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">
+                Cost estimator
+              </span>
+              <h2 className={`mt-6 ${calmHeading} text-4xl lg:text-5xl text-[#15171A] max-w-3xl`}>
+                Estimate your colocation cost.
+              </h2>
+              <p className="mt-6 text-lg lg:text-xl text-black/70 font-light leading-relaxed max-w-2xl">
+                Pick your GPUs and cooling. We translate that into facility power
+                and an all-inclusive monthly range. Bringing your own hardware? Use
+                "Other" and enter the power draw.
+              </p>
+            </motion.div>
 
-            <div className="mt-14 lg:mt-20 border-t border-white/10">
-              {reasons.map((reason) => (
-                <motion.div
-                  key={reason.label}
-                  {...fadeUp}
-                  transition={{ duration: 0.7, delay: 0.05, ease: EASE }}
-                  className="group grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-3 py-7 lg:py-9 border-b border-white/10 items-baseline"
-                >
-                  <h3 className={`lg:col-span-5 text-xl lg:text-2xl ${calmHeading} text-white`}>
-                    {reason.title}
-                  </h3>
-                  <p className="lg:col-span-6 lg:col-start-7 text-base text-white/70 leading-relaxed">
-                    {reason.description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+              className="mt-14 lg:mt-20"
+            >
+              <ColoCalculator />
+            </motion.div>
           </div>
         </section>
 
         {/* ───── 03 · The sites ───── */}
-        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
+        <section className="py-20 lg:py-28 bg-black">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
             <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
               <h2 className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-3xl`}>
@@ -423,10 +611,10 @@ const ColocationPage = () => {
                 transition={{ duration: 0.8, ease: EASE }}
                 className="lg:col-span-8"
               >
-                <figure className="relative aspect-[16/9] overflow-hidden border border-white/10 bg-[#0A0A0A]">
+                <figure className="relative aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
                   <img
-                    src="/coloc/site-overview-aerial.png"
-                    alt="Aerial view of Helios modular data halls beside a substation and wind turbines at dusk"
+                    src="/coloc/site-halls-powerplant.png"
+                    alt="Line-drawing rendering of Helios modular data halls lined up beside a substation and wind farm — representational, not a specific facility"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 </figure>
@@ -436,14 +624,42 @@ const ColocationPage = () => {
                 transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
                 className="lg:col-span-4"
               >
-                <figure className="relative aspect-[4/5] lg:h-full lg:aspect-auto overflow-hidden border border-white/10 bg-[#0A0A0A]">
-                  <img
-                    src="/coloc/hall-interior-rack-corridor.png"
-                    alt="Interior corridor of high-density data hall racks"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </figure>
+                <LineArtPlaceholder
+                  label="Line drawing — high-density data hall, rack corridor cutaway."
+                  className="aspect-[4/5] lg:h-full lg:aspect-auto"
+                />
               </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ───── 04 · Why Helios — built for AI factories ───── */}
+        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <motion.h2
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-4xl`}
+            >
+              Most colo is built for servers. Ours is built for AI factories.
+            </motion.h2>
+
+            <div className="mt-14 lg:mt-20 border-t border-white/10">
+              {reasons.map((reason) => (
+                <motion.div
+                  key={reason.label}
+                  {...fadeUp}
+                  transition={{ duration: 0.7, delay: 0.05, ease: EASE }}
+                  className="group grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-3 py-7 lg:py-9 border-b border-white/10 items-baseline"
+                >
+                  <h3 className={`lg:col-span-5 text-xl lg:text-2xl ${calmHeading} text-white`}>
+                    {reason.title}
+                  </h3>
+                  <p className="lg:col-span-6 lg:col-start-7 text-base text-white/70 leading-relaxed">
+                    {reason.description}
+                  </p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>

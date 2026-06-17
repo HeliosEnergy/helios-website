@@ -421,21 +421,26 @@ const SustainabilityPage = () => {
             <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 pb-28 lg:pb-44">
               <div className="lg:col-span-6 lg:col-start-1 order-2 lg:order-1">
                 <WaterOdometer />
-                <p className="mt-5 text-sm lg:text-base text-white/50">
-                  Litres of water drawn for cooling — per site, per year.
-                </p>
+                <figure className="mt-10 relative overflow-hidden bg-[#070707]">
+                  <img
+                    src="/sustainability/dry-cooler.png"
+                    alt="Line drawing of a dry cooler — closed-loop heat rejection with top-mounted fans, air flow in and out"
+                    className="w-full h-auto"
+                  />
+                </figure>
               </div>
 
               <div className="lg:col-span-4 lg:col-start-9 order-1 lg:order-2">
                 <InstrumentIndex>01</InstrumentIndex>
                 <h3 className={`mt-5 ${calmHeading} text-3xl lg:text-4xl text-white`}>
-                  Water-free cooling, even at NVL72 densities.
+                  0 L of water wasted, even at NVL72 densities.
                 </h3>
                 <div className="mt-7 space-y-5">
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Most AI data centers evaporate millions of liters of water a year to stay
-                    cool. Helios sites use closed-loop direct-to-chip liquid cooling and dry
-                    coolers to reject heat without drawing on local water supplies.
+                    cool. Helios sites run a closed-loop, direct-to-chip liquid cooling system
+                    paired with dry coolers: the loop is filled once and recirculated, so
+                    effectively no water is wasted to keep your GPUs cold.
                   </p>
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     That means no competition with communities and agriculture for water, and no
@@ -474,35 +479,25 @@ const SustainabilityPage = () => {
               <div className="lg:col-span-4 lg:col-start-2">
                 <InstrumentIndex>03</InstrumentIndex>
                 <h3 className={`mt-5 ${calmHeading} text-3xl lg:text-4xl text-white`}>
-                  We aim for the highest renewable share at every site.
+                  Every site is integrated with renewable power.
                 </h3>
                 <div className="mt-7 space-y-5">
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Every Helios site is developed alongside clean generation and backed by
-                    long-term power agreements, so renewable energy is part of every site's mix —
-                    around 70% today, and climbing as we add capacity.
-                  </p>
-                  <p className="text-lg text-white/70 font-light leading-relaxed">
-                    Siting next to generation is also why we move fast: secured power is the
-                    hardest part of any data center build, and we lock it before you sign.
+                    long-term power agreements, so renewable energy is part of every site's mix.
+                    The share grows as we add capacity, and because we site next to generation we
+                    tap clean power others can't reach.
                   </p>
                 </div>
               </div>
               <div className="lg:col-span-6 lg:col-start-7">
-                <div className="flex items-end gap-4 text-white">
-                  <span className="pb-1.5 lg:pb-5 font-mono text-3xl lg:text-5xl tracking-tight text-emerald-400">
-                    ~
-                  </span>
-                  <span className="text-[72px] sm:text-[104px] lg:text-[148px] font-heading font-medium tracking-tight leading-none">
-                    70
-                  </span>
-                  <span className="pb-1.5 lg:pb-3 font-mono text-xl lg:text-2xl tracking-[0.2em] text-emerald-400">
-                    %
-                  </span>
-                </div>
-                <p className="mt-8 text-sm lg:text-base text-white/50">
-                  Renewable energy in every site's mix — and rising.
-                </p>
+                <figure className="relative overflow-hidden bg-[#070707]">
+                  <img
+                    src="/sustainability/solar-hydro.png"
+                    alt="Line drawing of solar panels and a hydro dam feeding a Helios modular data center"
+                    className="w-full h-auto"
+                  />
+                </figure>
               </div>
             </div>
           </div>
@@ -562,11 +557,11 @@ const SustainabilityPage = () => {
         <section className="px-4 lg:px-6 pb-24 lg:pb-32 bg-black">
           <div className="max-w-7xl mx-auto">
             <ImagePlaceholder
-              label="Placeholder — aerial: Helios site beside solar field at dusk, ≥2560px"
+              label="Line drawing — data center halls lined up beside a power plant (representational, not a photo). Awaiting Jose's reference to AI-stylize."
               className="h-[320px] lg:h-[520px]"
             />
             <p className="mt-4 text-sm text-white/50">
-              A Helios site: solar-adjacent, dry-cooled, live in about three months.
+              A Helios site: power-adjacent, dry-cooled, live in about three months.
             </p>
           </div>
         </section>

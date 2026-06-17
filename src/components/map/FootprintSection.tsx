@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
-import { COLO_SITES, STATUS_META, type Site } from "./sites";
+import { COLO_SITES, STATUS_META, STATUS_LEGEND, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
 
@@ -46,15 +46,15 @@ const Ledger = ({
             <span className="ml-2 font-mono font-normal text-xs text-white/55">{site.abbr}</span>
           </span>
           <span className="flex items-center gap-2">
-            {variant === "colo" && (
-              <span className="font-mono text-xs text-white/70 mr-1">{site.capacity}</span>
-            )}
             <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
             <span className="font-mono text-xs text-white/70 w-[4.6rem]">{meta.label}</span>
           </span>
         </button>
       );
     })}
+    <p className="px-5 py-3 font-mono text-[11px] leading-relaxed text-white/45">
+      {STATUS_LEGEND}
+    </p>
   </div>
 );
 

@@ -393,10 +393,10 @@ const sustainability = [
     body: "Purpose-built halls, direct liquid cooling and modern power distribution keep overhead low, so more of every megawatt goes to compute.",
   },
   {
-    metric: "~70",
-    unit: "%",
+    metric: "Every",
+    unit: "site",
     title: "Renewable-backed power",
-    body: "We aim for the highest renewable share at every site — around 70% today, sited next to clean generation and backed by long-term power agreements, and climbing as we add capacity.",
+    body: "Every Helios site is developed alongside clean generation and backed by long-term power agreements, so renewable energy is part of every site's mix. The share grows as we add capacity, and because we site next to generation we tap clean power others can't reach.",
   },
 ];
 
@@ -486,15 +486,15 @@ export const HomeSustainabilitySection = () => {
 
         {/* Proof — three quiet readings. Each value sits above one thin
             measure line whose fill tells the story: water held empty, power
-            mostly to compute, renewable ~70% and climbing. No labels, no
-            ornament — the number, the line and the title carry it. */}
+            mostly to compute, renewable power in every site's mix. No labels,
+            no ornament — the number, the line and the title carry it. */}
         <div className="mt-20 lg:mt-32">
           <div className="h-px w-full bg-white/10" aria-hidden />
           <div className="grid gap-y-16 pt-14 md:grid-cols-3 md:gap-x-12 lg:gap-x-24 lg:pt-20">
             {[
               { value: "0", unit: "L", fill: 0 },
               { value: "Low", unit: "PUE", fill: 0.88 },
-              { value: "~70", unit: "%", fill: 0.7 },
+              { value: "Every", unit: "site", fill: 1 },
             ].map((m, i) => (
               <motion.div
                 key={sustainability[i].title}

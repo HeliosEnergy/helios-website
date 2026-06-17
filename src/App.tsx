@@ -2,11 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 // import Blog from "./pages/Blog"; // HIDDEN - waiting for content
 // import BlogPost from "./pages/BlogPost"; // HIDDEN - waiting for content
-import PricingPage from "./pages/PricingPage";
+// HIDDEN - Pricing page taken down until per-kW/month pricing is corrected (re-enable the import + route below to restore).
+// import PricingPage from "./pages/PricingPage";
 import ModelLibraryPage from "./pages/ModelLibraryPage";
 import ModelDetailsPage from "./pages/ModelDetailsPage";
 import Tnc from "./pages/Tnc";
@@ -62,7 +63,8 @@ const App = () => (
           {/* HIDDEN - Blog routes waiting for content */}
           {/* <Route path="/blog" element={<Blog />} /> */}
           {/* <Route path="/blog/:slug" element={<BlogPost />} /> */}
-          <Route path="/pricing" element={<PricingPage />} />
+          {/* HIDDEN - Pricing taken down until pricing is corrected; redirect to home for now. */}
+          <Route path="/pricing" element={<Navigate to="/" replace />} />
           <Route path="/model-library" element={<ModelLibraryPage />} />
           <Route path="/model-library/:slug" element={<ModelDetailsPage />} />
           <Route path="/tnc" element={<Tnc />} />
