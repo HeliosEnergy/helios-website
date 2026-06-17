@@ -306,13 +306,16 @@ const ContactPage = () => {
   useEffect(() => {
     const service = searchParams.get('service') as ServiceInterest | null;
     const cluster = searchParams.get('cluster') as ClusterType | null;
+    const message = searchParams.get('message');
 
     if (service && Object.keys(serviceLabels).includes(service)) {
       setFormData(prev => ({
         ...prev,
         serviceInterest: service,
         // If cluster param is provided and service is clusters, prefill cluster type
-        clusterTypes: service === 'clusters' && cluster ? [cluster] : []
+        clusterTypes: service === 'clusters' && cluster ? [cluster] : [],
+        // Prefill the message (e.g. a summary from the colocation cost estimator).
+        ...(message ? { message } : {}),
       }));
     }
   }, [searchParams]);

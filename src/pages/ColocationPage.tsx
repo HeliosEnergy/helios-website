@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
@@ -219,35 +220,6 @@ const ModuleViewer = () => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Line-art placeholder — clearly illustrative, never mistaken for a   */
-/* photograph. Drops in for the AI-stylized line drawings Jose sends.  */
-/* ------------------------------------------------------------------ */
-
-const LineArtPlaceholder = ({
-  label,
-  className = "",
-}: {
-  label: string;
-  className?: string;
-}) => (
-  <div className={`relative overflow-hidden border border-white/15 bg-[#0A0A0A] ${className}`}>
-    <div
-      className="absolute inset-0"
-      aria-hidden
-      style={{
-        background:
-          "repeating-linear-gradient(45deg, transparent, transparent 23px, rgba(255,255,255,0.05) 23px, rgba(255,255,255,0.05) 24px)",
-      }}
-    />
-    <div className="absolute inset-0 flex items-center justify-center p-6">
-      <p className="font-mono text-[11px] leading-relaxed text-white/45 text-center max-w-xs">
-        {label}
-      </p>
-    </div>
-  </div>
-);
-
-/* ------------------------------------------------------------------ */
 /* Colocation cost estimator                                           */
 /* ------------------------------------------------------------------ */
 
@@ -267,26 +239,43 @@ const CALC_GPUS: GpuOption[] = [
 
 // Facility overhead (PUE). Liquid runs tighter than air.
 const CALC_PUE = { liquid: 1.2, air: 1.4 } as const;
-// Published colocation range, per kW per month.
-const RATE_LOW = 150;
-const RATE_HIGH = 225;
+// Published colocation rate band, per kW per month — depends on cooling.
+const CALC_RATES = {
+  air: { low: 150, high: 175 },
+  liquid: { low: 200, high: 225 },
+} as const;
+
+// One node = 8 GPUs. Slider runs in nodes; max is a clean power of two.
+const GPUS_PER_NODE = 8;
+const NODE_MAX = 4096;
 
 const fmtUsd = (n: number) =>
   `$${Math.round(n).toLocaleString("en-US")}`;
+const fmtInt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 const ColoCalculator = () => {
   const [gpuId, setGpuId] = useState<string>(CALC_GPUS[0].id);
-  const [qty, setQty] = useState<number>(72);
+  const [nodes, setNodes] = useState<number>(8);
   const [customKw, setCustomKw] = useState<number>(1.0);
   const [cooling, setCooling] = useState<"liquid" | "air">("liquid");
 
   const gpu = CALC_GPUS.find((g) => g.id === gpuId)!;
   const perGpuKw = gpu.id === "custom" ? customKw : gpu.kw;
-  const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 0;
-  const itKw = safeQty * perGpuKw;
+  const gpus = nodes * GPUS_PER_NODE;
+  const itKw = gpus * perGpuKw;
   const facilityKw = itKw * CALC_PUE[cooling];
-  const lo = facilityKw * RATE_LOW;
-  const hi = facilityKw * RATE_HIGH;
+  const rate = CALC_RATES[cooling];
+  const lo = facilityKw * rate.low;
+  const hi = facilityKw * rate.high;
+  const sliderPct = ((nodes - 1) / (NODE_MAX - 1)) * 100;
+
+  const enquiry = `Colocation enquiry — from the cost estimator:
+• GPU type: ${gpu.name}
+• Nodes: ${fmtInt(nodes)} (${fmtInt(gpus)} GPUs · 8 GPUs/node)
+• Cooling: ${cooling === "liquid" ? "Liquid cooled" : "Air cooled"}
+• Estimated facility power: ${fmtInt(facilityKw)} kW
+• Estimated cost: ${fmtUsd(lo)}–${fmtUsd(hi)} / month (based on $${rate.low}–$${rate.high} / kW / month)`;
+  const enquiryHref = `/contact?service=coloc&message=${encodeURIComponent(enquiry)}`;
 
   const fieldLabel =
     "block font-mono text-[11px] uppercase tracking-[0.16em] text-black/50 mb-2.5";
@@ -315,37 +304,65 @@ const ColoCalculator = () => {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
-          <div>
-            <label htmlFor="calc-qty" className={fieldLabel}>
-              Number of GPUs
+        <div>
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <label htmlFor="calc-nodes" className={fieldLabel.replace(" mb-2.5", "")}>
+              Cluster size
             </label>
+            <div className="text-right leading-none">
+              <span className="font-heading text-3xl tracking-tight text-black">
+                {fmtInt(nodes)}
+              </span>
+              <span className="font-mono text-xs text-black/50 ml-2">
+                {nodes === 1 ? "node" : "nodes"}
+              </span>
+              <div className="mt-1 font-mono text-[11px] text-black/45">
+                {fmtInt(gpus)} GPUs · 8 / node
+              </div>
+            </div>
+          </div>
+          <div className="relative h-2 bg-black/10">
             <input
-              id="calc-qty"
-              type="number"
+              id="calc-nodes"
+              type="range"
               min={1}
-              value={qty}
-              onChange={(e) => setQty(parseInt(e.target.value, 10) || 0)}
-              className={inputBase}
+              max={NODE_MAX}
+              step={1}
+              value={nodes}
+              onChange={(e) => setNodes(parseInt(e.target.value, 10) || 1)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+            <div
+              className="absolute h-full bg-black"
+              style={{ width: `${sliderPct}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-black pointer-events-none"
+              style={{ left: `calc(${sliderPct}% - 10px)` }}
             />
           </div>
-          {gpu.id === "custom" && (
-            <div>
-              <label htmlFor="calc-kw" className={fieldLabel}>
-                kW per GPU
-              </label>
-              <input
-                id="calc-kw"
-                type="number"
-                min={0.1}
-                step={0.1}
-                value={customKw}
-                onChange={(e) => setCustomKw(parseFloat(e.target.value) || 0)}
-                className={inputBase}
-              />
-            </div>
-          )}
+          <div className="mt-2.5 flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-black/35">
+            <span>1 node</span>
+            <span>{fmtInt(NODE_MAX)} nodes</span>
+          </div>
         </div>
+
+        {gpu.id === "custom" && (
+          <div>
+            <label htmlFor="calc-kw" className={fieldLabel}>
+              kW per GPU
+            </label>
+            <input
+              id="calc-kw"
+              type="number"
+              min={0.1}
+              step={0.1}
+              value={customKw}
+              onChange={(e) => setCustomKw(parseFloat(e.target.value) || 0)}
+              className={`${inputBase} max-w-[180px]`}
+            />
+          </div>
+        )}
 
         <div>
           <span className={fieldLabel}>Cooling</span>
@@ -394,7 +411,7 @@ const ColoCalculator = () => {
             <span className="font-mono text-sm text-primary pb-1">/ month</span>
           </div>
           <p className="mt-3 font-mono text-[11px] text-white/45">
-            Based on $150–$225 / kW / month · {itKw.toLocaleString("en-US", { maximumFractionDigits: 0 })} kW IT load × {CALC_PUE[cooling]} PUE
+            {cooling === "liquid" ? "Liquid" : "Air"} cooled · ${rate.low}–${rate.high} / kW / month · {fmtInt(itKw)} kW IT load × {CALC_PUE[cooling]} PUE
           </p>
         </div>
 
@@ -402,6 +419,14 @@ const ColoCalculator = () => {
           All-inclusive, white-glove colocation: Helios maintains everything —
           power, cooling, networking and remote hands. You get bare-metal access.
         </p>
+
+        <Link
+          to={enquiryHref}
+          className="mt-7 group inline-flex w-full items-center justify-between gap-3 bg-primary text-black px-5 py-3.5 font-mono text-xs uppercase tracking-[0.16em] transition-colors hover:bg-white"
+        >
+          Send this as an enquiry
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </Link>
         <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
           Indicative estimate — final pricing confirmed on a call.
         </p>
@@ -605,31 +630,19 @@ const ColocationPage = () => {
               <ColoFootprintMap />
             </motion.div>
 
-            <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-6 lg:gap-8">
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.8, ease: EASE }}
-                className="lg:col-span-8"
-              >
-                <figure className="relative aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
-                  <img
-                    src="/coloc/site-halls-powerplant.png"
-                    alt="Line-drawing rendering of Helios modular data halls lined up beside a substation and wind farm — representational, not a specific facility"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </figure>
-              </motion.div>
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
-                className="lg:col-span-4"
-              >
-                <LineArtPlaceholder
-                  label="Line drawing — high-density data hall, rack corridor cutaway."
-                  className="aspect-[4/5] lg:h-full lg:aspect-auto"
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className="mt-14 lg:mt-20"
+            >
+              <figure className="relative aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
+                <img
+                  src="/coloc/halls-powerplant.png"
+                  alt="Line drawing of Helios modular data halls lined up beside a power plant and substation — representational, not a specific facility"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-              </motion.div>
-            </div>
+              </figure>
+            </motion.div>
           </div>
         </section>
 

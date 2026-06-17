@@ -196,21 +196,6 @@ const PueRuler = () => {
   );
 };
 
-const ImagePlaceholder =({ label, className }: { label: string; className: string }) => (
-  <div className={`relative overflow-hidden border border-white/10 bg-[#070707] ${className}`}>
-    <div
-      className="absolute inset-0"
-      aria-hidden
-      style={{
-        background:
-          "repeating-linear-gradient(45deg, transparent, transparent 23px, rgba(255,255,255,0.045) 23px, rgba(255,255,255,0.045) 24px)",
-      }}
-    />
-    <div className="absolute inset-0 flex items-center justify-center">
-      <p className="font-mono text-xs text-white/40 text-center px-6 leading-relaxed">{label}</p>
-    </div>
-  </div>
-);
 
 const InstrumentIndex = ({ children }: { children: string }) => (
   <span className="font-mono text-sm text-emerald-400">{children}</span>
@@ -556,10 +541,13 @@ const SustainabilityPage = () => {
         {/* ——— Full-bleed site image ——— */}
         <section className="px-4 lg:px-6 pb-24 lg:pb-32 bg-black">
           <div className="max-w-7xl mx-auto">
-            <ImagePlaceholder
-              label="Line drawing — data center halls lined up beside a power plant (representational, not a photo). Awaiting Jose's reference to AI-stylize."
-              className="h-[320px] lg:h-[520px]"
-            />
+            <figure className="relative overflow-hidden bg-black">
+              <img
+                src="/coloc/halls-powerplant.png"
+                alt="Line drawing of Helios data center halls lined up beside a power plant and substation"
+                className="w-full h-auto"
+              />
+            </figure>
             <p className="mt-4 text-sm text-white/50">
               A Helios site: power-adjacent, dry-cooled, live in about three months.
             </p>
