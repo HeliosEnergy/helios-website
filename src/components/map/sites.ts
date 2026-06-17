@@ -1,6 +1,9 @@
 import mapData from "./us-map-data.json";
 
-export type SiteStatus = "live" | "energizing" | "reserving";
+/* Status is intentionally a single state for now. Until power is energized
+   and GPUs are racked, every site reads the same: the power is reserved and
+   ready. Live / Energizing tiers will come back once sites are actually online. */
+export type SiteStatus = "reserved";
 
 export interface Site {
   id: keyof typeof mapData.sites;
@@ -11,10 +14,6 @@ export interface Site {
   x: number;
   y: number;
   status: SiteStatus;
-  statusLabel: string;
-  capacity: string;
-  cooling: string;
-  power: string;
 }
 
 const at = (id: keyof typeof mapData.sites) => ({
@@ -23,74 +22,16 @@ const at = (id: keyof typeof mapData.sites) => ({
 });
 
 export const STATUS_META: Record<SiteStatus, { label: string; dot: string }> = {
-  live: { label: "Live", dot: "bg-eco" },
-  energizing: { label: "Energizing", dot: "bg-primary" },
-  reserving: { label: "Reserving", dot: "bg-white/40" },
+  reserved: { label: "Reserved", dot: "bg-primary" },
 };
 
-export const DC_SITES: Site[] = [
-  {
-    id: "utah",
-    name: "Utah",
-    metro: "Salt Lake City metro",
-    abbr: "UT",
-    ...at("utah"),
-    status: "live",
-    statusLabel: "Live",
-    capacity: "40 MW",
-    cooling: "Direct-to-chip, water-free",
-    power: "Solar + storage PPA",
-  },
-  {
-    id: "northCarolina",
-    name: "North Carolina",
-    metro: "Charlotte metro",
-    abbr: "NC",
-    ...at("northCarolina"),
-    status: "energizing",
-    statusLabel: "Energizing Q3 2026",
-    capacity: "32 MW",
-    cooling: "Direct-to-chip, water-free",
-    power: "Nuclear-backed grid",
-  },
-  {
-    id: "florida",
-    name: "Florida",
-    metro: "Jacksonville metro",
-    abbr: "FL",
-    ...at("florida"),
-    status: "live",
-    statusLabel: "Live",
-    capacity: "24 MW",
-    cooling: "Direct-to-chip, water-free",
-    power: "Solar + grid mix",
-  },
-];
+/** What "Reserved" means — surfaced as the map legend. */
+export const STATUS_LEGEND = "Reserved — power is ready, ready for GPUs.";
 
 export const COLO_SITES: Site[] = [
-  ...DC_SITES,
-  {
-    id: "kentucky",
-    name: "Kentucky",
-    metro: "Louisville metro",
-    abbr: "KY",
-    ...at("kentucky"),
-    status: "reserving",
-    statusLabel: "Reserving · live Q4 2026",
-    capacity: "18 MW",
-    cooling: "Direct-to-chip, water-free",
-    power: "Hydro + grid mix",
-  },
-  {
-    id: "texas",
-    name: "Texas",
-    metro: "Dallas–Fort Worth",
-    abbr: "TX",
-    ...at("texas"),
-    status: "reserving",
-    statusLabel: "Reserving · live Q1 2027",
-    capacity: "60 MW",
-    cooling: "Direct-to-chip, water-free",
-    power: "Wind + solar PPA",
-  },
+  { id: "utah", name: "Utah", metro: "Salt Lake City metro", abbr: "UT", ...at("utah"), status: "reserved" },
+  { id: "northCarolina", name: "North Carolina", metro: "Charlotte metro", abbr: "NC", ...at("northCarolina"), status: "reserved" },
+  { id: "florida", name: "Florida", metro: "Jacksonville metro", abbr: "FL", ...at("florida"), status: "reserved" },
+  { id: "kentucky", name: "Kentucky", metro: "Louisville metro", abbr: "KY", ...at("kentucky"), status: "reserved" },
+  { id: "texas", name: "Texas", metro: "Dallas–Fort Worth", abbr: "TX", ...at("texas"), status: "reserved" },
 ];

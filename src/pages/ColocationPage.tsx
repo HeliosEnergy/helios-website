@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
@@ -141,18 +142,56 @@ const PlanBackdrop = () => (
 /* ------------------------------------------------------------------ */
 
 const ModuleViewer = () => {
-  const [view, setView] = useState<(typeof moduleViews)[number]["id"]>("enclosure");
+  // Skin on by default; reveal the structure (skin off) on hover / tap.
+  const [revealed, setRevealed] = useState(false);
+  // Hover-capable pointers (desktop) get the hover reveal; touch devices keep
+  // the old auto-switch, since there is no hover there.
+  const [canHover, setCanHover] = useState(true);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setView((v) => (v === "enclosure" ? "structure" : "enclosure"));
-    }, 4200);
-
-    return () => clearInterval(t);
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const apply = () => setCanHover(mq.matches);
+    apply();
+    mq.addEventListener?.("change", apply);
+    return () => mq.removeEventListener?.("change", apply);
   }, []);
 
+  // Touch / no-hover devices: auto-cycle enclosure <-> structure like before.
+  useEffect(() => {
+    if (canHover) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setRevealed((r) => !r), 4200);
+    return () => clearInterval(t);
+  }, [canHover]);
+
+  const view: (typeof moduleViews)[number]["id"] = revealed ? "structure" : "enclosure";
+  const active = moduleViews.find((v) => v.id === view)!;
+
+  // Interaction props only on hover-capable devices.
+  const interactionProps = canHover
+    ? {
+        onMouseEnter: () => setRevealed(true),
+        onMouseLeave: () => setRevealed(false),
+        onClick: () => setRevealed((r) => !r),
+        role: "button" as const,
+        tabIndex: 0,
+        "aria-label": "Toggle data hall cutaway view",
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setRevealed((r) => !r);
+          }
+        },
+      }
+    : {};
+
   return (
-    <div className="relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white">
+    <div
+      className={`group relative aspect-[4/3] md:aspect-[16/9] lg:aspect-[2.25/1] overflow-hidden bg-white ${
+        canHover ? "cursor-pointer" : ""
+      }`}
+      {...interactionProps}
+    >
       {moduleViews.map((v) => (
         <motion.img
           key={v.id}
@@ -164,6 +203,231 @@ const ModuleViewer = () => {
           className="absolute inset-0 w-full h-full object-contain scale-[1.7]"
         />
       ))}
+
+      {/* Caption + hover affordance (hint only where hover applies) */}
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 lg:p-5">
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-black/70">
+          {active.label}
+        </span>
+        {canHover && (
+          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/40 transition-opacity duration-300 group-hover:opacity-0">
+            Hover to see inside
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/* Colocation cost estimator                                           */
+/* ------------------------------------------------------------------ */
+
+// Approx. power draw per GPU (kW), board-level. These are estimates pending
+// Jose's confirmed figures. A broad list — customers may bring their own GPUs.
+type GpuOption = { id: string; name: string; kw: number };
+const CALC_GPUS: GpuOption[] = [
+  { id: "gb300", name: "GB300 (NVL72)", kw: 1.4 },
+  { id: "b300", name: "B300", kw: 1.2 },
+  { id: "b200", name: "B200", kw: 1.0 },
+  { id: "h200", name: "H200", kw: 0.7 },
+  { id: "h100", name: "H100", kw: 0.7 },
+  { id: "rtx-pro-6000", name: "RTX PRO 6000", kw: 0.6 },
+  { id: "5090", name: "RTX 5090", kw: 0.575 },
+  { id: "custom", name: "Other / bring your own", kw: 1.0 },
+];
+
+// Published colocation rate band, per kW per month — depends on cooling.
+const CALC_RATES = {
+  air: { low: 150, high: 175 },
+  liquid: { low: 200, high: 225 },
+} as const;
+
+// One node = 8 GPUs. Slider runs in nodes; max is a clean power of two.
+const GPUS_PER_NODE = 8;
+const NODE_MAX = 4096;
+
+const fmtUsd = (n: number) =>
+  `$${Math.round(n).toLocaleString("en-US")}`;
+const fmtInt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+const ColoCalculator = () => {
+  const [gpuId, setGpuId] = useState<string>(CALC_GPUS[0].id);
+  const [nodes, setNodes] = useState<number>(8);
+  const [customKw, setCustomKw] = useState<number>(1.0);
+  const [cooling, setCooling] = useState<"liquid" | "air">("liquid");
+
+  const gpu = CALC_GPUS.find((g) => g.id === gpuId)!;
+  const perGpuKw = gpu.id === "custom" ? customKw : gpu.kw;
+  const gpus = nodes * GPUS_PER_NODE;
+  const itKw = gpus * perGpuKw;
+  const rate = CALC_RATES[cooling];
+  const lo = itKw * rate.low;
+  const hi = itKw * rate.high;
+  const sliderPct = ((nodes - 1) / (NODE_MAX - 1)) * 100;
+
+  const enquiry = `Colocation enquiry — from the cost estimator:
+• GPU type: ${gpu.name}
+• Nodes: ${fmtInt(nodes)} (${fmtInt(gpus)} GPUs · 8 GPUs/node)
+• Cooling: ${cooling === "liquid" ? "Liquid cooled" : "Air cooled"}
+• Estimated power: ${fmtInt(itKw)} kW
+• Estimated cost: ${fmtUsd(lo)}–${fmtUsd(hi)} / month (based on $${rate.low}–$${rate.high} / kW / month)`;
+  const enquiryHref = `/contact?service=coloc&message=${encodeURIComponent(enquiry)}`;
+
+  const fieldLabel =
+    "block font-mono text-[11px] uppercase tracking-[0.16em] text-black/50 mb-2.5";
+  const inputBase =
+    "w-full bg-white border border-black/15 px-4 py-3 font-heading text-lg text-black focus:outline-none focus:border-black/60 transition-colors";
+
+  return (
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-start">
+      {/* Inputs */}
+      <div className="space-y-7">
+        <div>
+          <label htmlFor="calc-gpu" className={fieldLabel}>
+            GPU type
+          </label>
+          <select
+            id="calc-gpu"
+            value={gpuId}
+            onChange={(e) => setGpuId(e.target.value)}
+            className={`${inputBase} appearance-none cursor-pointer`}
+          >
+            {CALC_GPUS.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <label htmlFor="calc-nodes" className={fieldLabel.replace(" mb-2.5", "")}>
+              Cluster size
+            </label>
+            <div className="text-right leading-none">
+              <span className="font-heading text-3xl tracking-tight text-black">
+                {fmtInt(nodes)}
+              </span>
+              <span className="font-mono text-xs text-black/50 ml-2">
+                {nodes === 1 ? "node" : "nodes"}
+              </span>
+              <div className="mt-1 font-mono text-[11px] text-black/45">
+                {fmtInt(gpus)} GPUs · 8 / node
+              </div>
+            </div>
+          </div>
+          <div className="relative h-2 bg-black/10">
+            <input
+              id="calc-nodes"
+              type="range"
+              min={1}
+              max={NODE_MAX}
+              step={1}
+              value={nodes}
+              onChange={(e) => setNodes(parseInt(e.target.value, 10) || 1)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+            <div
+              className="absolute h-full bg-black"
+              style={{ width: `${sliderPct}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-black pointer-events-none"
+              style={{ left: `calc(${sliderPct}% - 10px)` }}
+            />
+          </div>
+          <div className="mt-2.5 flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-black/35">
+            <span>1 node</span>
+            <span>{fmtInt(NODE_MAX)} nodes</span>
+          </div>
+        </div>
+
+        {gpu.id === "custom" && (
+          <div>
+            <label htmlFor="calc-kw" className={fieldLabel}>
+              kW per GPU
+            </label>
+            <input
+              id="calc-kw"
+              type="number"
+              min={0.1}
+              step={0.1}
+              value={customKw}
+              onChange={(e) => setCustomKw(parseFloat(e.target.value) || 0)}
+              className={`${inputBase} max-w-[180px]`}
+            />
+          </div>
+        )}
+
+        <div>
+          <span className={fieldLabel}>Cooling</span>
+          <div className="grid grid-cols-2 gap-0 border border-black/15">
+            {(["liquid", "air"] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCooling(c)}
+                className={`py-3 font-mono text-xs uppercase tracking-[0.14em] transition-colors ${
+                  cooling === c
+                    ? "bg-black text-white"
+                    : "bg-white text-black/60 hover:text-black"
+                }`}
+              >
+                {c === "liquid" ? "Liquid cooled" : "Air cooled"}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Readout */}
+      <div className="bg-black text-white p-7 lg:p-9">
+        <div className="flex items-baseline justify-between gap-4 pb-5 border-b border-white/15">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+            Estimated power
+          </span>
+          <span className="font-heading text-2xl lg:text-3xl tracking-tight">
+            {itKw.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            <span className="text-primary text-lg"> kW</span>
+          </span>
+        </div>
+
+        <div className="pt-6">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+            Estimated cost
+          </span>
+          <div className="mt-3 flex items-end gap-2 flex-wrap">
+            <span className="font-heading text-4xl lg:text-5xl tracking-tight leading-none">
+              {fmtUsd(lo)}
+            </span>
+            <span className="font-heading text-2xl lg:text-3xl tracking-tight leading-none text-white/45 pb-0.5">
+              – {fmtUsd(hi)}
+            </span>
+            <span className="font-mono text-sm text-primary pb-1">/ month</span>
+          </div>
+          <p className="mt-3 font-mono text-[11px] text-white/45">
+            {cooling === "liquid" ? "Liquid" : "Air"} cooled · ${rate.low}–${rate.high} / kW / month · {fmtInt(itKw)} kW IT load
+          </p>
+        </div>
+
+        <p className="mt-7 pt-6 border-t border-white/15 text-sm text-white/65 leading-relaxed">
+          All-inclusive, white-glove colocation: Helios maintains everything —
+          power, cooling, networking and remote hands. You get bare-metal access.
+        </p>
+
+        <Link
+          to={enquiryHref}
+          className="mt-7 group inline-flex w-full items-center justify-between gap-3 bg-primary text-black px-5 py-3.5 font-mono text-xs uppercase tracking-[0.16em] transition-colors hover:bg-white"
+        >
+          Send this as an enquiry
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </Link>
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
+          Indicative estimate — final pricing confirmed on a call.
+        </p>
+      </div>
     </div>
   );
 };
@@ -314,8 +578,73 @@ const ColocationPage = () => {
           </div>
         </section>
 
-        {/* ───── 02 · Specification index — why Helios ───── */}
+        {/* ───── 02 · Cost estimator ───── */}
+        <section className="py-20 lg:py-28 bg-white text-black border-t border-black/10">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">
+                Cost estimator
+              </span>
+              <h2 className={`mt-6 ${calmHeading} text-4xl lg:text-5xl text-[#15171A] max-w-3xl`}>
+                Estimate your colocation cost.
+              </h2>
+              <p className="mt-6 text-lg lg:text-xl text-black/70 font-light leading-relaxed max-w-2xl">
+                Pick your GPUs and cooling. We translate that into facility power
+                and an all-inclusive monthly range. Bringing your own hardware? Use
+                "Other" and enter the power draw.
+              </p>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+              className="mt-14 lg:mt-20"
+            >
+              <ColoCalculator />
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ───── 03 · The sites ───── */}
         <section className="py-20 lg:py-28 bg-black">
+          <div className="max-w-7xl mx-auto px-4 lg:px-12">
+            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
+              <h2 className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-3xl`}>
+                Power first. Everything else follows.
+              </h2>
+              <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
+                We site next to clean generation, contract the megawatts long-term,
+                and energize the land before a single module arrives. Your hall
+                lands on power that already exists.
+              </p>
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
+              className="mt-12 lg:mt-16"
+            >
+              <ColoFootprintMap />
+            </motion.div>
+
+            <motion.div
+              {...fadeUp}
+              transition={{ duration: 0.8, ease: EASE }}
+              className="mt-14 lg:mt-20"
+            >
+              <figure className="relative aspect-[16/9] overflow-hidden bg-[#0A0A0A]">
+                <img
+                  src="/coloc/halls-powerplant.png"
+                  alt="Line drawing of Helios modular data halls lined up beside a power plant and substation — representational, not a specific facility"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </figure>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ───── 04 · Why Helios — built for AI factories ───── */}
+        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
             <motion.h2
               {...fadeUp}
@@ -341,59 +670,6 @@ const ColocationPage = () => {
                   </p>
                 </motion.div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ───── 03 · The sites ───── */}
-        <section className="py-20 lg:py-28 bg-black border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-4 lg:px-12">
-            <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
-              <h2 className={`${calmHeading} text-4xl lg:text-5xl text-white max-w-3xl`}>
-                Power first. Everything else follows.
-              </h2>
-              <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
-                We site next to clean generation, contract the megawatts long-term,
-                and energize the land before a single module arrives. Your hall
-                lands on power that already exists.
-              </p>
-            </motion.div>
-
-            <motion.div
-              {...fadeUp}
-              transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
-              className="mt-12 lg:mt-16"
-            >
-              <ColoFootprintMap />
-            </motion.div>
-
-            <div className="mt-14 lg:mt-20 grid lg:grid-cols-12 gap-6 lg:gap-8">
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.8, ease: EASE }}
-                className="lg:col-span-8"
-              >
-                <figure className="relative aspect-[16/9] overflow-hidden border border-white/10 bg-[#0A0A0A]">
-                  <img
-                    src="/coloc/site-overview-aerial.png"
-                    alt="Aerial view of Helios modular data halls beside a substation and wind turbines at dusk"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </figure>
-              </motion.div>
-              <motion.div
-                {...fadeUp}
-                transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
-                className="lg:col-span-4"
-              >
-                <figure className="relative aspect-[4/5] lg:h-full lg:aspect-auto overflow-hidden border border-white/10 bg-[#0A0A0A]">
-                  <img
-                    src="/coloc/hall-interior-rack-corridor.png"
-                    alt="Interior corridor of high-density data hall racks"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                </figure>
-              </motion.div>
             </div>
           </div>
         </section>

@@ -8,7 +8,7 @@ import { EASE, fadeUp, sectionHeading } from "./HomeRevampSections";
 const GPU_DATA = [
   {
     id: "gb300",
-    clusterId: "gb300",
+    clusterId: "gb300-nvl72", // matches ContactPage ClusterType
     eyebrow: "Rack-scale system",
     name: "NVIDIA GB300 NVL72",
     availability: "Q3 capacity",
@@ -32,7 +32,7 @@ const GPU_DATA = [
   },
   {
     id: "rtx6000",
-    clusterId: "rtx-6000-pro", // matches ContactPage ClusterType
+    clusterId: "rtx-pro-6000", // matches ContactPage ClusterType
     eyebrow: "Workhorse GPU",
     name: "NVIDIA RTX PRO 6000",
     availability: "Available now",

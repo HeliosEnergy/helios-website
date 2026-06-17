@@ -12,9 +12,14 @@ import {
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeavyGfx } from "@/hooks/use-heavy-gfx";
+import { InViewGate } from "./ui/InViewGate";
 import { ArrowCTA } from "./ui/ArrowCTA";
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Cap decorative shaders well below the library's ~8.3MP default.
+const SHADER_MAX_PX = 1280 * 720;
 
 export const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -44,6 +49,8 @@ const offerings = [
     primaryHref: "/contact?service=clusters",
     secondary: "Explore GPU Cloud",
     secondaryHref: "/clusters",
+    custom:
+      "Custom configurations welcome — tell us the B300 build you want and we can provide that version. Flexible on CPU type, storage, network equipment and more.",
     image: "/gpus/dgx-b200.jpg",
     specs: [
       { k: "GPUs", v: "8 to 4096" },
@@ -69,6 +76,7 @@ const offerings = [
     primaryHref: "/contact?service=coloc",
     secondary: "Explore Colocation",
     secondaryHref: "/colocation",
+    custom: "",
     image: "/coloc/hall-interior-rack-corridor.png",
     specs: [
       { k: "Power", v: "10s of MW" },
@@ -181,6 +189,21 @@ export const HomeOfferingsSection = () => {
                   </motion.div>
                 </AnimatePresence>
               </motion.div>
+
+              <AnimatePresence mode="wait">
+                {o.custom && (
+                  <motion.p
+                    key={`custom-${active}`}
+                    initial={swap.initial}
+                    animate={swap.animate}
+                    exit={swap.exit}
+                    transition={{ duration: 0.36, ease: EASE }}
+                    className="mt-8 max-w-md border-l-2 border-primary pl-4 text-sm font-light leading-relaxed text-[#2A2D31]/75"
+                  >
+                    {o.custom}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* RIGHT: tall bleeding image with vertical dot switcher */}
@@ -375,22 +398,23 @@ const sustainability = [
     body: "Purpose-built halls, direct liquid cooling and modern power distribution keep overhead low, so more of every megawatt goes to compute.",
   },
   {
-    metric: "100",
-    unit: "%",
+    metric: "Every",
+    unit: "site",
     title: "Renewable-backed power",
-    body: "Every site is powered with renewable energy in the mix, sited next to clean generation and backed by long-term power agreements.",
+    body: "Every Helios site is developed alongside clean generation and backed by long-term power agreements, so renewable energy is part of every site's mix. The share grows as we add capacity, and because we site next to generation we tap clean power others can't reach.",
   },
 ];
 
 export const HomeSustainabilitySection = () => {
-  const isMobile = useIsMobile();
+  const heavyGfx = useHeavyGfx();
   const reduced = useReducedMotion();
 
   return (
     <section className="relative overflow-hidden bg-black py-24 lg:py-36 px-4 lg:px-6">
-      {/* Ground light rising beneath the metrics — WebGL crashes iOS Safari, so CSS fallback on mobile */}
-      {!isMobile ? (
-        <div
+      {/* Ground light rising beneath the metrics — animated on capable devices,
+          CSS fallback elsewhere; unmounts when scrolled off-screen. */}
+      {heavyGfx ? (
+        <InViewGate
           className="absolute inset-x-0 bottom-0 h-3/4 pointer-events-none opacity-40"
           aria-hidden
           style={{
@@ -411,6 +435,8 @@ export const HomeSustainabilitySection = () => {
             speed={0.15}
             scale={1.9}
             offsetY={0.3}
+            minPixelRatio={1}
+            maxPixelCount={SHADER_MAX_PX}
           />
           <PaperTexture
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.5 }}
@@ -423,8 +449,10 @@ export const HomeSustainabilitySection = () => {
             crumples={0.15}
             folds={0.1}
             drops={0.05}
+            minPixelRatio={1}
+            maxPixelCount={SHADER_MAX_PX}
           />
-        </div>
+        </InViewGate>
       ) : (
         <div
           className="absolute inset-x-0 bottom-0 h-3/4 pointer-events-none"
@@ -468,15 +496,15 @@ export const HomeSustainabilitySection = () => {
 
         {/* Proof — three quiet readings. Each value sits above one thin
             measure line whose fill tells the story: water held empty, power
-            mostly to compute, renewable drawn full. No labels, no ornament —
-            the number, the line and the title carry it. */}
+            mostly to compute, renewable power in every site's mix. No labels,
+            no ornament — the number, the line and the title carry it. */}
         <div className="mt-20 lg:mt-32">
           <div className="h-px w-full bg-white/10" aria-hidden />
           <div className="grid gap-y-16 pt-14 md:grid-cols-3 md:gap-x-12 lg:gap-x-24 lg:pt-20">
             {[
               { value: "0", unit: "L", fill: 0 },
               { value: "Low", unit: "PUE", fill: 0.88 },
-              { value: "100", unit: "%", fill: 1 },
+              { value: "Every", unit: "site", fill: 1 },
             ].map((m, i) => (
               <motion.div
                 key={sustainability[i].title}

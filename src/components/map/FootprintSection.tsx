@@ -1,9 +1,9 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
-import { COLO_SITES, DC_SITES, STATUS_META, type Site } from "./sites";
+import { COLO_SITES, STATUS_META, STATUS_LEGEND, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
 
@@ -46,15 +46,15 @@ const Ledger = ({
             <span className="ml-2 font-mono font-normal text-xs text-white/55">{site.abbr}</span>
           </span>
           <span className="flex items-center gap-2">
-            {variant === "colo" && (
-              <span className="font-mono text-xs text-white/70 mr-1">{site.capacity}</span>
-            )}
             <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
             <span className="font-mono text-xs text-white/70 w-[4.6rem]">{meta.label}</span>
           </span>
         </button>
       );
     })}
+    <p className="px-5 py-3 font-mono text-[11px] leading-relaxed text-white/45">
+      {STATUS_LEGEND}
+    </p>
   </div>
 );
 
@@ -72,20 +72,29 @@ export const FootprintMap = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-120px" });
+  // Toggles as the map enters/leaves the viewport; drives the render loop.
+  const inView = useInView(ref, { margin: "-120px" });
+  // Mount the WebGL scene the first time it's seen, then keep it (paused when
+  // off-screen) so the intro plays once rather than replaying on each scroll.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    if (inView) setMounted(true);
+  }, [inView]);
 
   return (
     <div ref={ref} className="relative">
       <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[975/540]">
         <Suspense fallback={null}>
-          <SiteMapScene
-            sites={sites}
-            variant={variant}
-            activeId={activeId}
-            onActive={setActiveId}
-            play={inView}
-            reduced={!!reduced}
-          />
+          {mounted && (
+            <SiteMapScene
+              sites={sites}
+              variant={variant}
+              activeId={activeId}
+              onActive={setActiveId}
+              play={inView}
+              reduced={!!reduced}
+            />
+          )}
         </Suspense>
       </div>
       <Ledger sites={sites} variant={variant} activeId={activeId} onActive={setActiveId} />
@@ -114,7 +123,7 @@ export const HomeFootprintSection = () => (
           className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
         >
           Helios builds where clean power is abundant and interconnection is
-          fast. Three sites across three grids today — water-free,
+          fast. Five sites across five grids today — water-free,
           renewable-backed, Blackwell-ready.
         </motion.p>
       </div>
@@ -124,7 +133,7 @@ export const HomeFootprintSection = () => (
         transition={{ duration: 0.9, delay: 0.15, ease: EASE }}
         className="mt-10 lg:mt-14"
       >
-        <FootprintMap sites={DC_SITES} variant="home" />
+        <FootprintMap sites={COLO_SITES} variant="home" />
       </motion.div>
 
       <motion.div

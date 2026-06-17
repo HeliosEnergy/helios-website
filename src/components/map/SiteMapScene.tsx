@@ -310,46 +310,29 @@ const MarkerTooltip = ({
     >
       <div className="flex items-center gap-2">
         <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-        <span className="font-mono text-xs text-white/60">{site.statusLabel}</span>
+        <span className="font-mono text-xs text-white/60">{meta.label}</span>
       </div>
       <p className="mt-2 font-heading font-bold text-white text-lg leading-tight tracking-tight">
         {site.name}
       </p>
       <p className="mt-0.5 text-sm text-white/50">{site.metro}</p>
       {variant === "colo" && (
-        <dl className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
-          {(
-            [
-              ["Capacity", site.capacity],
-              ["Cooling", site.cooling],
-              ["Power", site.power],
-            ] as const
-          ).map(([k, v]) => (
-            <div key={k} className="flex items-baseline justify-between gap-3">
-              <dt className="font-mono text-xs text-white/45">{k}</dt>
-              <dd className="text-sm text-white/85 text-right">{v}</dd>
-            </div>
-          ))}
-        </dl>
+        <p className="mt-3 pt-3 border-t border-white/10 text-sm text-white/60 leading-relaxed">
+          Power is ready, ready for GPUs.
+        </p>
       )}
     </motion.div>
   );
 };
 
-/* Marker fill carries status meaning, matching the ledger legend:
-   live = green, energizing = amber, reserving = hollow cool ring. */
+/* Every site reads "Reserved" for now — a single primary-filled marker. */
 const MARKER_FILL: Record<SiteStatus, string> = {
-  live: "bg-eco shadow-[0_0_16px_3px_hsl(var(--eco)/0.5)]",
-  energizing: "bg-primary shadow-[0_0_16px_3px_hsl(24_100%_64%/0.55)]",
-  reserving: "border-[1.5px] border-white/55 bg-black/40",
+  reserved: "bg-primary shadow-[0_0_16px_3px_hsl(24_100%_64%/0.55)]",
 };
 
-/* Diameter encodes capacity (area ∝ MW), so a 60 MW site reads bigger
-   than an 18 MW one at a glance. Floored so the smallest stays tappable. */
-const markerSize = (capacity: string) => {
-  const mw = parseInt(capacity, 10) || 24;
-  return Math.max(10, Math.round(18 * Math.sqrt(mw / 60)));
-};
+/* Uniform marker size — capacity is no longer published, so dots no longer
+   encode MW. Kept tappable on touch. */
+const MARKER_DIA = 14;
 
 const Markers = ({
   sites,
@@ -370,8 +353,7 @@ const Markers = ({
       const active = activeId === site.id;
       const below = site.y < CY;
       const align = site.x > 700 ? ("right" as const) : ("center" as const);
-      const reserving = site.status === "reserving";
-      const dia = markerSize(site.capacity);
+      const dia = MARKER_DIA;
       return (
         <group key={site.id} position={[wx, wy, 4]}>
           <Html center zIndexRange={[40, 0]} style={{ pointerEvents: "none" }}>
@@ -383,7 +365,7 @@ const Markers = ({
             >
               <button
                 type="button"
-                aria-label={`${site.name} — ${site.statusLabel}`}
+                aria-label={`${site.name} — Reserved`}
                 onMouseEnter={() => onActive(site.id)}
                 onMouseLeave={() => onActive(null)}
                 onFocus={() => onActive(site.id)}
@@ -391,17 +373,10 @@ const Markers = ({
                 onClick={() => onActive(active ? null : site.id)}
                 className="relative flex items-center justify-center w-7 h-7 cursor-pointer"
               >
-                {!reserving && (
-                  <span
-                    className="map-ping absolute inset-0 rounded-full"
-                    style={
-                      {
-                        animationDelay: `${i * 0.5}s`,
-                        ...(site.status === "live" ? { "--ping": "158 64% 52%" } : {}),
-                      } as React.CSSProperties
-                    }
-                  />
-                )}
+                <span
+                  className="map-ping absolute inset-0 rounded-full"
+                  style={{ animationDelay: `${i * 0.5}s` } as React.CSSProperties}
+                />
                 <span
                   className={`relative block rounded-full transition-transform duration-300 ${
                     MARKER_FILL[site.status]
@@ -463,9 +438,12 @@ const SceneInner = ({ sites, variant, activeId, onActive, play, reduced }: Scene
 };
 
 const SiteMapScene = (props: SceneProps) => (
+  // Render only while on-screen (`play`). Off-screen, the loop fully stops so
+  // the map's WebGL context sits idle instead of driving the GPU forever.
   <Canvas
+    frameloop={props.play ? "always" : "never"}
     camera={{ fov: FOV, near: 10, far: 5000, position: [0, 0, 1200] }}
-    dpr={[1, 2]}
+    dpr={[1, 1.5]}
     gl={{ antialias: true, alpha: true }}
     className="!absolute !inset-0"
   >

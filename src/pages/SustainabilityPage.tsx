@@ -3,12 +3,16 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeavyGfx } from "@/hooks/use-heavy-gfx";
+import { InViewGate } from "@/components/ui/InViewGate";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { EASE, fadeUp } from "@/components/HomeRevampSections";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
+
+// Cap decorative shaders well below the library's ~8.3MP default.
+const SHADER_MAX_PX = 1280 * 720;
 
 const consequences = [
   {
@@ -196,21 +200,6 @@ const PueRuler = () => {
   );
 };
 
-const ImagePlaceholder =({ label, className }: { label: string; className: string }) => (
-  <div className={`relative overflow-hidden border border-white/10 bg-[#070707] ${className}`}>
-    <div
-      className="absolute inset-0"
-      aria-hidden
-      style={{
-        background:
-          "repeating-linear-gradient(45deg, transparent, transparent 23px, rgba(255,255,255,0.045) 23px, rgba(255,255,255,0.045) 24px)",
-      }}
-    />
-    <div className="absolute inset-0 flex items-center justify-center">
-      <p className="font-mono text-xs text-white/40 text-center px-6 leading-relaxed">{label}</p>
-    </div>
-  </div>
-);
 
 const InstrumentIndex = ({ children }: { children: string }) => (
   <span className="font-mono text-sm text-emerald-400">{children}</span>
@@ -319,7 +308,7 @@ const AdvantageSection = () => {
 };
 
 const SustainabilityPage = () => {
-  const isMobile = useIsMobile();
+  const heavyGfx = useHeavyGfx();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -329,9 +318,10 @@ const SustainabilityPage = () => {
       <main>
         {/* ——— Hero ——— */}
         <section className="relative overflow-hidden pt-28 lg:pt-40 pb-4 px-4 lg:px-6">
-          {/* Canopy light from above — WebGL crashes iOS Safari, so CSS fallback on mobile */}
-          {!isMobile ? (
-            <div
+          {/* Canopy light from above — animated on capable devices, CSS fallback
+              elsewhere; unmounts when scrolled off-screen. */}
+          {heavyGfx ? (
+            <InViewGate
               className="absolute inset-x-0 top-0 h-full pointer-events-none opacity-30"
               aria-hidden
               style={{
@@ -352,6 +342,8 @@ const SustainabilityPage = () => {
                 speed={0.12}
                 scale={1.9}
                 offsetY={-0.35}
+                minPixelRatio={1}
+                maxPixelCount={SHADER_MAX_PX}
               />
               <PaperTexture
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.45 }}
@@ -364,8 +356,10 @@ const SustainabilityPage = () => {
                 crumples={0.15}
                 folds={0.1}
                 drops={0.05}
+                minPixelRatio={1}
+                maxPixelCount={SHADER_MAX_PX}
               />
-            </div>
+            </InViewGate>
           ) : (
             <div
               className="absolute inset-0 pointer-events-none"
@@ -421,26 +415,26 @@ const SustainabilityPage = () => {
             <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 pb-28 lg:pb-44">
               <div className="lg:col-span-6 lg:col-start-1 order-2 lg:order-1">
                 <WaterOdometer />
-                <p className="mt-5 text-sm lg:text-base text-white/50">
-                  Litres of water drawn for cooling — per site, per year.
-                </p>
-
-                <ImagePlaceholder
-                  label="Placeholder — dry cooler / cold plate macro, ≥1600px"
-                  className="mt-14 lg:mt-16 aspect-[16/10] max-w-xl"
-                />
+                <figure className="mt-10 relative overflow-hidden bg-[#070707]">
+                  <img
+                    src="/sustainability/dry-cooler.png"
+                    alt="Line drawing of a dry cooler — closed-loop heat rejection with top-mounted fans, air flow in and out"
+                    className="w-full h-auto"
+                  />
+                </figure>
               </div>
 
               <div className="lg:col-span-4 lg:col-start-9 order-1 lg:order-2">
                 <InstrumentIndex>01</InstrumentIndex>
                 <h3 className={`mt-5 ${calmHeading} text-3xl lg:text-4xl text-white`}>
-                  Water-free cooling, even at NVL72 densities.
+                  0 L of water wasted, even at NVL72 densities.
                 </h3>
                 <div className="mt-7 space-y-5">
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Most AI data centers evaporate millions of liters of water a year to stay
-                    cool. Helios sites use closed-loop direct-to-chip liquid cooling and dry
-                    coolers to reject heat without drawing on local water supplies.
+                    cool. Helios sites run a closed-loop, direct-to-chip liquid cooling system
+                    paired with dry coolers: the loop is filled once and recirculated, so
+                    effectively no water is wasted to keep your GPUs cold.
                   </p>
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     That means no competition with communities and agriculture for water, and no
@@ -479,32 +473,25 @@ const SustainabilityPage = () => {
               <div className="lg:col-span-4 lg:col-start-2">
                 <InstrumentIndex>03</InstrumentIndex>
                 <h3 className={`mt-5 ${calmHeading} text-3xl lg:text-4xl text-white`}>
-                  Renewable-backed power is part of the site plan.
+                  Every site is integrated with renewable power.
                 </h3>
                 <div className="mt-7 space-y-5">
                   <p className="text-lg text-white/70 font-light leading-relaxed">
                     Every Helios site is developed alongside clean generation and backed by
-                    long-term power agreements, so renewable energy is always part of the mix
-                    powering your cluster.
-                  </p>
-                  <p className="text-lg text-white/70 font-light leading-relaxed">
-                    Siting next to generation is also why we move fast: secured power is the
-                    hardest part of any data center build, and we lock it before you sign.
+                    long-term power agreements, so renewable energy is part of every site's mix.
+                    The share grows as we add capacity, and because we site next to generation we
+                    tap clean power others can't reach.
                   </p>
                 </div>
               </div>
               <div className="lg:col-span-6 lg:col-start-7">
-                <div className="flex items-end gap-4 text-white">
-                  <span className="text-[72px] sm:text-[104px] lg:text-[148px] font-heading font-medium tracking-tight leading-none">
-                    100
-                  </span>
-                  <span className="pb-1.5 lg:pb-3 font-mono text-xl lg:text-2xl tracking-[0.2em] text-emerald-400">
-                    %
-                  </span>
-                </div>
-                <p className="mt-8 text-sm lg:text-base text-white/50">
-                  100 of 100 sites — renewable-backed.
-                </p>
+                <figure className="relative overflow-hidden bg-[#070707]">
+                  <img
+                    src="/sustainability/solar-hydro.png"
+                    alt="Line drawing of solar panels and a hydro dam feeding a Helios modular data center"
+                    className="w-full h-auto"
+                  />
+                </figure>
               </div>
             </div>
           </div>
@@ -563,12 +550,15 @@ const SustainabilityPage = () => {
         {/* ——— Full-bleed site image ——— */}
         <section className="px-4 lg:px-6 pb-24 lg:pb-32 bg-black">
           <div className="max-w-7xl mx-auto">
-            <ImagePlaceholder
-              label="Placeholder — aerial: Helios site beside solar field at dusk, ≥2560px"
-              className="h-[320px] lg:h-[520px]"
-            />
+            <figure className="relative overflow-hidden bg-black">
+              <img
+                src="/coloc/halls-powerplant.png"
+                alt="Line drawing of Helios data center halls lined up beside a power plant and substation"
+                className="w-full h-auto"
+              />
+            </figure>
             <p className="mt-4 text-sm text-white/50">
-              A Helios site: solar-adjacent, dry-cooled, live in about three months.
+              A Helios site: power-adjacent, dry-cooled, live in about three months.
             </p>
           </div>
         </section>

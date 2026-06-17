@@ -16,7 +16,7 @@ const navItems = [
   { label: "Colocation", hasDropdown: false, href: "/colocation" },
   { label: "Sustainability", hasDropdown: false, href: "/sustainability" },
   { label: "Models", hasDropdown: true, dropdown: ModelsDropdown },
-  { label: "Pricing", hasDropdown: false, href: "/pricing" },
+  // HIDDEN - Pricing taken down until pricing is corrected.
   { label: "Partners", hasDropdown: true, dropdown: PartnersDropdown },
 ];
 
