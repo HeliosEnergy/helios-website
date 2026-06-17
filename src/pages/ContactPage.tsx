@@ -14,7 +14,7 @@ const EMBER_GLOW = "radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 type ServiceInterest = 'clusters' | 'coloc' | 'inference' | 'baremetal' | 'partnership' | 'others';
-type ClusterType = 'gb300-nvl72' | 'b300' | 'rtx-pro-6000' | '5090';
+type ClusterType = 'gb300-nvl72' | 'b300' | 'b200' | 'h200' | 'h100' | 'rtx-pro-6000' | '5090';
 
 interface InferenceModel {
   _id: string;
@@ -250,23 +250,27 @@ const EstimationSlider = ({
 );
 
 const clusterOptions: { value: ClusterType; label: string }[] = [
-  { value: 'gb300-nvl72', label: 'GB300 NVL72' },
+  // Blackwell
+  { value: 'gb300-nvl72', label: 'GB300' },
   { value: 'b300', label: 'B300' },
+  { value: 'b200', label: 'B200' },
+  // Hopper
+  { value: 'h200', label: 'H200' },
+  { value: 'h100', label: 'H100' },
+  // Other
   { value: 'rtx-pro-6000', label: 'RTX PRO 6000' },
   { value: '5090', label: '5090' },
 ];
 
-// Sizing math. Standard nodes hold 8 GPUs; the GB300 NVL72 is a separate
-// entity that scales one rack (72 GPUs) at a time.
+// Sizing math. Standard nodes hold 8 GPUs; GB300 is sized in individual GPUs.
 const GPUS_PER_NODE = 8;
-const GPUS_PER_NVL72 = 72;
-const NODE_SLIDER_MAX = 1024; // 1024+ nodes
+const NODE_SLIDER_MAX = 4096; // 4096+ (1024 × 4)
 
-// When GB300 NVL72 is the sole selected type, the slider counts NVL72 racks.
+// When GB300 is the sole selected type, the slider counts individual GPUs.
 const sizingForTypes = (types: ClusterType[]) => {
-  const nvl72Only = types.length === 1 && types[0] === 'gb300-nvl72';
-  return nvl72Only
-    ? { gpusPerUnit: GPUS_PER_NVL72, unit: 'rack', unitPlural: 'racks' }
+  const gb300Only = types.length === 1 && types[0] === 'gb300-nvl72';
+  return gb300Only
+    ? { gpusPerUnit: 1, unit: 'gpu', unitPlural: 'gpus' }
     : { gpusPerUnit: GPUS_PER_NODE, unit: 'node', unitPlural: 'nodes' };
 };
 
@@ -466,6 +470,14 @@ const ContactPage = () => {
             gpuCountMax: formData.nodeRange[1] * gpusPerUnit,
           };
         })()
+      }),
+      // Colocation hardware
+      ...(formData.serviceInterest === 'coloc' && formData.clusterTypes.length > 0 && {
+        colocationDetails: {
+          types: formData.clusterTypes.map(c =>
+            clusterOptions.find(o => o.value === c)?.label || c
+          ).join(', '),
+        }
       }),
       // Inference details
       ...(formData.serviceInterest === 'inference' && selectedModelDetails.length > 0 && {
@@ -669,7 +681,7 @@ const ContactPage = () => {
 
                           <div className="space-y-4">
                             <span className="block text-sm font-medium text-white">
-                              Approximate {unit === 'rack' ? 'NVL72 Rack' : 'Node'} Count
+                              Approximate {unit === 'gpu' ? 'GPU' : 'Node'} Count
                             </span>
                             <DualRangeSlider
                               min={1}
@@ -700,11 +712,21 @@ const ContactPage = () => {
                         transition={{ duration: 0.3 }}
                         className="space-y-8 overflow-hidden"
                       >
-                        <div className="bg-white/[0.04] rounded-3xl p-6 border border-white/15 space-y-3">
-                          <span className="block text-sm font-medium text-white">Colocation capacity</span>
-                          <p className="text-sm text-white/60 leading-relaxed">
-                            Tell us your target megawatts, rack density, hardware plan, and timeline in the message field.
-                          </p>
+                        <div className="bg-white/[0.04] rounded-3xl p-6 border border-white/15 space-y-6">
+                          <div className="space-y-4">
+                            <span className="block text-sm font-medium text-white">Which GPUs are you colocating?</span>
+                            <ChipSelect
+                              options={clusterOptions}
+                              selected={formData.clusterTypes}
+                              onToggle={(v) => handleClusterToggle(v as ClusterType)}
+                            />
+                          </div>
+                          <div className="space-y-3">
+                            <span className="block text-sm font-medium text-white">Colocation capacity</span>
+                            <p className="text-sm text-white/60 leading-relaxed">
+                              Tell us your target megawatts, rack density, hardware plan, and timeline in the message field.
+                            </p>
+                          </div>
                         </div>
                       </motion.div>
                     )}

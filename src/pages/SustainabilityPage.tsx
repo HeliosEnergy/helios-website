@@ -3,12 +3,16 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeavyGfx } from "@/hooks/use-heavy-gfx";
+import { InViewGate } from "@/components/ui/InViewGate";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { EASE, fadeUp } from "@/components/HomeRevampSections";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
+
+// Cap decorative shaders well below the library's ~8.3MP default.
+const SHADER_MAX_PX = 1280 * 720;
 
 const consequences = [
   {
@@ -304,7 +308,7 @@ const AdvantageSection = () => {
 };
 
 const SustainabilityPage = () => {
-  const isMobile = useIsMobile();
+  const heavyGfx = useHeavyGfx();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -314,9 +318,10 @@ const SustainabilityPage = () => {
       <main>
         {/* ——— Hero ——— */}
         <section className="relative overflow-hidden pt-28 lg:pt-40 pb-4 px-4 lg:px-6">
-          {/* Canopy light from above — WebGL crashes iOS Safari, so CSS fallback on mobile */}
-          {!isMobile ? (
-            <div
+          {/* Canopy light from above — animated on capable devices, CSS fallback
+              elsewhere; unmounts when scrolled off-screen. */}
+          {heavyGfx ? (
+            <InViewGate
               className="absolute inset-x-0 top-0 h-full pointer-events-none opacity-30"
               aria-hidden
               style={{
@@ -337,6 +342,8 @@ const SustainabilityPage = () => {
                 speed={0.12}
                 scale={1.9}
                 offsetY={-0.35}
+                minPixelRatio={1}
+                maxPixelCount={SHADER_MAX_PX}
               />
               <PaperTexture
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.45 }}
@@ -349,8 +356,10 @@ const SustainabilityPage = () => {
                 crumples={0.15}
                 folds={0.1}
                 drops={0.05}
+                minPixelRatio={1}
+                maxPixelCount={SHADER_MAX_PX}
               />
-            </div>
+            </InViewGate>
           ) : (
             <div
               className="absolute inset-0 pointer-events-none"

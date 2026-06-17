@@ -438,9 +438,12 @@ const SceneInner = ({ sites, variant, activeId, onActive, play, reduced }: Scene
 };
 
 const SiteMapScene = (props: SceneProps) => (
+  // Render only while on-screen (`play`). Off-screen, the loop fully stops so
+  // the map's WebGL context sits idle instead of driving the GPU forever.
   <Canvas
+    frameloop={props.play ? "always" : "never"}
     camera={{ fov: FOV, near: 10, far: 5000, position: [0, 0, 1200] }}
-    dpr={[1, 2]}
+    dpr={[1, 1.5]}
     gl={{ antialias: true, alpha: true }}
     className="!absolute !inset-0"
   >

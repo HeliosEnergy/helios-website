@@ -1,7 +1,13 @@
 import { motion } from "framer-motion";
 import { PaperTexture, SimplexNoise, MeshGradient } from "@paper-design/shaders-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeavyGfx } from "@/hooks/use-heavy-gfx";
+import { InViewGate } from "@/components/ui/InViewGate";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
+
+// Cap each decorative shader to ~0.9MP instead of the library default of
+// ~8.3MP, and drop its 2x pixel-ratio floor to 1 — far less GPU work, and
+// invisible on these soft background layers.
+const SHADER_MAX_PX = 1280 * 720;
 
 const heroContent = {
   titlePrefix: 'Frontier compute,',
@@ -10,7 +16,7 @@ const heroContent = {
 };
 
 export const HeroSection = () => {
-  const isMobile = useIsMobile();
+  const heavyGfx = useHeavyGfx();
 
   return (
     <section className="relative overflow-hidden bg-black min-h-[540px] md:min-h-[900px] flex items-start justify-center pt-24 lg:pt-32">
@@ -26,17 +32,26 @@ export const HeroSection = () => {
         }}
       />
 
-      {/* Alchemy Background Stack — desktop only (WebGL crashes iOS Safari) */}
-      {!isMobile && (
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-          <SimplexNoise opacity={0.1} />
-          <PaperTexture opacity={0.15} />
-        </div>
+      {/* Alchemy Background Stack — capable devices only; unmounts off-screen.
+          (Heavy WebGL crashes iOS Safari and weak GPUs.) */}
+      {heavyGfx && (
+        <InViewGate className="absolute inset-0 z-0 pointer-events-none opacity-40">
+          <SimplexNoise opacity={0.1} minPixelRatio={1} maxPixelCount={SHADER_MAX_PX} />
+          <PaperTexture opacity={0.15} minPixelRatio={1} maxPixelCount={SHADER_MAX_PX} />
+        </InViewGate>
       )}
 
-      {/* Celestial Aura — desktop only */}
-      {!isMobile ? (
-        <div className="absolute top-0 right-0 w-[1200px] h-[1200px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0">
+      {/* Celestial Aura — animated on capable devices, static gradient otherwise */}
+      {heavyGfx ? (
+        <InViewGate
+          className="absolute top-0 right-0 w-[1200px] h-[1200px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0"
+          fallback={
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{ background: 'radial-gradient(circle, rgba(255,184,0,0.12) 0%, rgba(255,107,53,0.06) 50%, transparent 70%)' }}
+            />
+          }
+        >
           <MeshGradient
             speed={0.2}
             color1="#FFB800"
@@ -44,8 +59,10 @@ export const HeroSection = () => {
             color3="#000000"
             color4="#000000"
             opacity={0.15}
+            minPixelRatio={1}
+            maxPixelCount={SHADER_MAX_PX}
           />
-        </div>
+        </InViewGate>
       ) : (
         <div
           className="absolute top-0 right-0 w-[600px] h-[600px] -translate-y-1/2 translate-x-1/4 pointer-events-none z-0 rounded-full"

@@ -237,8 +237,6 @@ const CALC_GPUS: GpuOption[] = [
   { id: "custom", name: "Other / bring your own", kw: 1.0 },
 ];
 
-// Facility overhead (PUE). Liquid runs tighter than air.
-const CALC_PUE = { liquid: 1.2, air: 1.4 } as const;
 // Published colocation rate band, per kW per month — depends on cooling.
 const CALC_RATES = {
   air: { low: 150, high: 175 },
@@ -263,17 +261,16 @@ const ColoCalculator = () => {
   const perGpuKw = gpu.id === "custom" ? customKw : gpu.kw;
   const gpus = nodes * GPUS_PER_NODE;
   const itKw = gpus * perGpuKw;
-  const facilityKw = itKw * CALC_PUE[cooling];
   const rate = CALC_RATES[cooling];
-  const lo = facilityKw * rate.low;
-  const hi = facilityKw * rate.high;
+  const lo = itKw * rate.low;
+  const hi = itKw * rate.high;
   const sliderPct = ((nodes - 1) / (NODE_MAX - 1)) * 100;
 
   const enquiry = `Colocation enquiry — from the cost estimator:
 • GPU type: ${gpu.name}
 • Nodes: ${fmtInt(nodes)} (${fmtInt(gpus)} GPUs · 8 GPUs/node)
 • Cooling: ${cooling === "liquid" ? "Liquid cooled" : "Air cooled"}
-• Estimated facility power: ${fmtInt(facilityKw)} kW
+• Estimated power: ${fmtInt(itKw)} kW
 • Estimated cost: ${fmtUsd(lo)}–${fmtUsd(hi)} / month (based on $${rate.low}–$${rate.high} / kW / month)`;
   const enquiryHref = `/contact?service=coloc&message=${encodeURIComponent(enquiry)}`;
 
@@ -392,7 +389,7 @@ const ColoCalculator = () => {
             Estimated power
           </span>
           <span className="font-heading text-2xl lg:text-3xl tracking-tight">
-            {facilityKw.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            {itKw.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             <span className="text-primary text-lg"> kW</span>
           </span>
         </div>
@@ -411,7 +408,7 @@ const ColoCalculator = () => {
             <span className="font-mono text-sm text-primary pb-1">/ month</span>
           </div>
           <p className="mt-3 font-mono text-[11px] text-white/45">
-            {cooling === "liquid" ? "Liquid" : "Air"} cooled · ${rate.low}–${rate.high} / kW / month · {fmtInt(itKw)} kW IT load × {CALC_PUE[cooling]} PUE
+            {cooling === "liquid" ? "Liquid" : "Air"} cooled · ${rate.low}–${rate.high} / kW / month · {fmtInt(itKw)} kW IT load
           </p>
         </div>
 

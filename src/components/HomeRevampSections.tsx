@@ -12,9 +12,14 @@ import {
 import { GrainGradient, PaperTexture } from "@paper-design/shaders-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeavyGfx } from "@/hooks/use-heavy-gfx";
+import { InViewGate } from "./ui/InViewGate";
 import { ArrowCTA } from "./ui/ArrowCTA";
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
+
+// Cap decorative shaders well below the library's ~8.3MP default.
+const SHADER_MAX_PX = 1280 * 720;
 
 export const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -401,14 +406,15 @@ const sustainability = [
 ];
 
 export const HomeSustainabilitySection = () => {
-  const isMobile = useIsMobile();
+  const heavyGfx = useHeavyGfx();
   const reduced = useReducedMotion();
 
   return (
     <section className="relative overflow-hidden bg-black py-24 lg:py-36 px-4 lg:px-6">
-      {/* Ground light rising beneath the metrics — WebGL crashes iOS Safari, so CSS fallback on mobile */}
-      {!isMobile ? (
-        <div
+      {/* Ground light rising beneath the metrics — animated on capable devices,
+          CSS fallback elsewhere; unmounts when scrolled off-screen. */}
+      {heavyGfx ? (
+        <InViewGate
           className="absolute inset-x-0 bottom-0 h-3/4 pointer-events-none opacity-40"
           aria-hidden
           style={{
@@ -429,6 +435,8 @@ export const HomeSustainabilitySection = () => {
             speed={0.15}
             scale={1.9}
             offsetY={0.3}
+            minPixelRatio={1}
+            maxPixelCount={SHADER_MAX_PX}
           />
           <PaperTexture
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.5 }}
@@ -441,8 +449,10 @@ export const HomeSustainabilitySection = () => {
             crumples={0.15}
             folds={0.1}
             drops={0.05}
+            minPixelRatio={1}
+            maxPixelCount={SHADER_MAX_PX}
           />
-        </div>
+        </InViewGate>
       ) : (
         <div
           className="absolute inset-x-0 bottom-0 h-3/4 pointer-events-none"

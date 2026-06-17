@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
@@ -72,20 +72,29 @@ export const FootprintMap = ({
   const [activeId, setActiveId] = useState<string | null>(null);
   const reduced = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-120px" });
+  // Toggles as the map enters/leaves the viewport; drives the render loop.
+  const inView = useInView(ref, { margin: "-120px" });
+  // Mount the WebGL scene the first time it's seen, then keep it (paused when
+  // off-screen) so the intro plays once rather than replaying on each scroll.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    if (inView) setMounted(true);
+  }, [inView]);
 
   return (
     <div ref={ref} className="relative">
       <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-[975/540]">
         <Suspense fallback={null}>
-          <SiteMapScene
-            sites={sites}
-            variant={variant}
-            activeId={activeId}
-            onActive={setActiveId}
-            play={inView}
-            reduced={!!reduced}
-          />
+          {mounted && (
+            <SiteMapScene
+              sites={sites}
+              variant={variant}
+              activeId={activeId}
+              onActive={setActiveId}
+              play={inView}
+              reduced={!!reduced}
+            />
+          )}
         </Suspense>
       </div>
       <Ledger sites={sites} variant={variant} activeId={activeId} onActive={setActiveId} />
