@@ -223,17 +223,18 @@ const ModuleViewer = () => {
 /* Colocation cost estimator                                           */
 /* ------------------------------------------------------------------ */
 
-// Approx. power draw per GPU (kW), board-level. These are estimates pending
-// Jose's confirmed figures. A broad list — customers may bring their own GPUs.
+// Power draw per GPU (kW), board-level — manufacturer TDP/TGP figures.
+// SXM TDP is used for the data-center parts (H100/H200). A broad list —
+// customers may bring their own GPUs.
 type GpuOption = { id: string; name: string; kw: number };
 const CALC_GPUS: GpuOption[] = [
-  { id: "gb300", name: "GB300 (NVL72)", kw: 1.4 },
-  { id: "b300", name: "B300", kw: 1.2 },
-  { id: "b200", name: "B200", kw: 1.0 },
-  { id: "h200", name: "H200", kw: 0.7 },
-  { id: "h100", name: "H100", kw: 0.7 },
-  { id: "rtx-pro-6000", name: "RTX PRO 6000", kw: 0.6 },
-  { id: "5090", name: "RTX 5090", kw: 0.575 },
+  { id: "gb300", name: "GB300 (NVL72)", kw: 1.4 }, // 1,400W TGP / GPU; 135kW rack (72 GPUs)
+  { id: "b300", name: "B300", kw: 1.4 }, // Blackwell Ultra SXM, 1,400W TDP
+  { id: "b200", name: "B200", kw: 1.0 }, // HGX B200 SXM, 1,000W TDP
+  { id: "h200", name: "H200", kw: 0.7 }, // SXM, up to 700W (NVL/PCIe up to 600W)
+  { id: "h100", name: "H100", kw: 0.7 }, // SXM, up to 700W (NVL/PCIe 350–400W)
+  { id: "rtx-pro-6000", name: "RTX PRO 6000", kw: 0.6 }, // 600W configurable TDP
+  { id: "5090", name: "RTX 5090", kw: 0.575 }, // 575W TGP
   { id: "custom", name: "Other / bring your own", kw: 1.0 },
 ];
 
