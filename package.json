@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "test:worker": "node --import tsx --test cloudflare-worker/src/index.test.ts",
     "preview": "vite preview",
     "sanity": "sanity dev",
     "migrate": "npx tsx migrate-to-sanity.ts",
