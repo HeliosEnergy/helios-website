@@ -44,7 +44,123 @@ export default defineType({
             title: 'Helios Price (USD/hr)',
             type: 'number',
             validation: (Rule) => Rule.required().min(0),
-            description: 'Hourly price for Helios Compute',
+            description: 'Current 3-year/base reserved hourly price for Helios Compute',
+        }),
+        defineField({
+            name: 'pricingSourceProvider',
+            title: 'Pricing Source Provider',
+            type: 'string',
+            description: 'Source used for market benchmark pricing, e.g. getdeploying',
+        }),
+        defineField({
+            name: 'pricingFormulaVersion',
+            title: 'Pricing Formula Version',
+            type: 'string',
+            description: 'Formula identifier used to calculate Helios reserved pricing',
+        }),
+        defineField({
+            name: 'pricingCurrency',
+            title: 'Pricing Currency',
+            type: 'string',
+            description: 'Currency for pricing fields, e.g. USD',
+        }),
+        defineField({
+            name: 'pricingUnit',
+            title: 'Pricing Unit',
+            type: 'string',
+            description: 'Unit for pricing fields, e.g. gpu_hour',
+        }),
+        defineField({
+            name: 'pricingHoursPerMonth',
+            title: 'Pricing Hours Per Month',
+            type: 'number',
+            description: 'Hours used for monthly estimates',
+        }),
+        defineField({
+            name: 'pricingLastPublishedAt',
+            title: 'Pricing Last Published At',
+            type: 'datetime',
+            description: 'Timestamp when Helios last published this computed pricing snapshot',
+        }),
+        defineField({
+            name: 'marketSourceUrl',
+            title: 'Market Source URL',
+            type: 'url',
+            description: 'GetDeploying GPU page used for this benchmark',
+        }),
+        defineField({
+            name: 'marketSourceUpdatedAt',
+            title: 'Market Source Updated At',
+            type: 'datetime',
+            description: 'Timestamp reported by the source page',
+        }),
+        defineField({
+            name: 'marketReservedAvgPrice',
+            title: 'Market Reserved Average (USD/GPU/hr)',
+            type: 'number',
+            validation: (Rule) => Rule.min(0),
+            description: 'Reserved average pulled from the market source before Helios discount',
+        }),
+        defineField({
+            name: 'heliosBaseReservedPrice',
+            title: 'Helios Base Reserved Price (USD/GPU/hr)',
+            type: 'number',
+            validation: (Rule) => Rule.min(0),
+            description: 'Market reserved average multiplied by 0.95; equivalent to 3-year price',
+        }),
+        defineField({
+            name: 'derivedFromGpuId',
+            title: 'Derived From GPU ID',
+            type: 'string',
+            description: 'GPU ID used as pricing source for derived products such as GB300',
+        }),
+        defineField({
+            name: 'derivationMultiplier',
+            title: 'Derivation Multiplier',
+            type: 'number',
+            description: 'Multiplier applied to the source GPU price for derived products',
+        }),
+        defineField({
+            name: 'heliosReservedTermPrices',
+            title: 'Helios Reserved Term Prices',
+            type: 'array',
+            of: [
+                {
+                    type: 'object',
+                    fields: [
+                        defineField({
+                            name: 'years',
+                            title: 'Years',
+                            type: 'number',
+                            validation: (Rule) => Rule.required().integer().min(1).max(5),
+                        }),
+                        defineField({
+                            name: 'multiplier',
+                            title: 'Multiplier',
+                            type: 'number',
+                            validation: (Rule) => Rule.required().min(0),
+                        }),
+                        defineField({
+                            name: 'price',
+                            title: 'Price (USD/GPU/hr)',
+                            type: 'number',
+                            validation: (Rule) => Rule.required().min(0),
+                        }),
+                    ],
+                    preview: {
+                        select: {
+                            years: 'years',
+                            price: 'price',
+                        },
+                        prepare({ years, price }) {
+                            return {
+                                title: `${years} year`,
+                                subtitle: `$${price}/GPU/hr`,
+                            }
+                        },
+                    },
+                },
+            ],
         }),
         defineField({
             name: 'awsPrice',
