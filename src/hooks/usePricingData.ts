@@ -9,6 +9,24 @@ export interface GPUModel {
     memory: string;
     specs?: string;
     heliosPrice: number;
+    pricingSourceProvider?: string;
+    pricingFormulaVersion?: string;
+    pricingCurrency?: string;
+    pricingUnit?: string;
+    pricingHoursPerMonth?: number;
+    pricingLastPublishedAt?: string;
+    marketSourceUrl?: string;
+    marketSourceUpdatedAt?: string;
+    marketReservedAvgPrice?: number;
+    heliosBaseReservedPrice?: number;
+    derivedFromGpuId?: string;
+    derivationMultiplier?: number;
+    heliosReservedTermPrices?: {
+        _key?: string;
+        years: number;
+        multiplier: number;
+        price: number;
+    }[];
     awsPrice?: string;
     googleCloudPrice?: string;
     coreweavePrice?: string;
