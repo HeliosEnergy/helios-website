@@ -212,14 +212,14 @@ const ARC_FRAG = /* glsl */ `
 
 const ARC_PAIRS: Record<"home" | "colo", [string, string][]> = {
   home: [
-    ["utah", "northCarolina"],
-    ["northCarolina", "florida"],
+    ["utah", "colorado"],
+    ["utah", "california"],
   ],
   colo: [
-    ["utah", "northCarolina"],
-    ["northCarolina", "florida"],
+    ["utah", "colorado"],
+    ["utah", "california"],
     ["utah", "texas"],
-    ["northCarolina", "kentucky"],
+    ["colorado", "newJersey"],
   ],
 };
 
@@ -316,6 +316,14 @@ const MarkerTooltip = ({
         {site.name}
       </p>
       <p className="mt-0.5 text-sm text-white/50">{site.metro}</p>
+      <p className="mt-3 flex items-baseline gap-1.5">
+        <span className="font-heading font-bold text-primary text-2xl leading-none tracking-tight">
+          {site.mw.toLocaleString()}
+        </span>
+        <span className="font-mono text-xs text-white/60">
+          MW · {site.siteCount} {site.siteCount === 1 ? "site" : "sites"}
+        </span>
+      </p>
       {variant === "colo" && (
         <p className="mt-3 pt-3 border-t border-white/10 text-sm text-white/60 leading-relaxed">
           Power is ready, ready for GPUs.
@@ -330,9 +338,10 @@ const MARKER_FILL: Record<SiteStatus, string> = {
   reserved: "bg-primary shadow-[0_0_16px_3px_hsl(24_100%_64%/0.55)]",
 };
 
-/* Uniform marker size — capacity is no longer published, so dots no longer
-   encode MW. Kept tappable on touch. */
-const MARKER_DIA = 14;
+/* Marker size encodes reserved capacity: bigger dot = more MW. sqrt compresses
+   the range so the 6 MW site stays tappable without the 971 MW anchor blowing
+   out the scale. */
+const mwToDia = (mw: number) => Math.max(10, Math.min(30, 9 + Math.sqrt(mw) * 0.7));
 
 const Markers = ({
   sites,
@@ -353,7 +362,7 @@ const Markers = ({
       const active = activeId === site.id;
       const below = site.y < CY;
       const align = site.x > 700 ? ("right" as const) : ("center" as const);
-      const dia = MARKER_DIA;
+      const dia = mwToDia(site.mw);
       return (
         <group key={site.id} position={[wx, wy, 4]}>
           <Html center zIndexRange={[40, 0]} style={{ pointerEvents: "none" }}>
@@ -365,7 +374,7 @@ const Markers = ({
             >
               <button
                 type="button"
-                aria-label={`${site.name} — Reserved`}
+                aria-label={`${site.name} — ${site.mw} MW reserved`}
                 onMouseEnter={() => onActive(site.id)}
                 onMouseLeave={() => onActive(null)}
                 onFocus={() => onActive(site.id)}
@@ -393,6 +402,8 @@ const Markers = ({
                 >
                   <span className={`h-1 w-1 rounded-full ${STATUS_META[site.status].dot}`} />
                   {site.name}
+                  <span className="text-white/50">·</span>
+                  <span className="text-primary">{site.mw} MW</span>
                 </span>
                 <AnimatePresence>
                   {active && (
