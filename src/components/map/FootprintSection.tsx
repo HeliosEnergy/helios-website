@@ -47,7 +47,9 @@ const Ledger = ({
           </span>
           <span className="flex items-center gap-2">
             <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-            <span className="font-mono text-xs text-white/70 w-[4.6rem]">{meta.label}</span>
+            <span className="font-mono text-xs text-white/70 w-[4.6rem] text-right tabular-nums">
+              {site.mw.toLocaleString()} MW
+            </span>
           </span>
         </button>
       );
@@ -123,7 +125,7 @@ export const HomeFootprintSection = () => (
           className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
         >
           Helios builds where clean power is abundant and interconnection is
-          fast. Five sites across five grids today — water-free,
+          fast. Twenty-one sites across six states today — water-free,
           renewable-backed, Blackwell-ready.
         </motion.p>
       </div>
