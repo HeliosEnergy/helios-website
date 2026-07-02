@@ -9,10 +9,10 @@ const DASHBOARD_SIGNUP_URL = CONSOLE_SIGNUP_URL;
 
 // Simplified nav items for mobile
 const mobileNavItems = [
-  // HIDDEN - Pricing taken down until pricing is corrected.
   { label: "Colocation", href: "/colocation" },
   { label: "Sustainability", href: "/sustainability" },
   { label: "Model Library", href: "/model-library" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 export const MobileNav = () => {

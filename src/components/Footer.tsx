@@ -5,7 +5,7 @@ const footerLinks: Record<string, { label: string; to: string }[]> = {
   Company: [
     { label: "Careers", to: "/careers" },
     { label: "Contact", to: "/contact" },
-    // HIDDEN - Pricing taken down until pricing is corrected.
+    { label: "Pricing", to: "/pricing" },
   ],
   Legal: [
     { label: "Terms", to: "/tnc" },

@@ -550,7 +550,11 @@ const InferencePage: React.FC = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              {/* HIDDEN - "View Pricing" removed; pricing page taken down until pricing is corrected. */}
+              <Link to="/pricing">
+                <Button variant="outline" className="rounded-full border-white/20 bg-transparent text-white hover:bg-white/10 px-10 py-7 text-lg font-semibold">
+                  View Pricing
+                </Button>
+              </Link>
             </div>
           </motion.div>
         </div>
