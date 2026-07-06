@@ -33,24 +33,24 @@ const Ledger = ({
           onMouseLeave={() => onActive(null)}
           onFocus={() => onActive(site.id)}
           onBlur={() => onActive(null)}
-          className={`w-full grid grid-cols-[1.25rem_1fr_auto] items-center gap-1.5 px-3 py-1.5 text-left transition-colors duration-300 ${
+          className={`w-full grid grid-cols-[1.25rem_1fr_auto] items-center gap-1.5 px-3 py-1 text-left transition-colors duration-300 ${
             active ? "bg-white/[0.06]" : ""
           }`}
         >
-          <span className="font-mono text-[10px] text-white/60">
+          <span className="font-mono text-[10px] leading-none text-white/60">
             {String(i + 1).padStart(2, "0")}
           </span>
-          <span className="font-heading font-bold text-white text-[12px] tracking-tight">
+          <span className="font-heading font-bold text-white text-[12px] leading-none tracking-tight">
             {site.name}
             <span className="ml-1.5 font-mono font-normal text-[9px] text-white/55">{site.abbr}</span>
           </span>
-          <span className="font-mono text-[10px] text-white/70 w-[3.4rem] text-right tabular-nums">
+          <span className="font-mono text-[10px] leading-none text-white/70 w-[3.4rem] text-right tabular-nums">
             {site.mw.toLocaleString()} MW
           </span>
         </button>
       );
     })}
-    <p className="px-3 py-1.5 font-mono text-[9px] leading-relaxed text-white/45">
+    <p className="px-3 py-1 font-mono text-[8px] leading-snug text-white/45">
       {STATUS_LEGEND}
     </p>
   </div>
@@ -121,7 +121,7 @@ export const HomeFootprintSection = () => (
           className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
         >
           Helios builds where clean power is abundant and interconnection is
-          fast. Twenty-one sites across six states today — water-free,
+          fast. Twenty-four sites across seven states today — water-free,
           renewable-backed, Blackwell-ready.
         </motion.p>
       </div>

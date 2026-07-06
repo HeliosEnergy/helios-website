@@ -37,9 +37,10 @@ export const STATUS_LEGEND = "Reserved — power is ready, ready for GPUs.";
    reads as a capacity ranking. */
 export const COLO_SITES: Site[] = [
   { id: "utah", name: "Utah", metro: "Salt Lake City metro", abbr: "UT", mw: 971, siteCount: 12, ...at("utah"), status: "reserved" },
-  { id: "texas", name: "Texas", metro: "Dallas–Fort Worth", abbr: "TX", mw: 856, siteCount: 3, ...at("texas"), status: "reserved" },
+  { id: "texas", name: "Texas", metro: "Dallas–Fort Worth", abbr: "TX", mw: 906, siteCount: 5, ...at("texas"), status: "reserved" },
   { id: "colorado", name: "Colorado", metro: "Denver metro", abbr: "CO", mw: 25, siteCount: 2, ...at("colorado"), status: "reserved" },
   { id: "california", name: "California", metro: "Anaheim metro", abbr: "CA", mw: 23, siteCount: 2, ...at("california"), status: "reserved" },
+  { id: "kentucky", name: "Kentucky", metro: "London", abbr: "KY", mw: 20, siteCount: 1, ...at("kentucky"), status: "reserved" },
   { id: "idaho", name: "Idaho", metro: "Boise metro", abbr: "ID", mw: 10, siteCount: 1, ...at("idaho"), status: "reserved" },
   { id: "newJersey", name: "New Jersey", metro: "Northern New Jersey", abbr: "NJ", mw: 6, siteCount: 1, ...at("newJersey"), status: "reserved" },
 ];

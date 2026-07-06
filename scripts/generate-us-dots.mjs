@@ -71,11 +71,13 @@ for (let y = minY; y <= maxY; y += ROW, row++) {
 // albers files are built with scale 1300, translate [487.5, 305].
 const projection = geoAlbersUsa().scale(1300).translate([487.5, 305]);
 const cities = {
-  utah: [-111.891, 40.7608], // Salt Lake City
-  northCarolina: [-80.8431, 35.2271], // Charlotte
-  florida: [-81.6557, 30.3322], // Jacksonville
-  kentucky: [-85.7585, 38.2527], // Louisville
-  texas: [-96.797, 32.7767], // Dallas
+  utah: [-111.8904, 40.759], // Salt Lake City metro
+  texas: [-96.7975, 32.7782], // Dallas-Fort Worth
+  california: [-117.9077, 33.8393], // Anaheim
+  colorado: [-104.8773, 39.6501], // Denver / Parker
+  kentucky: [-84.0811, 37.1271], // London
+  idaho: [-116.1979, 43.6185], // Boise
+  newJersey: [-74.2987, 40.5503], // Northern New Jersey
 };
 const sites = Object.fromEntries(
   Object.entries(cities).map(([k, lonLat]) => {
