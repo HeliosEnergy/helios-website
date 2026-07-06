@@ -308,8 +308,7 @@ const MarkerTooltip = ({
         align === "center" ? "left-1/2" : "right-0"
       } w-60 border border-white/10 bg-black/85 backdrop-blur-md p-4 text-left`}
     >
-      <div className="flex items-center gap-2">
-        <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+      <div className="flex items-center">
         <span className="font-mono text-xs text-white/60">{meta.label}</span>
       </div>
       <p className="mt-2 font-heading font-bold text-white text-lg leading-tight tracking-tight">
@@ -400,9 +399,7 @@ const Markers = ({
                     active ? "opacity-0" : "opacity-100"
                   }`}
                 >
-                  <span className={`h-1 w-1 rounded-full ${STATUS_META[site.status].dot}`} />
                   {site.name}
-                  <span className="text-white/50">·</span>
                   <span className="text-primary">{site.mw} MW</span>
                 </span>
                 <AnimatePresence>

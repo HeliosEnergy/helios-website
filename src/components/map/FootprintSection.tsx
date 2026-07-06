@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
-import { COLO_SITES, STATUS_META, STATUS_LEGEND, type Site } from "./sites";
+import { COLO_SITES, STATUS_LEGEND, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
 
@@ -22,9 +22,8 @@ const Ledger = ({
   activeId: string | null;
   onActive: (id: string | null) => void;
 }) => (
-  <div className="mt-4 lg:mt-0 lg:absolute lg:left-0 lg:bottom-0 lg:w-[330px] border border-white/10 bg-black/75 lg:backdrop-blur-md divide-y divide-white/10">
+  <div className="mt-4 lg:mt-0 lg:absolute lg:left-0 lg:bottom-0 lg:w-[230px] border border-white/10 bg-black/75 lg:backdrop-blur-md divide-y divide-white/10">
     {sites.map((site, i) => {
-      const meta = STATUS_META[site.status];
       const active = activeId === site.id;
       return (
         <button
@@ -34,27 +33,24 @@ const Ledger = ({
           onMouseLeave={() => onActive(null)}
           onFocus={() => onActive(site.id)}
           onBlur={() => onActive(null)}
-          className={`w-full grid grid-cols-[2rem_1fr_auto] items-center gap-2 px-5 py-3.5 text-left transition-colors duration-300 ${
+          className={`w-full grid grid-cols-[1.25rem_1fr_auto] items-center gap-1.5 px-3 py-1.5 text-left transition-colors duration-300 ${
             active ? "bg-white/[0.06]" : ""
           }`}
         >
-          <span className="font-mono text-xs text-white/60">
+          <span className="font-mono text-[10px] text-white/60">
             {String(i + 1).padStart(2, "0")}
           </span>
-          <span className="font-heading font-bold text-white text-[15px] tracking-tight">
+          <span className="font-heading font-bold text-white text-[12px] tracking-tight">
             {site.name}
-            <span className="ml-2 font-mono font-normal text-xs text-white/55">{site.abbr}</span>
+            <span className="ml-1.5 font-mono font-normal text-[9px] text-white/55">{site.abbr}</span>
           </span>
-          <span className="flex items-center gap-2">
-            <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-            <span className="font-mono text-xs text-white/70 w-[4.6rem] text-right tabular-nums">
-              {site.mw.toLocaleString()} MW
-            </span>
+          <span className="font-mono text-[10px] text-white/70 w-[3.4rem] text-right tabular-nums">
+            {site.mw.toLocaleString()} MW
           </span>
         </button>
       );
     })}
-    <p className="px-5 py-3 font-mono text-[11px] leading-relaxed text-white/45">
+    <p className="px-3 py-1.5 font-mono text-[9px] leading-relaxed text-white/45">
       {STATUS_LEGEND}
     </p>
   </div>
