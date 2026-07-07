@@ -241,7 +241,7 @@ const CALC_GPUS: GpuOption[] = [
 // Published colocation rate band, per kW per month — depends on cooling.
 const CALC_RATES = {
   air: { low: 150, high: 175 },
-  liquid: { low: 200, high: 225 },
+  liquid: { low: 175, high: 200 },
 } as const;
 
 // One node = 8 GPUs. Slider runs in nodes; max is a clean power of two.
