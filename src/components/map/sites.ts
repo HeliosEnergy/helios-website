@@ -20,6 +20,23 @@ export interface Site {
   status: SiteStatus;
 }
 
+export interface SiteCapacitySnapshot {
+  publishedAt?: string;
+  sourceModifiedTime?: string;
+  totalMw?: number;
+  computeMw?: number;
+  energyMw?: number;
+  siteCount?: number;
+  sites?: Array<{
+    id: string;
+    stateAbbr?: string;
+    totalMw: number;
+    computeMw?: number;
+    energyMw?: number;
+    siteCount: number;
+  }>;
+}
+
 const at = (id: keyof typeof mapData.sites) => ({
   x: mapData.sites[id][0],
   y: mapData.sites[id][1],
@@ -44,3 +61,27 @@ export const COLO_SITES: Site[] = [
   { id: "idaho", name: "Idaho", metro: "Boise metro", abbr: "ID", mw: 10, siteCount: 1, ...at("idaho"), status: "reserved" },
   { id: "newJersey", name: "New Jersey", metro: "Northern New Jersey", abbr: "NJ", mw: 6, siteCount: 1, ...at("newJersey"), status: "reserved" },
 ];
+
+const SITE_IDS = new Set(COLO_SITES.map((site) => site.id));
+
+export const mergeCapacitySnapshot = (snapshot?: SiteCapacitySnapshot | null): Site[] => {
+  if (!snapshot?.sites?.length) return COLO_SITES;
+
+  const liveById = new Map(
+    snapshot.sites
+      .filter((site) => SITE_IDS.has(site.id) && Number.isFinite(site.totalMw) && Number.isFinite(site.siteCount))
+      .map((site) => [site.id, site]),
+  );
+
+  if (liveById.size === 0) return COLO_SITES;
+
+  return [...liveById.values()].map((live) => {
+    const site = COLO_SITES.find((candidate) => candidate.id === live.id);
+    if (!site) return null;
+    return {
+      ...site,
+      mw: live.totalMw,
+      siteCount: live.siteCount,
+    };
+  }).filter((site): site is Site => Boolean(site)).sort((a, b) => b.mw - a.mw);
+};

@@ -31,3 +31,9 @@ dist-ssr
 .env.vercel
 .env.verify
 .design-refs/
+
+# Local source workbook used only for capacity-sync parser reference.
+Helios_Powered_Sites.xlsx
+
+# Local Google service account credentials.
+controltower-*.json*

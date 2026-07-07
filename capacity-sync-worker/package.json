@@ -1,0 +1,19 @@
+{
+  "name": "helios-capacity-sync-worker",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260701.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.24.3"
+  }
+}

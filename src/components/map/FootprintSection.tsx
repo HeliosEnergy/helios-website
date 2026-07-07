@@ -3,7 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { EASE, fadeUp, sectionHeading } from "@/components/HomeRevampSections";
-import { COLO_SITES, STATUS_LEGEND, type Site } from "./sites";
+import { useSiteCapacityData } from "@/hooks/useSiteCapacityData";
+import { STATUS_LEGEND, type Site } from "./sites";
 
 const SiteMapScene = lazy(() => import("./SiteMapScene"));
 
@@ -104,55 +105,64 @@ export const FootprintMap = ({
 /* Homepage section                                                    */
 /* ------------------------------------------------------------------ */
 
-export const HomeFootprintSection = () => (
-  <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
-    <div className="max-w-7xl mx-auto">
-      <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 items-end">
+export const HomeFootprintSection = () => {
+  const { sites } = useSiteCapacityData();
+  const totalSites = sites.reduce((sum, site) => sum + site.siteCount, 0);
+  const stateCount = sites.length;
+
+  return (
+    <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 items-end">
+          <motion.div
+            {...fadeUp}
+            transition={{ duration: 0.8, ease: EASE }}
+            className="lg:col-span-7"
+          >
+            <h2 className={sectionHeading}>Where the megawatts live.</h2>
+          </motion.div>
+          <motion.p
+            {...fadeUp}
+            transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
+            className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
+          >
+            Helios builds where clean power is abundant and interconnection is
+            fast. {totalSites.toLocaleString()} sites across {stateCount} states today — water-free,
+            renewable-backed, Blackwell-ready.
+          </motion.p>
+        </div>
+
         <motion.div
           {...fadeUp}
-          transition={{ duration: 0.8, ease: EASE }}
-          className="lg:col-span-7"
+          transition={{ duration: 0.9, delay: 0.15, ease: EASE }}
+          className="mt-10 lg:mt-14"
         >
-          <h2 className={sectionHeading}>Where the megawatts live.</h2>
+          <FootprintMap sites={sites} variant="home" />
         </motion.div>
-        <motion.p
+
+        <motion.div
           {...fadeUp}
           transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-          className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
+          className="mt-10 lg:mt-12 flex justify-end"
         >
-          Helios builds where clean power is abundant and interconnection is
-          fast. Twenty-four sites across seven states today — water-free,
-          renewable-backed, Blackwell-ready.
-        </motion.p>
+          <Link
+            to="/colocation"
+            className="inline-flex items-center gap-3 text-white font-mono uppercase tracking-widest text-xs border-b border-white/30 hover:border-primary hover:text-primary pb-2 transition-colors group"
+          >
+            Explore colocation sites
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </motion.div>
       </div>
-
-      <motion.div
-        {...fadeUp}
-        transition={{ duration: 0.9, delay: 0.15, ease: EASE }}
-        className="mt-10 lg:mt-14"
-      >
-        <FootprintMap sites={COLO_SITES} variant="home" />
-      </motion.div>
-
-      <motion.div
-        {...fadeUp}
-        transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-        className="mt-10 lg:mt-12 flex justify-end"
-      >
-        <Link
-          to="/colocation"
-          className="inline-flex items-center gap-3 text-white font-mono uppercase tracking-widest text-xs border-b border-white/30 hover:border-primary hover:text-primary pb-2 transition-colors group"
-        >
-          Explore colocation sites
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </motion.div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 /* ------------------------------------------------------------------ */
 /* Colocation page map                                                 */
 /* ------------------------------------------------------------------ */
 
-export const ColoFootprintMap = () => <FootprintMap sites={COLO_SITES} variant="colo" />;
+export const ColoFootprintMap = () => {
+  const { sites } = useSiteCapacityData();
+  return <FootprintMap sites={sites} variant="colo" />;
+};

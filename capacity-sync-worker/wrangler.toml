@@ -1,0 +1,16 @@
+name = "helios-capacity-sync-worker"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+[vars]
+GOOGLE_DRIVE_FILE_ID = "1AL3Zi06FJy23Hc9RSdTWa1x2ikAJamyb"
+PUBLIC_BASE_URL = "https://helios-capacity-sync-worker.helios-energy.workers.dev"
+SANITY_PROJECT_ID = "05vcm5dh"
+SANITY_DATASET = "production"
+
+[triggers]
+crons = ["0 */12 * * *"]
+
+[[kv_namespaces]]
+binding = "CAPACITY_SYNC_STATE"
+id = "5b36d378b10f45688d54019e0ad78c99"
