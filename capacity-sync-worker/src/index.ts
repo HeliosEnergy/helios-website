@@ -57,6 +57,7 @@ const SNAPSHOT_ID = "site-capacity-current";
 const SANITY_API_VERSION = "2024-12-19";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 const CAPACITY_SHEET_NAME = "Powered Sites";
+const POTENTIAL_ARR_PER_MW = 18;
 
 const STATE_TO_SITE_ID: Record<string, string> = {
   CA: "california",
@@ -305,6 +306,21 @@ function headerIndex(header: string[], label: string): number {
   return index;
 }
 
+function optionalHeaderIndex(header: string[], label: string): number {
+  return header.findIndex((value) => value.trim().toLowerCase() === label.toLowerCase());
+}
+
+function capacityValue(row: string[], totalMwIndex: number, potentialArrIndex: number, project: string): number | null {
+  const rawCapacity = (row[totalMwIndex] || "").trim();
+  if (rawCapacity) return numberValue(rawCapacity, `${project} total MW`);
+
+  const rawPotentialArr = potentialArrIndex >= 0 ? (row[potentialArrIndex] || "").trim() : "";
+  if (!rawPotentialArr) return null;
+
+  const potentialArr = numberValue(rawPotentialArr, `${project} potential ARR`);
+  return potentialArr / POTENTIAL_ARR_PER_MW;
+}
+
 function normalizeState(raw: string): string {
   const trimmed = raw.trim().toUpperCase();
   const mapped = GEO_TO_STATE[trimmed] || trimmed;
@@ -350,6 +366,7 @@ function parseCapacityWorkbook(buffer: ArrayBuffer): CapacitySnapshot {
   const header = rows[headerRowIndex].map((value) => value.trim());
   const projectIndex = headerIndex(header, "Project");
   const totalMwIndex = headerIndex(header, "Total Capacity (MW)");
+  const potentialArrIndex = optionalHeaderIndex(header, "Potential ARR / Project ($M)");
   const assetTypeIndex = headerIndex(header, "Asset Type");
   const geoIndex = headerIndex(header, "Geo/Market");
 
@@ -365,10 +382,11 @@ function parseCapacityWorkbook(buffer: ArrayBuffer): CapacitySnapshot {
     const rawCapacity = (row[totalMwIndex] || "").trim();
     const rawGeo = (row[geoIndex] || "").trim();
     if (!project && !rawCapacity && !rawGeo) continue;
-    if (!project || !rawCapacity) continue;
+    if (!project) continue;
 
     const stateAbbr = resolveState(project, rawGeo);
-    const capacity = numberValue(rawCapacity, `${project} total MW`);
+    const capacity = capacityValue(row, totalMwIndex, potentialArrIndex, project);
+    if (capacity === null) continue;
     const assetType = (row[assetTypeIndex] || "").trim().toLowerCase();
     const projectKey = project.toLowerCase();
     const isEnergy = assetType.includes("energy") || projectKey.includes("bess") || projectKey.includes("pv +");

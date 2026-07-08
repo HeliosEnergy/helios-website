@@ -71,6 +71,10 @@ Required columns:
 - `Asset Type`
 - `Geo/Market`
 
+Optional fallback column:
+
+- `Potential ARR / Project ($M)`
+
 `Geo/Market` values are normalized into map state IDs. Known non-state labels
 include `So. UT` and `SLC Metro`, both mapped to Utah. If `Geo/Market` is blank,
 the worker falls back to known `Powered Sites` project names or state
@@ -78,3 +82,8 @@ abbreviations embedded in the project name. Blank geography that cannot be
 resolved fails the sync instead of publishing a partial snapshot. State totals
 are rounded to the nearest MW for the website map, while compute/energy totals
 preserve the source decimal values.
+
+If `Total Capacity (MW)` is blank for a row, the worker derives capacity from
+`Potential ARR / Project ($M) / 18`. This matches the current workbook formula
+used by the powered-sites schedule and prevents rows with blank cached capacity
+cells from being dropped.
