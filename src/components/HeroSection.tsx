@@ -102,7 +102,7 @@ export const HeroSection = () => {
               </div>
 
               <div className="pt-4">
-                <ArrowCTA to="/contact?service=coloc" tone="dark" accent="primary">
+                <ArrowCTA to="/contact?service=clusters" tone="dark" accent="primary">
                   Reserve capacity
                 </ArrowCTA>
               </div>
