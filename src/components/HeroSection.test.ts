@@ -10,3 +10,9 @@ test('Reserve capacity opens the request form with Clusters selected', () => {
     /<ArrowCTA to="\/contact\?service=clusters" tone="dark" accent="primary">\s*Reserve capacity/,
   );
 });
+
+test('the request form defaults to Clusters when no service is provided', () => {
+  const source = readFileSync(new URL('../pages/ContactPage.tsx', import.meta.url), 'utf8');
+
+  assert.match(source, /serviceInterest: 'clusters',/);
+});
