@@ -580,7 +580,10 @@ const ColocationPage = () => {
         </section>
 
         {/* ───── 02 · Cost estimator ───── */}
-        <section className="py-20 lg:py-28 bg-white text-black border-t border-black/10">
+        <section
+          id="calculator"
+          className="scroll-mt-24 py-20 lg:py-28 bg-white text-black border-t border-black/10"
+        >
           <div className="max-w-7xl mx-auto px-4 lg:px-12">
             <motion.div {...fadeUp} transition={{ duration: 0.8, ease: EASE }}>
               <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">

@@ -4,6 +4,7 @@ import { ArrowRight, Check, ChevronDown, Cpu } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { GPUModel, usePricingData } from '@/hooks/usePricingData';
+import { ColocationBanner } from '@/components/pricing/ColocationBanner';
 
 type RateMode = 'hourly' | 'monthly';
 
@@ -397,6 +398,12 @@ const PricingPage: React.FC = () => {
                                 <ReservedRateTable gpuModels={gpus} selectedGpuId={selectedGpu.id} />
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <section className="px-6 py-6">
+                    <div className="mx-auto max-w-6xl">
+                        <ColocationBanner />
                     </div>
                 </section>
 
