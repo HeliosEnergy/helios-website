@@ -74,7 +74,7 @@ const CareersPage = () => {
               <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#FF8F5A]">
                 Careers at Helios
               </p>
-              <h1 className="mt-6 max-w-4xl text-5xl font-bold leading-[0.98] tracking-[-0.035em] text-balance sm:text-6xl lg:text-7xl">
+              <h1 className="mt-6 max-w-4xl text-5xl font-bold leading-[0.98] tracking-[-0.035em] text-balance sm:text-6xl lg:text-[3.5rem]">
                 Build the infrastructure behind frontier AI.
               </h1>
               <p className="mt-7 max-w-[62ch] text-lg leading-relaxed text-white/70 text-pretty">

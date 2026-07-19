@@ -161,6 +161,7 @@ const ServicePill = ({
   <button
     type="button"
     onClick={onClick}
+    aria-pressed={isSelected}
     className={`
       relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300
       border
@@ -193,6 +194,7 @@ const ChipSelect = ({
           key={option.value}
           type="button"
           onClick={() => onToggle(option.value)}
+          aria-pressed={isSelected}
           className={`
             px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
             border flex items-center gap-2
@@ -815,7 +817,7 @@ const ContactPage = () => {
                               </div>
                             </div>
                           </div>
-                          {!colocationRequirementsComplete && (
+                          {!colocationRequirementsComplete && formState === 'error' && (
                             <p role="alert" className="text-sm text-[#FF9B77]">
                               Select a cooling requirement and minimum facility tier.
                             </p>

@@ -6,9 +6,9 @@ export const ColocationBanner = () => (
     aria-labelledby="gpu-colocation-heading"
     className="relative isolate overflow-hidden rounded-xl bg-[#111214] px-6 py-9 text-white sm:px-10 sm:py-11 lg:px-12"
   >
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-[46%] min-w-[280px] overflow-hidden" aria-hidden="true">
-      <div className="colo-orbit colo-orbit--outer absolute right-[-112px] top-1/2 h-[390px] w-[390px] -translate-y-1/2 opacity-35" />
-      <div className="colo-orbit colo-orbit--inner absolute right-[-42px] top-1/2 h-[250px] w-[250px] -translate-y-1/2 opacity-30" />
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-[34%] min-w-[200px] overflow-hidden sm:w-[46%] sm:min-w-[280px]" aria-hidden="true">
+      <div className="colo-orbit colo-orbit--outer absolute right-[-180px] top-1/2 h-[390px] w-[390px] -translate-y-1/2 opacity-20 sm:right-[-112px] sm:opacity-35" />
+      <div className="colo-orbit colo-orbit--inner absolute right-[-110px] top-1/2 h-[250px] w-[250px] -translate-y-1/2 opacity-15 sm:right-[-42px] sm:opacity-30" />
     </div>
 
     <div className="relative max-w-2xl">
