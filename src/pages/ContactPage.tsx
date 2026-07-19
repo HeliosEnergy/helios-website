@@ -15,6 +15,8 @@ const EMBER_GLOW = "radial-gradient(circle at center, rgba(255, 107, 53, 0.15) 0
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 type ServiceInterest = 'clusters' | 'coloc' | 'inference' | 'baremetal' | 'partnership' | 'others';
 type ClusterType = 'gb300-nvl72' | 'b300' | 'b200' | 'h200' | 'h100' | 'rtx-pro-6000' | '5090';
+type CoolingRequirement = 'air' | 'liquid';
+type FacilityTier = 'tier-1' | 'tier-2' | 'tier-3';
 
 interface InferenceModel {
   _id: string;
@@ -36,6 +38,9 @@ interface FormData {
   // Clusters / baremetal specific
   clusterTypes: ClusterType[];
   nodeRange: [number, number];
+  // Colocation specific
+  coolingRequirement: CoolingRequirement | '';
+  minimumFacilityTier: FacilityTier | '';
   // Inference specific
   selectedModels: string[];
   modelEstimations: Record<string, number>; // model ID -> estimation value
@@ -262,6 +267,22 @@ const clusterOptions: { value: ClusterType; label: string }[] = [
   { value: '5090', label: '5090' },
 ];
 
+const coolingOptions = [
+  { value: 'air', label: 'Air cooled' },
+  { value: 'liquid', label: 'Liquid cooled' },
+] satisfies Array<{ value: CoolingRequirement; label: string }>;
+
+const facilityTierOptions = [
+  { value: 'tier-1', label: 'Tier I' },
+  { value: 'tier-2', label: 'Tier II' },
+  { value: 'tier-3', label: 'Tier III' },
+] satisfies Array<{ value: FacilityTier; label: string }>;
+
+const requirementClass =
+  'min-h-11 rounded-xl border border-white/20 bg-white/[0.04] px-3 py-2.5 text-sm font-medium text-white/75 transition-colors hover:border-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
+const selectedRequirementClass =
+  'min-h-11 rounded-xl border border-[#FF6B35] bg-[#FF6B35]/15 px-3 py-2.5 text-sm font-medium text-[#FF8F5A] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
+
 // Sizing math. Standard nodes hold 8 GPUs; GB300 is sized in individual GPUs.
 const GPUS_PER_NODE = 8;
 const NODE_SLIDER_MAX = 4096; // 4096+ (1024 × 4)
@@ -293,6 +314,8 @@ const ContactPage = () => {
     serviceInterest: 'clusters',
     clusterTypes: [],
     nodeRange: [8, 64],
+    coolingRequirement: '',
+    minimumFacilityTier: '',
     selectedModels: [],
     modelEstimations: {},
     partnershipDetails: ''
@@ -318,6 +341,8 @@ const ContactPage = () => {
         serviceInterest: service,
         // If cluster param is provided and service is clusters, prefill cluster type
         clusterTypes: service === 'clusters' && cluster ? [cluster] : [],
+        coolingRequirement: '',
+        minimumFacilityTier: '',
         // Prefill the message (e.g. a summary from the colocation cost estimator).
         ...(message ? { message } : {}),
       }));
@@ -335,6 +360,8 @@ const ContactPage = () => {
       serviceInterest: service,
       // Reset conditional fields when service changes
       clusterTypes: [],
+      coolingRequirement: '',
+      minimumFacilityTier: '',
       selectedModels: [],
       modelEstimations: {},
       partnershipDetails: ''
@@ -391,6 +418,10 @@ const ContactPage = () => {
     return inferenceModels.filter(m => formData.selectedModels.includes(m.id));
   }, [inferenceModels, formData.selectedModels]);
 
+  const colocationRequirementsComplete =
+    formData.serviceInterest !== 'coloc' ||
+    Boolean(formData.coolingRequirement && formData.minimumFacilityTier);
+
   // Get estimation config for a specific unit type
   const getEstimationConfig = (unit: string) => {
     switch (unit) {
@@ -443,6 +474,13 @@ const ContactPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!colocationRequirementsComplete) {
+      setFormState('error');
+      setErrorMessage('Select a cooling requirement and minimum facility tier.');
+      return;
+    }
+
     setFormState('loading');
     setErrorMessage('');
 
@@ -472,11 +510,17 @@ const ContactPage = () => {
         })()
       }),
       // Colocation hardware
-      ...(formData.serviceInterest === 'coloc' && formData.clusterTypes.length > 0 && {
+      ...(formData.serviceInterest === 'coloc' && {
         colocationDetails: {
-          types: formData.clusterTypes.map(c =>
-            clusterOptions.find(o => o.value === c)?.label || c
-          ).join(', '),
+          types: formData.clusterTypes.length > 0
+            ? formData.clusterTypes.map(c =>
+                clusterOptions.find(o => o.value === c)?.label || c
+              ).join(', ')
+            : 'Not specified',
+          coolingRequirement:
+            coolingOptions.find(option => option.value === formData.coolingRequirement)?.label || 'Not specified',
+          minimumFacilityTier:
+            facilityTierOptions.find(option => option.value === formData.minimumFacilityTier)?.label || 'Not specified',
         }
       }),
       // Inference details
@@ -527,6 +571,8 @@ const ContactPage = () => {
       serviceInterest: 'clusters',
       clusterTypes: [],
       nodeRange: [8, 64],
+      coolingRequirement: '',
+      minimumFacilityTier: '',
       selectedModels: [],
       modelEstimations: {},
       partnershipDetails: ''
@@ -721,6 +767,59 @@ const ContactPage = () => {
                               onToggle={(v) => handleClusterToggle(v as ClusterType)}
                             />
                           </div>
+                          <div className="grid gap-6 md:grid-cols-2">
+                            <div className="space-y-3">
+                              <span className="block text-sm font-medium text-white">Cooling requirement</span>
+                              <div className="grid grid-cols-2 gap-2" role="group" aria-label="Cooling requirement">
+                                {coolingOptions.map(option => (
+                                  <button
+                                    key={option.value}
+                                    type="button"
+                                    aria-pressed={formData.coolingRequirement === option.value}
+                                    onClick={() => setFormData(previous => ({
+                                      ...previous,
+                                      coolingRequirement: option.value,
+                                    }))}
+                                    className={
+                                      formData.coolingRequirement === option.value
+                                        ? selectedRequirementClass
+                                        : requirementClass
+                                    }
+                                  >
+                                    {option.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <span className="block text-sm font-medium text-white">Minimum facility tier</span>
+                              <div className="grid grid-cols-3 gap-2" role="group" aria-label="Minimum facility tier">
+                                {facilityTierOptions.map(option => (
+                                  <button
+                                    key={option.value}
+                                    type="button"
+                                    aria-pressed={formData.minimumFacilityTier === option.value}
+                                    onClick={() => setFormData(previous => ({
+                                      ...previous,
+                                      minimumFacilityTier: option.value,
+                                    }))}
+                                    className={
+                                      formData.minimumFacilityTier === option.value
+                                        ? selectedRequirementClass
+                                        : requirementClass
+                                    }
+                                  >
+                                    {option.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          {!colocationRequirementsComplete && (
+                            <p role="alert" className="text-sm text-[#FF9B77]">
+                              Select a cooling requirement and minimum facility tier.
+                            </p>
+                          )}
                           <div className="space-y-3">
                             <span className="block text-sm font-medium text-white">Colocation capacity</span>
                             <p className="text-sm text-white/60 leading-relaxed">
