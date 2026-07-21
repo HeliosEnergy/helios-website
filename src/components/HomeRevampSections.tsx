@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import {
   motion,
   AnimatePresence,
@@ -66,7 +66,7 @@ const offerings = [
       "High-density colocation engineered for Blackwell-generation deployments. Liquid-cooled, water-free halls with renewable-backed power, in blocks of tens of megawatts.",
     bullets: [
       "Purpose-built for GB300 / B300 / RTX PRO 6000 racks",
-      "10s of MW per customer, ready in ~3 months",
+      "10s of MW per customer, targeting ~3 months from contract",
       "Up to rack densities required by NVL72 systems",
       "Remote hands, security and 24/7 operations included",
     ],
@@ -117,7 +117,7 @@ export const HomeOfferingsSection = () => {
     setActive((cur) => (cur === next ? cur : next));
   });
 
-  // Click a dot: on desktop scroll to that segment (keeps the pin in sync);
+  // Select a tab: on desktop scroll to that segment (keeps the pin in sync);
   // on mobile just switch with a transition.
   const goTo = (i: number) => {
     if (isMobile || !wrapRef.current) {
@@ -129,6 +129,17 @@ export const HomeOfferingsSection = () => {
     const len = el.offsetHeight - window.innerHeight;
     const prog = i === 0 ? 0.25 : 0.75;
     window.scrollTo({ top: top + prog * len, behavior: reduced ? "auto" : "smooth" });
+  };
+
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const previous = event.key === "ArrowUp" || event.key === "ArrowLeft";
+    const next = event.key === "ArrowDown" || event.key === "ArrowRight";
+    if (!previous && !next && event.key !== "Home" && event.key !== "End") return;
+
+    event.preventDefault();
+    const target = event.key === "Home" ? 0 : event.key === "End" ? offerings.length - 1 : previous ? (i - 1 + offerings.length) % offerings.length : (i + 1) % offerings.length;
+    goTo(target);
+    document.getElementById(`offering-tab-${target}`)?.focus();
   };
 
   const swap = reduced
@@ -163,6 +174,9 @@ export const HomeOfferingsSection = () => {
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={active}
+                    id="offering-content"
+                    role="tabpanel"
+                    aria-labelledby={`offering-tab-${active}`}
                     initial={swap.initial}
                     animate={swap.animate}
                     exit={swap.exit}
@@ -224,7 +238,7 @@ export const HomeOfferingsSection = () => {
                 />
               </AnimatePresence>
 
-              {/* vertical dot switcher / scroll indicator */}
+              {/* Visible, keyboard-operable offering selector */}
               <div
                 role="tablist"
                 aria-label="Compute options"
@@ -235,20 +249,22 @@ export const HomeOfferingsSection = () => {
                   return (
                     <button
                       key={opt.label}
+                      id={`offering-tab-${i}`}
                       role="tab"
                       aria-selected={on}
-                      aria-label={opt.label}
+                      aria-controls="offering-content"
                       onClick={() => goTo(i)}
-                      className="group flex items-center gap-3"
+                      onKeyDown={(event) => handleTabKeyDown(event, i)}
+                      className="group flex min-h-11 min-w-32 items-center gap-3 rounded-sm px-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                       <span
                         className={`block w-1.5 rounded-full transition-all duration-300 ${
-                          on ? "h-8 bg-[#E0701A]" : "h-1.5 bg-white/45 group-hover:bg-white/80"
+                          on ? "h-8 bg-[#E0701A]" : "h-3 bg-white/45 group-hover:bg-white/80"
                         }`}
                       />
                       <span
                         className={`font-mono text-[10px] uppercase tracking-[0.18em] transition-colors duration-300 ${
-                          on ? "text-white" : "text-white/0 group-hover:text-white/60"
+                          on ? "text-white" : "text-white/70 group-hover:text-white"
                         }`}
                       >
                         {opt.label}
@@ -269,7 +285,7 @@ const MONTHS_MAX = 36;
 const RULER_TICKS = [0, 6, 12, 18, 24, 30, 36];
 
 const timeline = [
-  { label: "Helios", solid: 3, max: 3, display: "~3 mo", active: true },
+  { label: "Helios reserved capacity", solid: 3, max: 3, display: "~3 mo target", active: true },
   { label: "Typical colocation lease", solid: 12, max: 18, display: "12–18 mo", active: false },
   { label: "New data center buildout", solid: 24, max: 36, display: "24–36 mo", active: false },
 ];
@@ -284,8 +300,9 @@ export const HomeSpeedSection = () => (
           We deliver in months.
         </h2>
         <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
-          Power, land and supply chain are pre-secured at every Helios site. When you sign, we
-          build. You're training about three months later.
+          For reserved capacity, Helios targets training readiness about three months after
+          contract. Final schedules depend on site, configuration, equipment availability and
+          interconnection.
         </p>
       </motion.div>
 
@@ -377,8 +394,8 @@ export const HomeSpeedSection = () => (
         ))}
       </div>
       <p className="mt-6 text-white/55 text-sm max-w-3xl">
-        Industry ranges are typical published timelines for leased colocation and greenfield
-        builds, drawn to scale. Your Helios timeline is committed at contract.
+        Illustrative planning comparison, not a service-level commitment. Industry ranges are
+        directional; your Helios schedule and delivery milestones are confirmed in the contract.
       </p>
     </div>
   </section>
@@ -387,21 +404,21 @@ export const HomeSpeedSection = () => (
 const sustainability = [
   {
     metric: "0",
-    unit: "L",
-    title: "Water-free cooling",
-    body: "Closed-loop liquid and air systems mean our sites consume no water for cooling. Not a drop from local communities, even at NVL72 rack densities.",
+    unit: "L*",
+    title: "No evaporative cooling",
+    body: "Closed-loop liquid and air systems are designed to consume no water for facility cooling. This does not cover domestic or construction water use.",
   },
   {
-    metric: "Low",
-    unit: "PUE",
-    title: "Power-efficient by design",
-    body: "Purpose-built halls, direct liquid cooling and modern power distribution keep overhead low, so more of every megawatt goes to compute.",
-  },
-  {
-    metric: "Every",
+    metric: "By",
     unit: "site",
+    title: "Power efficiency",
+    body: "PUE varies with site, load and operating conditions. Helios provides modeled or measured site-specific data during technical diligence.",
+  },
+  {
+    metric: "Long-term",
+    unit: "agreements",
     title: "Renewable-backed power",
-    body: "Every Helios site is developed alongside clean generation and backed by long-term power agreements, so renewable energy is part of every site's mix. The share grows as we add capacity, and because we site next to generation we tap clean power others can't reach.",
+    body: "Sites are developed alongside renewable generation and supported by long-term power agreements. The renewable share varies by site and over time.",
   },
 ];
 
@@ -489,8 +506,8 @@ export const HomeSustainabilitySection = () => {
             </span>
           </h2>
           <p className="mt-6 text-lg lg:text-xl text-white/75 font-light leading-relaxed max-w-2xl">
-            Every Helios data center is engineered to use zero water for cooling, run
-            power-efficient, and draw on renewable energy.
+            Helios sites are designed around closed-loop cooling, efficient power distribution
+            and renewable-backed supply. Site-specific operating data is available during diligence.
           </p>
         </motion.div>
 
@@ -502,9 +519,9 @@ export const HomeSustainabilitySection = () => {
           <div className="h-px w-full bg-white/10" aria-hidden />
           <div className="grid gap-y-16 pt-14 md:grid-cols-3 md:gap-x-12 lg:gap-x-24 lg:pt-20">
             {[
-              { value: "0", unit: "L", fill: 0 },
-              { value: "Low", unit: "PUE", fill: 0.88 },
-              { value: "Every", unit: "site", fill: 1 },
+              { value: "0", unit: "L*", fill: 0 },
+              { value: "By", unit: "site", fill: 0.72 },
+              { value: "Long-term", unit: "agreements", fill: 1 },
             ].map((m, i) => (
               <motion.div
                 key={sustainability[i].title}
@@ -512,7 +529,7 @@ export const HomeSustainabilitySection = () => {
                 transition={{ duration: 0.8, delay: i * 0.1, ease: EASE }}
               >
                 <div className="flex items-end gap-3">
-                  <span className="font-heading text-7xl font-semibold leading-none tracking-tight text-white lg:text-8xl">
+                  <span className="font-heading text-5xl font-semibold leading-none tracking-tight text-white sm:text-6xl lg:text-7xl">
                     {m.value}
                   </span>
                   <span className="mb-2 text-base font-light text-white/40">{m.unit}</span>
@@ -542,6 +559,11 @@ export const HomeSustainabilitySection = () => {
             ))}
           </div>
         </div>
+        <p className="mt-10 max-w-3xl text-sm leading-relaxed text-white/60">
+          *Facility-cooling design claim only. PUE and renewable-energy share vary by site and
+          operating conditions; request the current site-specific diligence package for measured
+          or modeled values.
+        </p>
         <Link
           to="/sustainability"
           className="mt-10 inline-flex items-center gap-2 text-eco hover:text-eco-bright transition-colors font-semibold group"

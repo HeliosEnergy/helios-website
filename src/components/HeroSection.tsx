@@ -12,7 +12,7 @@ const SHADER_MAX_PX = 1280 * 720;
 const heroContent = {
   titlePrefix: 'Frontier compute,',
   titleHighlight: 'live in ~3 months.',
-  subtitle: 'Thousands of NVIDIA Blackwell GPUs or tens of megawatts of colocation, deployed in about three months. Not years. Water-free cooling, power-efficient sites, always backed by renewable energy.',
+  subtitle: 'For reserved capacity, Helios targets deployment about three months from contract, subject to final configuration and site readiness. Choose dedicated Blackwell GPU clusters or high-density colocation.',
 };
 
 export const HeroSection = () => {
@@ -82,7 +82,7 @@ export const HeroSection = () => {
               className="space-y-10 lg:space-y-12"
             >
               <div className="space-y-6 lg:space-y-8 max-w-6xl">
-                <motion.h2
+                <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -90,7 +90,7 @@ export const HeroSection = () => {
                 >
                   {heroContent.titlePrefix}{" "}
                   <span className="text-primary">{heroContent.titleHighlight}</span>
-                </motion.h2>
+                </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

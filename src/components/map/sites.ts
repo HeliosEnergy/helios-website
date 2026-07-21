@@ -47,7 +47,8 @@ export const STATUS_META: Record<SiteStatus, { label: string; dot: string }> = {
 };
 
 /** What "Reserved" means — surfaced as the map legend. */
-export const STATUS_LEGEND = "Reserved — power is ready, ready for GPUs.";
+export const STATUS_LEGEND =
+  "Reserved capacity — allocated in the development pipeline; not necessarily energized.";
 
 /* State markers roll up the individual sites in the powered-sites schedule.
    MW is total reserved capacity per state; sorted high-to-low so the ledger

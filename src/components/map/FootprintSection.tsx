@@ -34,7 +34,7 @@ const Ledger = ({
           onMouseLeave={() => onActive(null)}
           onFocus={() => onActive(site.id)}
           onBlur={() => onActive(null)}
-          className={`w-full grid grid-cols-[1.25rem_1fr_auto] items-center gap-1.5 px-3 py-1 text-left transition-colors duration-300 ${
+          className={`grid min-h-11 w-full grid-cols-[1.25rem_1fr_auto] items-center gap-1.5 px-3 py-2 text-left transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
             active ? "bg-white/[0.06]" : ""
           }`}
         >
@@ -106,9 +106,14 @@ export const FootprintMap = ({
 /* ------------------------------------------------------------------ */
 
 export const HomeFootprintSection = () => {
-  const { sites } = useSiteCapacityData();
+  const { sites, snapshot, isFallback } = useSiteCapacityData();
   const totalSites = sites.reduce((sum, site) => sum + site.siteCount, 0);
   const stateCount = sites.length;
+  const sourceDate = snapshot?.publishedAt || snapshot?.sourceModifiedTime;
+  const parsedSourceDate = sourceDate ? new Date(sourceDate) : null;
+  const capacityDate = parsedSourceDate && !Number.isNaN(parsedSourceDate.getTime())
+    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(parsedSourceDate)
+    : null;
 
   return (
     <section className="bg-black py-20 lg:py-28 px-4 lg:px-6 border-t border-white/10 overflow-hidden">
@@ -126,9 +131,8 @@ export const HomeFootprintSection = () => {
             transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
             className="lg:col-span-5 text-lg lg:text-xl text-white/70 font-light leading-relaxed lg:pb-2"
           >
-            Helios builds where clean power is abundant and interconnection is
-            fast. {totalSites.toLocaleString()} sites across {stateCount} states today — water-free,
-            renewable-backed, Blackwell-ready.
+            Helios is developing {totalSites.toLocaleString()} planned or reserved sites across {stateCount} states.
+            Map figures represent reserved power capacity, not operational GPU capacity.
           </motion.p>
         </div>
 
@@ -139,6 +143,12 @@ export const HomeFootprintSection = () => {
         >
           <FootprintMap sites={sites} variant="home" />
         </motion.div>
+
+        <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/60">
+          {isFallback
+            ? "Capacity figures use the site's fallback development schedule; confirm current status with Helios."
+            : `Capacity figures use the current Helios development schedule${capacityDate ? `, updated ${capacityDate}` : ""}.`}
+        </p>
 
         <motion.div
           {...fadeUp}
