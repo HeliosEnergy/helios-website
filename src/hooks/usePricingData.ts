@@ -11,12 +11,14 @@ export interface GPUModel {
     heliosPrice: number;
     pricingSourceProvider?: string;
     pricingFormulaVersion?: string;
+    pricingMarketMetric?: string;
     pricingCurrency?: string;
     pricingUnit?: string;
     pricingHoursPerMonth?: number;
     pricingLastPublishedAt?: string;
     marketSourceUrl?: string;
     marketSourceUpdatedAt?: string;
+    marketReservedBenchmarkPrice?: number;
     marketReservedAvgPrice?: number;
     heliosBaseReservedPrice?: number;
     derivedFromGpuId?: string;

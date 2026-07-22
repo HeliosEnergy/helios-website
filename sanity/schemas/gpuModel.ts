@@ -59,6 +59,12 @@ export default defineType({
             description: 'Formula identifier used to calculate Helios reserved pricing',
         }),
         defineField({
+            name: 'pricingMarketMetric',
+            title: 'Pricing Market Metric',
+            type: 'string',
+            description: 'GetDeploying chart metric used as the market benchmark',
+        }),
+        defineField({
             name: 'pricingCurrency',
             title: 'Pricing Currency',
             type: 'string',
@@ -95,18 +101,25 @@ export default defineType({
             description: 'Timestamp reported by the source page',
         }),
         defineField({
-            name: 'marketReservedAvgPrice',
-            title: 'Market Reserved Average (USD/GPU/hr)',
+            name: 'marketReservedBenchmarkPrice',
+            title: 'Market Reserved Chart Benchmark (USD/GPU/hr)',
             type: 'number',
             validation: (Rule) => Rule.min(0),
-            description: 'Reserved average pulled from the market source before Helios discount',
+            description: 'Customer-visible GetDeploying reserved chart median before the Helios discount',
+        }),
+        defineField({
+            name: 'marketReservedAvgPrice',
+            title: 'Legacy Market Reserved Price (USD/GPU/hr)',
+            type: 'number',
+            validation: (Rule) => Rule.min(0),
+            description: 'Compatibility alias. Use marketReservedBenchmarkPrice for v2 pricing.',
         }),
         defineField({
             name: 'heliosBaseReservedPrice',
             title: 'Helios Base Reserved Price (USD/GPU/hr)',
             type: 'number',
             validation: (Rule) => Rule.min(0),
-            description: 'Market reserved average multiplied by 0.95; equivalent to 3-year price',
+            description: 'Market reserved chart benchmark multiplied by 0.95; equivalent to 3-year price',
         }),
         defineField({
             name: 'derivedFromGpuId',

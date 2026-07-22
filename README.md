@@ -157,13 +157,13 @@ GetDeploying GPU pages
 
 The lead-gen worker runs on EC2 instance `i-0aa80083a425cc33b`. Its scheduler job `pricing_scrape` runs daily at `05:00 UTC`.
 
-Important implementation detail: the scraper uses the embedded GetDeploying chart payload, not the FAQ summary table. Each GPU page includes a `gpu-price-chart_data` JSON script with weekly chart rows. The scraper uses the latest chart date, filters reserved rows, and computes a weighted average using each row's `offering_count`. This is required because the FAQ table can disagree with the chart. B300 is the known example: the FAQ showed `$6.63/hr`, but the chart-derived reserved average was `$4.7292/hr`.
+Important implementation detail: the scraper uses the embedded GetDeploying chart payload, not the FAQ summary table. Each GPU page includes a `gpu-price-chart_data` JSON script with weekly chart rows. The scraper reproduces GetDeploying's own frontend algorithm: select the latest date, filter reservation rows, sort each row's `median_price`, and return the weighted median using `offering_count`. It then rounds to the same two-decimal value shown in the chart before applying the Helios formula. Formula version `reserved_chart_median_0.95_v2` replaced the incorrect v1 arithmetic-average implementation.
 
 Pricing formula:
 
 ```text
-market_reserved_avg = latest GetDeploying chart reserved weighted average
-base = market_reserved_avg * 0.95
+market_benchmark = latest GetDeploying reserved chart weighted median, rounded to 2 decimals
+base = market_benchmark * 0.95
 1 year = base * 1.10
 2 year = base * 1.05
 3 year = base
@@ -187,7 +187,7 @@ Useful verification commands from the website repo root:
 
 ```sh
 # Confirm the public Sanity CDN data that /pricing will read.
-curl -fsSL 'https://05vcm5dh.apicdn.sanity.io/v2024-12-19/data/query/production?query=*%5B_type%20%3D%3D%20%22gpuModel%22%20%26%26%20id%20in%20%5B%22gb300-nvl72%22%2C%22b300%22%2C%22b200%22%2C%22rtx-pro-6000%22%5D%5D%20%7C%20order(displayOrder%20asc)%7Bid%2Cname%2CheliosPrice%2CmarketReservedAvgPrice%2CheliosReservedTermPrices%2CpricingLastPublishedAt%7D'
+curl -fsSL 'https://05vcm5dh.apicdn.sanity.io/v2024-12-19/data/query/production?query=*%5B_type%20%3D%3D%20%22gpuModel%22%20%26%26%20id%20in%20%5B%22gb300-nvl72%22%2C%22b300%22%2C%22b200%22%2C%22rtx-pro-6000%22%5D%5D%20%7C%20order(displayOrder%20asc)%7Bid%2Cname%2CheliosPrice%2CpricingMarketMetric%2CmarketReservedBenchmarkPrice%2CheliosReservedTermPrices%2CpricingLastPublishedAt%7D'
 ```
 
 Useful worker-side commands from the EC2 box:
@@ -202,12 +202,13 @@ The lead-gen API also exposes local read-only pricing endpoints for Control Towe
 
 ```text
 GET /pricing/current
-GET /pricing/history?gpu_id=b300&term_years=3&from=2026-06-01&to=2026-06-30
+GET /pricing/history?gpu_id=b300&term_years=3&from=2026-06-30&to=2026-07-22
+GET /pricing/history?gpu_id=b300&formula_version=all
 GET /pricing/runs?limit=20
 GET /pricing/health
 ```
 
-Failure behavior: if a scrape fails or any required GPU is missing a reserved chart average, the worker does not publish partial Sanity data. The website keeps serving the last good Sanity snapshot.
+Failure behavior: if a scrape fails or any required GPU is missing a reserved chart median, the worker does not publish partial Sanity data. The website keeps serving the last good Sanity snapshot.
 
 ### Contact Form, Slack Leads, And SQS
 
