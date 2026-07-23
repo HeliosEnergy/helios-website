@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { ArrowCTA } from "@/components/ui/ArrowCTA";
 import { motion } from "framer-motion";
 import { AnnouncementBanner } from "@/components/AnnouncementBanner";
@@ -244,9 +244,11 @@ const CALC_RATES = {
   liquid: { low: 175, high: 200 },
 } as const;
 
-// One node = 8 GPUs. Slider runs in nodes; max is a clean power of two.
+// One node = 8 GPUs. The slider uses power-of-two steps; typing accepts exact counts.
 const GPUS_PER_NODE = 8;
+const NODE_MIN = 1;
 const NODE_MAX = 4096;
+const NODE_SLIDER_MAX = Math.log2(NODE_MAX);
 
 const fmtUsd = (n: number) =>
   `$${Math.round(n).toLocaleString("en-US")}`;
@@ -258,6 +260,11 @@ const ColoCalculator = () => {
   const [customKw, setCustomKw] = useState<number>(1.0);
   const [cooling, setCooling] = useState<"liquid" | "air">("liquid");
 
+  const setClampedNodeCount = (value: number) => {
+    const roundedValue = Math.round(value || NODE_MIN);
+    setNodes(Math.min(NODE_MAX, Math.max(NODE_MIN, roundedValue)));
+  };
+
   const gpu = CALC_GPUS.find((g) => g.id === gpuId)!;
   const perGpuKw = gpu.id === "custom" ? customKw : gpu.kw;
   const gpus = nodes * GPUS_PER_NODE;
@@ -265,20 +272,21 @@ const ColoCalculator = () => {
   const rate = CALC_RATES[cooling];
   const lo = itKw * rate.low;
   const hi = itKw * rate.high;
-  const sliderPct = ((nodes - 1) / (NODE_MAX - 1)) * 100;
+  const sliderValue = Math.log2(nodes);
+  const sliderPct = (sliderValue / NODE_SLIDER_MAX) * 100;
 
   const enquiry = `Colocation enquiry — from the cost estimator:
 • GPU type: ${gpu.name}
-• Nodes: ${fmtInt(nodes)} (${fmtInt(gpus)} GPUs · 8 GPUs/node)
+• Nodes: ${fmtInt(nodes)} (${fmtInt(gpus)} GPUs)
 • Cooling: ${cooling === "liquid" ? "Liquid cooled" : "Air cooled"}
 • Estimated power: ${fmtInt(itKw)} kW
 • Estimated cost: ${fmtUsd(lo)}–${fmtUsd(hi)} / month (based on $${rate.low}–$${rate.high} / kW / month)`;
   const enquiryHref = `/contact?service=coloc&message=${encodeURIComponent(enquiry)}`;
 
   const fieldLabel =
-    "block font-mono text-[11px] uppercase tracking-[0.16em] text-black/50 mb-2.5";
+    "block font-mono text-[11px] uppercase tracking-[0.16em] text-black/60 mb-2.5";
   const inputBase =
-    "w-full bg-white border border-black/15 px-4 py-3 font-heading text-lg text-black focus:outline-none focus:border-black/60 transition-colors";
+    "w-full bg-white border border-black/15 px-4 py-3 font-heading text-lg text-black transition-colors focus-visible:border-black/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/15 focus-visible:ring-offset-2";
 
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-start">
@@ -288,34 +296,53 @@ const ColoCalculator = () => {
           <label htmlFor="calc-gpu" className={fieldLabel}>
             GPU type
           </label>
-          <select
-            id="calc-gpu"
-            value={gpuId}
-            onChange={(e) => setGpuId(e.target.value)}
-            className={`${inputBase} appearance-none cursor-pointer`}
-          >
-            {CALC_GPUS.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="calc-gpu"
+              value={gpuId}
+              onChange={(e) => setGpuId(e.target.value)}
+              className={`${inputBase} appearance-none cursor-pointer pr-12`}
+            >
+              {CALC_GPUS.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-black/55"
+            />
+          </div>
         </div>
 
         <div>
           <div className="flex items-end justify-between gap-4 mb-4">
-            <label htmlFor="calc-nodes" className={fieldLabel.replace(" mb-2.5", "")}>
+            <label htmlFor="calc-nodes-input" className={fieldLabel.replace(" mb-2.5", "")}>
               Cluster size
             </label>
             <div className="text-right leading-none">
-              <span className="font-heading text-3xl tracking-tight text-black">
-                {fmtInt(nodes)}
-              </span>
-              <span className="font-mono text-xs text-black/50 ml-2">
-                {nodes === 1 ? "node" : "nodes"}
-              </span>
-              <div className="mt-1 font-mono text-[11px] text-black/45">
-                {fmtInt(gpus)} GPUs · 8 / node
+              <div className="flex items-center justify-end">
+                <input
+                  id="calc-nodes-input"
+                  type="number"
+                  min={1}
+                  max={NODE_MAX}
+                  step={1}
+                  value={nodes}
+                  onChange={(e) => setClampedNodeCount(Number(e.target.value))}
+                  aria-label="Number of nodes"
+                  aria-describedby="calc-node-summary"
+                  title="Type node count"
+                  className="h-9 cursor-text border-b-2 border-black/40 bg-transparent px-1 pb-0.5 text-right font-heading text-3xl tracking-tight text-black tabular-nums transition-colors hover:border-primary focus-visible:border-primary focus-visible:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  style={{ width: `${Math.max(2.25, String(nodes).length + 0.75)}ch` }}
+                />
+                <span className="ml-2 font-mono text-xs text-black/60">
+                  {nodes === 1 ? "node" : "nodes"}
+                </span>
+              </div>
+              <div id="calc-node-summary" className="mt-1 font-mono text-[11px] text-black/55">
+                {fmtInt(gpus)} GPUs
               </div>
             </div>
           </div>
@@ -323,25 +350,28 @@ const ColoCalculator = () => {
             <input
               id="calc-nodes"
               type="range"
-              min={1}
-              max={NODE_MAX}
+              min={0}
+              max={NODE_SLIDER_MAX}
               step={1}
-              value={nodes}
-              onChange={(e) => setNodes(parseInt(e.target.value, 10) || 1)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              value={sliderValue}
+              onChange={(e) => setClampedNodeCount(2 ** Number(e.target.value))}
+              aria-label="Cluster size"
+              aria-valuetext={`${fmtInt(nodes)} ${nodes === 1 ? "node" : "nodes"}`}
+              className="peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
             />
+            <div className="pointer-events-none absolute inset-0 peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-white" />
             <div
               className="absolute h-full bg-black"
               style={{ width: `${sliderPct}%` }}
             />
             <div
               className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-black pointer-events-none"
-              style={{ left: `calc(${sliderPct}% - 10px)` }}
+              style={{ left: `calc(${sliderPct}% - ${sliderPct / 5}px)` }}
             />
           </div>
-          <div className="mt-2.5 flex justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-black/35">
-            <span>1 node</span>
-            <span>{fmtInt(NODE_MAX)} nodes</span>
+          <div className="mt-2.5 flex justify-between font-mono text-[10px] tracking-[0.12em] text-black/60">
+            <span>{fmtInt(NODE_MIN)}</span>
+            <span>{fmtInt(NODE_MAX)}</span>
           </div>
         </div>
 
@@ -356,7 +386,7 @@ const ColoCalculator = () => {
               min={0.1}
               step={0.1}
               value={customKw}
-              onChange={(e) => setCustomKw(parseFloat(e.target.value) || 0)}
+              onChange={(e) => setCustomKw(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
               className={`${inputBase} max-w-[180px]`}
             />
           </div>
@@ -364,19 +394,24 @@ const ColoCalculator = () => {
 
         <div>
           <span className={fieldLabel}>Cooling</span>
-          <div className="grid grid-cols-2 gap-0 border border-black/15">
+          <div
+            role="group"
+            aria-label="Cooling method"
+            className="grid grid-cols-2 gap-0 border border-black/15"
+          >
             {(["liquid", "air"] as const).map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setCooling(c)}
-                className={`py-3 font-mono text-xs uppercase tracking-[0.14em] transition-colors ${
+                aria-pressed={cooling === c}
+                className={`py-3 font-mono text-xs uppercase tracking-[0.14em] transition-colors focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
                   cooling === c
                     ? "bg-black text-white"
                     : "bg-white text-black/60 hover:text-black"
                 }`}
               >
-                {c === "liquid" ? "Liquid cooled" : "Air cooled"}
+                {c === "liquid" ? "Liquid" : "Air"}
               </button>
             ))}
           </div>
@@ -384,9 +419,9 @@ const ColoCalculator = () => {
       </div>
 
       {/* Readout */}
-      <div className="bg-black text-white p-7 lg:p-9">
+      <div className="bg-black p-6 text-white sm:p-7 lg:p-9">
         <div className="flex items-baseline justify-between gap-4 pb-5 border-b border-white/15">
-          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/55">
             Estimated power
           </span>
           <span className="font-heading text-2xl lg:text-3xl tracking-tight">
@@ -396,37 +431,40 @@ const ColoCalculator = () => {
         </div>
 
         <div className="pt-6">
-          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/50">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/55">
             Estimated cost
           </span>
-          <div className="mt-3 flex items-end gap-2 flex-wrap">
-            <span className="font-heading text-4xl lg:text-5xl tracking-tight leading-none">
+          <div className="mt-3 flex items-baseline gap-2 whitespace-nowrap">
+            <span className="font-heading text-[clamp(1.75rem,7.5vw,3rem)] tracking-tight leading-none">
               {fmtUsd(lo)}
             </span>
-            <span className="font-heading text-2xl lg:text-3xl tracking-tight leading-none text-white/45 pb-0.5">
-              – {fmtUsd(hi)}
+            <span aria-hidden="true" className="font-heading text-xl leading-none text-white/45">
+              –
             </span>
-            <span className="font-mono text-sm text-primary pb-1">/ month</span>
+            <span className="font-heading text-[clamp(1.75rem,7.5vw,3rem)] tracking-tight leading-none">
+              {fmtUsd(hi)}
+            </span>
           </div>
-          <p className="mt-3 font-mono text-[11px] text-white/45">
-            {cooling === "liquid" ? "Liquid" : "Air"} cooled · ${rate.low}–${rate.high} / kW / month · {fmtInt(itKw)} kW IT load
+          <p className="mt-2 font-mono text-xs text-primary">per month</p>
+          <p className="mt-3 font-mono text-[11px] leading-relaxed text-white/55">
+            {cooling === "liquid" ? "Liquid" : "Air"} cooling · ${rate.low}–${rate.high}/kW/month
           </p>
         </div>
 
-        <p className="mt-7 pt-6 border-t border-white/15 text-sm text-white/65 leading-relaxed">
-          All-inclusive, white-glove colocation: Helios maintains everything —
-          power, cooling, networking and remote hands. You get bare-metal access.
+        <p className="mt-7 border-t border-white/15 pt-6 text-sm leading-relaxed text-white/70">
+          Includes power, cooling, networking, monitoring, and remote hands.
+          Bare-metal access stays yours.
         </p>
 
         <Link
           to={enquiryHref}
-          className="mt-7 group inline-flex w-full items-center justify-between gap-3 bg-primary text-black px-5 py-3.5 font-mono text-xs uppercase tracking-[0.16em] transition-colors hover:bg-white"
+          className="group mt-7 inline-flex w-full items-center justify-between gap-3 bg-primary px-5 py-3.5 font-mono text-xs uppercase tracking-[0.16em] text-black transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
         >
-          Send this as an enquiry
+          Request a quote
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </Link>
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/35">
-          Indicative estimate — final pricing confirmed on a call.
+        <p className="mt-3 font-mono text-[11px] leading-relaxed text-white/55">
+          Estimate only. Final pricing follows a technical review.
         </p>
       </div>
     </div>
@@ -593,16 +631,16 @@ const ColocationPage = () => {
                 Estimate your colocation cost.
               </h2>
               <p className="mt-6 text-lg lg:text-xl text-black/70 font-light leading-relaxed max-w-2xl">
-                Pick your GPUs and cooling. We translate that into facility power
-                and an all-inclusive monthly range. Bringing your own hardware? Use
-                "Other" and enter the power draw.
+                Choose a GPU, node count, and cooling method to estimate all-inclusive
+                monthly colocation cost. Bringing your own hardware? Select "Other"
+                and enter its power draw.
               </p>
             </motion.div>
 
             <motion.div
               {...fadeUp}
               transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-              className="mt-14 lg:mt-20"
+              className="mt-12 lg:mt-16"
             >
               <ColoCalculator />
             </motion.div>
